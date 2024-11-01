@@ -5,12 +5,12 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBryQaZBEbwEb6Ry4QOo4lZA1FxkpdNABc",
+  apiKey: process.env.REACT_APP_FIREBASE_APIKEY,
   authDomain: "ecofy-c5818.firebaseapp.com",
   projectId: "ecofy-c5818",
   storageBucket: "ecofy-c5818.firebasestorage.app",
   messagingSenderId: "809034977854",
-  appId: "1:809034977854:web:7dec6c7a0418146e5db76f",
+  appId: process.env.REACT_APP_FIREBASE_APPID,
   measurementId: "G-QL65760CJJ",
 };
 

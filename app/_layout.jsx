@@ -26,15 +26,15 @@ const _layout = () => {
   }
 
   return (
-    <AuthContextProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        {isLogin ? (
-          <Stack.Screen name="(tabs)" />
-        ) : (
-          <Stack.Screen name="(auth)" />
-        )}
-      </Stack>
-    </AuthContextProvider>
+      <AuthContextProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          {isLogin ? (
+              <Stack.Screen name="(tabs)" />
+          ) : (
+              <Stack.Screen name="(auth)" />
+          )}
+        </Stack>
+      </AuthContextProvider>
   );
 };
 

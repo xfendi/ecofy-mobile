@@ -63,9 +63,6 @@ const TabBar = ({ state, descriptors, navigation }) => {
               size: 30,
               color: isFocused ? primaryColor : "black",
             })}
-            <Text style={{ color: isFocused ? primaryColor : "black"}}>
-              {label}
-            </Text>
           </TouchableOpacity>
         );
       })}

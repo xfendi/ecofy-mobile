@@ -63,7 +63,7 @@ const login = () => {
 
         <View className="flex flex-row gap-5">
           <Text>Nie posiadasz konta?</Text>
-          <Link href="/reset" style={{ color: primaryColor }}>
+          <Link href="/register" style={{ color: primaryColor }}>
             Stwórz nowe konto
           </Link>
         </View>

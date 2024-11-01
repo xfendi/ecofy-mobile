@@ -8,19 +8,18 @@ import { primaryColor } from "../../config.json";
 const welcome = () => {
   return (
     <SafeAreaView>
-      <View className="flex gap-5 p-10 flex-col justify-center h-full items-center">
+      <View className="flex gap-10 p-10 flex-col justify-center h-full items-center">
         <Image
           className="w-[350px] h-[350px]"
           source={require("../../assets/images/adaptive-icon.png")}
         />
         <View className="flex flex-col gap-5">
-          <Text className="text-center text-5xl font-bold">
-            Welcome to Ecofy
-          </Text>
+          <Text className="text-center text-5xl font-bold">Witaj w Ecofy</Text>
 
           <Text className="text-center">
-            Connect with local eco-friendly events and initiatives. Join us in
-            making a positive impact in your community!
+            Połącz się z lokalnymi ekologicznymi wydarzeniami i inicjatywami.
+            Dołącz do nas, aby wprowadzać pozytywne zmiany w swojej
+            społeczności!
           </Text>
         </View>
         <View className="flex flex-row gap-5">
@@ -29,13 +28,13 @@ const welcome = () => {
             className="p-4 rounded-xl w-1/2 text-white text-xl font-semibold text-center"
             style={{ backgroundColor: primaryColor }}
           >
-            Login
+            Zaloguj się
           </Link>
           <Link
             href="/register"
             className="p-4 rounded-xl w-1/2 bg-white text-xl font-semibold text-center"
           >
-            Register
+            Zarejestruj się
           </Link>
         </View>
       </View>

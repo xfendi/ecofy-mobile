@@ -58,7 +58,7 @@ const register = () => {
 
         <View className="flex flex-row gap-5">
           <Text>Posiadasz już konto?</Text>
-          <Link href="/reset" style={{ color: primaryColor }}>
+          <Link href="/login" style={{ color: primaryColor }}>
             Zaloguj się
           </Link>
         </View>

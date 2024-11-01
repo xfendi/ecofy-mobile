@@ -8,7 +8,10 @@ import { primaryColor } from "../config.json"
 const TabBar = ({ state, descriptors, navigation }) => {
   const icons = {
     index: (props) => <FontAwesome name="home" {...props} />,
-    create: (props) => <FontAwesome name="home" {...props} />,
+    create: (props) => <FontAwesome name="plus" {...props} />,
+    map: (props) => <FontAwesome name="map" {...props} />,
+    events: (props) => <FontAwesome name="map-marker" {...props} />,
+    profile: (props) => <FontAwesome name="user" {...props} />,
   };
 
   return (

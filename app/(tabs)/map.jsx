@@ -54,6 +54,7 @@ const Map = () => {
                 >
                     {markers.map((marker) => (
                         <Marker
+                            tracksViewChanges={false}
                             key={marker.id}
                             coordinate={marker.coordinate}
                             title={marker.title}

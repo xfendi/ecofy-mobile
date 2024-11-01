@@ -25,7 +25,7 @@ const register = () => {
       return;
     }
     await createUser(email, password, name);
-    router.replace("/(tabs)");
+    router.replace("/onboard_one");
   };
   return (
     <SafeAreaView>

@@ -9,11 +9,14 @@ import {
 
 import { auth, db } from "../firebase";
 import { doc, setDoc } from "firebase/firestore";
+import { useRouter } from "expo-router";
 
 const UserContext = createContext();
 
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState({});
+
+  const router = useRouter();
 
   const createUser = async (email, password, name) => {
     await createUserWithEmailAndPassword(auth, email, password).then(
@@ -33,14 +36,20 @@ export const AuthContextProvider = ({ children }) => {
     return signInWithEmailAndPassword(auth, email, password);
   };
 
-  const logout = () => {
-    return signOut(auth);
+  const logout = async () => {
+    return signOut(auth).then(() => {
+      console.log("User signed out");
+      router.replace("/(auth)/welcome");
+    })
   };
 
   useEffect(() => {
     onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        console.log("User Auth:", currentUser);
+        console.log("Adres Email:", currentUser.email);
+        console.log("Zdjęcie Profilowe:", currentUser.photoURL);
+        console.log("Nazwa użytkownika: ", currentUser.displayName);
+        console.log("Email Zweryfikowany: ", currentUser.emailVerified);
       } else {
         console.log("User not logged in");
       }

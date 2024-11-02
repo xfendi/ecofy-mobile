@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import React from "react";
 
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -25,7 +25,7 @@ const TabBar = ({ state, descriptors, navigation }) => {
             ? options.title
             : route.name;
 
-        if (["_sitemap", "+not-found"].includes(route.name)) return null;
+        if (["_sitemap", "+not-found", "settings"].includes(route.name)) return null;
 
         const isFocused = state.index === index;
 

@@ -4,11 +4,16 @@ import React from "react";
 import { AntDesign } from "@expo/vector-icons";
 
 import { primaryColor } from "../config.json";
+import {useRouter} from "expo-router";
 
 const EventItem = ({ event, deleteFunction }) => {
+    const router = useRouter();
   const handleShowOnMap = (event) => {
-    // Logika do wyświetlania wydarzenia na mapie
-    console.log(`Pokaż wydarzenie na mapie: ${event.title}`);
+      router.push({
+          pathname: "/(tabs)/map",
+          params: { eventId: String(event.id) },
+      });
+
   };
 
   const handleDelete = (event) => {
@@ -21,9 +26,11 @@ const EventItem = ({ event, deleteFunction }) => {
         <Text className="text-xl font-semibold" style={{ color: primaryColor }}>
           {event.title}
         </Text>
-        <TouchableOpacity onPress={() => handleDelete(event)}>
-          <AntDesign name="delete" size={24} color="red" />
-        </TouchableOpacity>
+          {deleteFunction && (
+              <TouchableOpacity onPress={() => handleDelete(event)}>
+                  <AntDesign name="delete" size={24} color="red" />
+              </TouchableOpacity>
+          )}
       </View>
       <View>
         <Text className="text-gray-400">{event.date}</Text>

@@ -1,204 +1,256 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
-import axios from 'axios';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  RefreshControl,
+  ScrollView,
+} from "react-native";
+import axios from "axios";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
+import AppTextInput from "../../components/AppTextInput";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import { primaryColor } from "../../config.json";
+
 const CreateEvent = () => {
-    const [eventName, setEventName] = useState('');
-    const [eventDate, setEventDate] = useState(new Date());
-    const [eventAddress, setEventAddress] = useState('');
-    const [eventDescription, setEventDescription] = useState('');
-    const [locationResults, setLocationResults] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [showDatePicker, setShowDatePicker] = useState(false);
-    const [coordinates, setCoordinates] = useState({ lat: null, lon: null });
-    const apiKey = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY;
+  const [event, setEvent] = useState({
+    name: "",
+    date: new Date(),
+    address: "",
+    description: "",
+    coordinates: { lat: null, lon: null },
+    host: null,
+  });
 
-    const handleSearch = async () => {
-        if (!searchQuery) return;
-        try {
-            const response = await axios.get(`https://api.geoapify.com/v1/geocode/search?text=${searchQuery}&apiKey=${apiKey}`);
-            setLocationResults(response.data.features);
-        } catch (error) {
-            console.error('Error fetching location data:', error);
-        }
-    };
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-    const handleLocationSelect = (location) => {
-        setEventAddress(location.properties.formatted);
-        setCoordinates({
-            lat: location.geometry.coordinates[1],
-            lon: location.geometry.coordinates[0],
-        });
-        setLocationResults([]);
-    };
+  const [name, setName] = useState("");
+  const [date, setDate] = useState(new Date());
+  const [address, setAddress] = useState("");
+  const [description, setDescription] = useState("");
+  const [coordinates, setCoordinates] = useState({ lat: null, lon: null });
+  const [locationResults, setLocationResults] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-    const handleSubmit = () => {
-        console.log({
-            name: eventName,
-            date: eventDate.toISOString(),
-            address: eventAddress,
-            description: eventDescription,
-            coordinates: coordinates,
-        });
-        setEventName('');
-        setEventDate(new Date());
-        setEventAddress('');
-        setSearchQuery('');
-        setEventDescription('');
-        setLocationResults([]);
-        setCoordinates({ lat: null, lon: null });
-    };
+  const apiKey = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY;
 
-    return (
-        <FlatList
-            contentContainerStyle={styles.container}
-            data={[{ key: 'form' }]} // Dummy data to use FlatList
-            renderItem={() => (
-                <View>
-                    <Text style={styles.title}>Stwórz Wydarzenie</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Nazwa wydarzenia"
-                        value={eventName}
-                        onChangeText={setEventName}
-                    />
-                    <TouchableOpacity style={styles.dateButton} onPress={() => setShowDatePicker(true)}>
-                        <FontAwesome name="calendar" size={20} color="#fff" />
-                        <Text style={styles.dateButtonText}>{eventDate.toLocaleDateString()}</Text>
-                    </TouchableOpacity>
-                    {showDatePicker && (
-                        <DateTimePicker
-                            value={eventDate}
-                            mode="date"
-                            display="default"
-                            onChange={(event, selectedDate) => {
-                                setShowDatePicker(false);
-                                if (selectedDate) {
-                                    setEventDate(selectedDate);
-                                }
-                            }}
-                        />
-                    )}
-                    <View style={styles.locationContainer}>
-                        <FontAwesome name="search" size={20} style={styles.searchIcon} />
-                        <TextInput
-                            style={styles.locationInput}
-                            placeholder="Wyszukaj lokalizację"
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                            onSubmitEditing={handleSearch}
-                        />
-                    </View>
-                    <FlatList
-                        data={locationResults}
-                        keyExtractor={(location) => location.properties.place_id}
-                        renderItem={({ item }) => (
-                            <TouchableOpacity style={styles.locationButton} onPress={() => handleLocationSelect(item)}>
-                                <Text style={styles.locationText}>{item.properties.formatted}</Text>
-                            </TouchableOpacity>
-                        )}
-                        style={styles.locationList}
-                    />
-                    <Text style={styles.selectedAddress}>Wybrana lokalizacja: {eventAddress}</Text>
-                    <TextInput
-                        style={styles.descriptionInput}
-                        placeholder="Opis wydarzenia"
-                        value={eventDescription}
-                        onChangeText={setEventDescription}
-                        multiline
-                    />
-                    <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                        <Text style={styles.submitButtonText}>Utwórz Wydarzenie</Text>
-                    </TouchableOpacity>
-                </View>
+  const onRefresh = () => {
+    setIsRefreshing(true);
+
+    router.replace("/events");
+    setTimeout(() => {
+      setIsRefreshing(false); // Zatrzymanie odświeżania
+    }, 1000); // Czas odświeżania w milisekundach
+  };
+
+  const handleSearch = async () => {
+    if (!searchQuery) return;
+    try {
+      const response = await axios.get(
+        `https://api.geoapify.com/v1/geocode/search?text=${searchQuery}&apiKey=${apiKey}`
+      );
+      setLocationResults(response.data.features);
+    } catch (error) {
+      console.error("Error fetching location data:", error);
+    }
+  };
+
+  const handleLocationSelect = (location) => {
+    setAddress(location.properties.formatted);
+    setCoordinates({
+      lat: location.geometry.coordinates[1],
+      lon: location.geometry.coordinates[0],
+    });
+    setLocationResults([]);
+  };
+
+  const handleSubmit = () => {
+    console.log({
+      name: name,
+      date: date.toISOString(),
+      address: address,
+      description: description,
+      coordinates: coordinates,
+    });
+  };
+
+  return (
+    <SafeAreaView
+      className="p-5"
+      refreshControl={
+        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+      }
+    >
+      <ScrollView>
+        <View className="flex flex-col gap-5">
+          <Text className="text-2xl font-semibold">Stwórz Wydarzenie</Text>
+          <AppTextInput
+            placeholder="Nazwa wydarzenia"
+            value={name}
+            onChangeText={setName}
+            full
+          />
+          <TouchableOpacity
+            className="p-5 flex flex-row gap-5 items-center rounded-xl"
+            style={{ backgroundColor: primaryColor }}
+            onPress={() => setShowDatePicker(true)}
+          >
+            <FontAwesome name="calendar" size={20} color="#fff" />
+            <Text className="text-white text-xl font-semibold">
+              {date.toLocaleDateString()}
+            </Text>
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={date}
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(false);
+                if (selectedDate) {
+                  setDate(selectedDate);
+                }
+              }}
+            />
+          )}
+          <AppTextInput
+            placeholder="Wyszukaj lokalizację"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onSubmitEditing={handleSearch}
+            full
+          />
+          {locationResults.length > 0 && (
+            <View className="p-5 bg-white rounded-xl flex flex-col gap-5">
+              {locationResults.map((item) => (
+                <TouchableOpacity
+                  key={item.city}
+                  onPress={() => handleLocationSelect(item)}
+                  className="p-5 bg-gray-100 rounded-xl"
+                >
+                  <Text>{item.properties.formatted}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+          <AppTextInput
+            placeholder="Opis wydarzenia"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            full
+          />
+          <Text className="text-2xl font-semibold">
+            Podsumowanie
+          </Text>
+          <View className="flex flex-col gap-5 p-5 bg-white rounded-xl">
+            {name && (
+              <View className="flex flex-row items-center" style={{ gap: 5 }}>
+                <Text className="text-lg font-semibold">Nazwa:</Text>
+                <Text>{name}</Text>
+              </View>
             )}
-        />
-    );
+            {date && (
+              <View className="flex flex-row items-center" style={{ gap: 5 }}>
+                <Text className="text-lg font-semibold">Data:</Text>
+                <Text>{date.toLocaleDateString()}</Text>
+              </View>
+            )}
+            {address && (
+              <View className="flex flex-row items-center" style={{ gap: 5 }}>
+                <Text className="text-lg font-semibold">Adres:</Text>
+                <Text>{address}</Text>
+              </View>
+            )}
+            {description && (
+              <View className="flex flex-row items-center" style={{ gap: 5 }}>
+                <Text className="text-lg font-semibold">Opis:</Text>
+                <Text>{description}</Text>
+              </View>
+            )}
+          </View>
+          <TouchableOpacity
+            onPress={handleSubmit}
+            className="p-4 rounded-xl"
+            style={{ backgroundColor: "#8b5cf6" }}
+          >
+            <Text className="text-white text-xl font-semibold text-center">
+              Utwórz Wydarzenie
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        padding: 20,
-        backgroundColor: '#fff',
-        flexGrow: 1,
-        justifyContent: 'center',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-    input: {
-        height: 40,
-        borderColor: '#ccc',
-        borderWidth: 1,
-        marginBottom: 10,
-        paddingHorizontal: 10,
-    },
-    dateButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#007BFF',
-        padding: 10,
-        borderRadius: 5,
-        marginBottom: 10,
-    },
-    dateButtonText: {
-        color: '#fff',
-        marginLeft: 10,
-    },
-    locationContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderColor: '#ccc',
-        borderWidth: 1,
-        marginBottom: 10,
-        borderRadius: 5,
-        paddingHorizontal: 10,
-    },
-    searchIcon: {
-        marginRight: 10,
-    },
-    locationInput: {
-        flex: 1,
-        height: 40,
-    },
-    locationButton: {
-        padding: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
-        backgroundColor: '#eee',
-        marginBottom: 10,
-    },
-    locationText: {
-        fontSize: 16,
-    },
-    selectedAddress: {
-        marginVertical: 10,
-        fontStyle: 'italic',
-        textAlign: 'center',
-    },
-    descriptionInput: {
-        height: 100,
-        borderColor: '#ccc',
-        borderWidth: 1,
-        marginBottom: 10,
-        paddingHorizontal: 10,
-        textAlignVertical: 'top',
-    },
-    submitButton: {
-        backgroundColor: '#28a745',
-        padding: 10,
-        borderRadius: 5,
-        alignItems: 'center',
-    },
-    submitButtonText: {
-        color: '#fff',
-        fontSize: 18,
-    },
+  container: {
+    padding: 20,
+    backgroundColor: "#fff",
+    flexGrow: 1,
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  input: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  locationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: "#ccc",
+    borderWidth: 1,
+    marginBottom: 10,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  locationInput: {
+    flex: 1,
+    height: 40,
+  },
+  locationButton: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+    backgroundColor: "#eee",
+    marginBottom: 10,
+  },
+  locationText: {
+    fontSize: 16,
+  },
+  selectedAddress: {
+    marginVertical: 10,
+    fontStyle: "italic",
+    textAlign: "center",
+  },
+  submitButton: {
+    backgroundColor: "#28a745",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  submitButtonText: {
+    color: "#fff",
+    fontSize: 18,
+  },
 });
 
 export default CreateEvent;

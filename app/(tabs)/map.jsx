@@ -4,81 +4,129 @@ import MapView, { Marker } from "react-native-maps";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import EventListItem from "../../components/EventListItem";
 import useGeoLocation from "../../context/GeoLocationContext";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
+
+import { events } from "../../test-variables";
+import { primaryColor } from "../../config.json";
 
 const Map = () => {
-    const { location, region } = useGeoLocation();
-    const [selectedEvent, setSelectedEvent] = useState(null);
-    const mapRef = useRef(null);
-    const router = useRouter();
-    const params = useLocalSearchParams();
+  const { region } = useGeoLocation();
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const mapRef = useRef(null);
+  const params = useLocalSearchParams();
 
-    let eventId;
-    if (params.eventId && !isNaN(parseInt(params.eventId, 10))) {
-        eventId = parseInt(params.eventId, 10);
+  let eventId;
+  if (params.eventId && !isNaN(parseInt(params.eventId, 10))) {
+    eventId = parseInt(params.eventId, 10);
+  }
+
+  const markers = [
+    {
+      id: 1,
+      coordinates: { latitude: 53.3331, longitude: 15.0305 },
+      title: "Sprzątanie Parku",
+      address: "ul. Leśna 456, Kraków",
+      date: "2024-11-10",
+      description: "Wydarzenie sprzątania w Parku Chrobrego.",
+    },
+    {
+      id: 2,
+      coordinates: { latitude: 53.332, longitude: 15.0325 },
+      title: "Sadzenie Drzew",
+      date: "2024-11-10",
+      address: "ul. Leśna 456, Kraków",
+      description: "Inicjatywa sadzenia drzew wzdłuż rzeki Iny.",
+    },
+    {
+      id: 3,
+      coordinates: { latitude: 53.335, longitude: 15.029 },
+      title: "Warsztaty Ekologiczne",
+      address: "ul. Leśna 456, Kraków",
+      date: "2024-11-10",
+      description: "Warsztaty na temat zrównoważonego rozwoju.",
+    },
+    {
+      id: 4,
+      coordinates: { latitude: 53.334, longitude: 15.028 },
+      title: "Zbiórka Plastiku",
+      address: "ul. Leśna 456, Kraków",
+      date: "2024-11-10",
+      description: "Zbiórka plastiku w okolicach jeziora Miedwie.",
+    },
+    {
+      id: 5,
+      coordinates: { latitude: 53.3315, longitude: 15.034 },
+      title: "Eko-Market",
+      address: "ul. Leśna 456, Kraków",
+      date: "2024-11-10",
+      description: "Targ z lokalnymi, ekologicznymi produktami.",
+    },
+  ];
+
+  useEffect(() => {
+    if (eventId !== undefined) {
+      const event = markers.find((marker) => marker.id === eventId);
+      if (event) {
+        setSelectedEvent(eventId);
+        mapRef.current?.animateToRegion(
+          {
+            latitude: event.coordinates.latitude,
+            longitude: event.coordinates.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          },
+          1000
+        );
+      }
     }
+  }, [eventId]);
 
-    const markers = [
-        { id: 0, coordinate: { latitude: 53.3331, longitude: 15.0305 }, title: "Sprzątanie Parku", description: "Wydarzenie sprzątania w Parku Chrobrego." },
-        { id: 1, coordinate: { latitude: 53.3320, longitude: 15.0325 }, title: "Sadzenie Drzew", description: "Inicjatywa sadzenia drzew wzdłuż rzeki Iny." },
-        { id: 2, coordinate: { latitude: 53.3350, longitude: 15.0290 }, title: "Warsztaty Ekologiczne", description: "Warsztaty na temat zrównoważonego rozwoju." },
-        { id: 3, coordinate: { latitude: 53.3340, longitude: 15.0280 }, title: "Zbiórka Plastiku", description: "Zbiórka plastiku w okolicach jeziora Miedwie." },
-        { id: 4, coordinate: { latitude: 53.3315, longitude: 15.0340 }, title: "Eko-Market", description: "Targ z lokalnymi, ekologicznymi produktami." },
-    ];
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
+        <MapView
+          ref={mapRef}
+          region={region}
+          showsUserLocation={true}
+          style={styles.map}
+          provider="google"
+        >
+          {markers.map((marker) => (
+            <Marker
+              tracksViewChanges={false}
+              key={marker.id}
+              coordinate={marker.coordinates}
+              title={marker.title}
+              description={marker.description}
+              onPress={() => {
+                setSelectedEvent(marker.id);
+              }}
+            >
+              <FontAwesome
+                name="map-marker"
+                size={selectedEvent === marker.id ? 40 : 35}
+                color={selectedEvent === marker.id ? primaryColor : "black"}
+              />
+            </Marker>
+          ))}
+        </MapView>
 
-    useEffect(() => {
-        if (eventId !== undefined) {
-            const event = markers.find(marker => marker.id === eventId);
-            if (event) {
-                setSelectedEvent(eventId);
-                mapRef.current?.animateToRegion(
-                    {
-                        latitude: event.coordinate.latitude,
-                        longitude: event.coordinate.longitude,
-                        latitudeDelta: 0.01,
-                        longitudeDelta: 0.01,
-                    },
-                    1000
-                );
-            }
-        }
-    }, [eventId]);
-
-    return (
-        <SafeAreaView style={{ flex: 1 }}>
-            <View style={{ flex: 1 }}>
-                <MapView
-                    ref={mapRef}
-                    region={region}
-                    showsUserLocation={true}
-                    style={styles.map}
-                    provider="google"
-                >
-                    {markers.map((marker) => (
-                        <Marker
-                            tracksViewChanges={false}
-                            key={marker.id}
-                            coordinate={marker.coordinate}
-                            title={marker.title}
-                            description={marker.description}
-                            onPress={() => setSelectedEvent(marker.id)}
-                        >
-                            <FontAwesome name="map-marker" size={selectedEvent===marker.id ? 45:35} color={selectedEvent===marker.id ? 'green':'black'}/>
-                        </Marker>
-                    ))}
-                </MapView>
-
-                {selectedEvent !== null && <EventListItem eventData={markers[selectedEvent]} onClose={() => setSelectedEvent(null)} />}
-            </View>
-        </SafeAreaView>
-    );
+        {selectedEvent !== null && (
+          <EventListItem
+            eventData={markers[selectedEvent]}
+            onClose={() => setSelectedEvent(null)}
+          />
+        )}
+      </View>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
-    map: {
-        height: "100%",
-        width: "100%",
-    },
+  map: {
+    height: "100%",
+    width: "100%",
+  },
 });
 
 export default Map;

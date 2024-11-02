@@ -11,9 +11,9 @@ import { events, tips, faq } from "../../test-variables";
 const Index = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const { user, logout } = UserAuth();
+  const { user } = UserAuth();
   const router = useRouter();
-  const firstName = user?.displayName;
+  const firstName = user?.displayName.split(" ")[0];
 
   const onRefresh = () => {
     setIsRefreshing(true);
@@ -24,16 +24,8 @@ const Index = () => {
     }, 1000); // Czas odświeżania w milisekundach
   };
 
-  const handleLogout = async () => {
-    router.replace("/(auth)/welcome");
-    await logout();
-  };
-
-  const showDetails = (event) => {
-    router.push({
-      pathname: "/(tabs)/events",
-      params: { eventId: event.id },
-    });
+  const handleProfile = async () => {
+    router.replace("/profile");
   };
 
   return (
@@ -45,10 +37,8 @@ const Index = () => {
         }
       >
         <View className="flex flex-row justify-between items-center">
-          <Text className="text-3xl font-bold">
-            Witaj, {firstName} 👋
-          </Text>
-          <TouchableOpacity onPress={handleLogout}>
+          <Text className="text-3xl font-bold w-80">Witaj, {firstName} 👋</Text>
+          <TouchableOpacity onPress={handleProfile}>
             {user.photoURL && (
               <Image
                 source={{ uri: user.photoURL }}

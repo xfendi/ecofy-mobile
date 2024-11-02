@@ -49,25 +49,26 @@ const Profile = () => {
         }
       >
         <View className="flex flex-col gap-5">
-          <View className="flex flex-col items-center gap-5">
+          <View className="flex flex-row items-center gap-5">
             {user.photoURL ? (
               <Image
                 source={{ uri: user.photoURL }}
-                className="h-32 w-32 rounded-full"
+                className="rounded-full"
+                style={{ height: 64, width: 64 }}
               />
             ) : (
               <FontAwesome name="user" size={64} color={primaryColor} />
             )}
             <View>
-              <Text className="text-3xl font-bold text-center">
+              <Text className="text-3xl font-bold w-80">
                 {user.displayName}
               </Text>
-              <Text className="text-center text-lg">{user.email}</Text>
+              <Text className="text-lg w-80">{user.email}</Text>
             </View>
           </View>
           <View className="flex flex-row w-full gap-5 justify-center">
             <TouchableOpacity
-              className="p-4 rounded-xl w-1/2"
+              className="p-4 rounded-xl w-full"
               style={{ backgroundColor: primaryColor }}
             >
               <Link

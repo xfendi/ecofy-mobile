@@ -1,17 +1,27 @@
-// EventListItem.jsx
-import {View, Text, StyleSheet, Button} from 'react-native';
+import { View, Text, StyleSheet, Button, TouchableOpacity } from 'react-native';
 import React from 'react';
-const EventListItem = ({ eventData }) => {
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useRouter } from "expo-router"; // Importuj useRouter
 
-    const ShowMore = (id) =>{
-        {/*przeniesienie do events.jsx*/}
-    }
+const EventListItem = ({ eventData, onClose }) => {
+    const router = useRouter(); // Inicjalizuj router
+
+    const ShowMore = (id) => {
+        router.push({
+            pathname: "/(tabs)/events", // Ścieżka do komponentu Events
+            params: { eventId: id }, // Przekaż identyfikator wydarzenia
+        });
+    };
+
     return (
         <View style={styles.card}>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                <FontAwesome name="times" size={20} style={{ color: 'red' }} />
+            </TouchableOpacity>
             <Text style={styles.title}>{eventData?.title}</Text>
             <Text style={styles.description}>{eventData?.description}</Text>
             <Text style={styles.address}>{eventData?.address}</Text>
-            <Button title="Dowiedz się więcej" color="#2222ff" onPress={() => {ShowMore(eventData.id)}}/>
+            <Button title="Dowiedz się więcej" color="#2222ff" onPress={() => { ShowMore(eventData.id) }} />
         </View>
     );
 };
@@ -19,9 +29,9 @@ const EventListItem = ({ eventData }) => {
 const styles = StyleSheet.create({
     card: {
         position: 'absolute',
-        bottom: 100, // Odstęp od dolnej krawędzi ekranu
-        left: 20, // Odstęp od lewej krawędzi
-        right: 20, // Odstęp od prawej krawędzi
+        bottom: 100,
+        left: 20,
+        right: 20,
         backgroundColor: 'white',
         borderRadius: 10,
         padding: 15,
@@ -29,7 +39,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 5,
-        elevation: 5, // Działa na Androidzie, aby dodać cień
+        elevation: 5,
     },
     title: {
         fontSize: 16,
@@ -38,6 +48,11 @@ const styles = StyleSheet.create({
     description: {
         fontSize: 14,
         color: 'gray',
+    },
+    closeButton: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
     },
 });
 

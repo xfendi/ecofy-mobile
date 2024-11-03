@@ -105,7 +105,7 @@ const Index = () => {
     setNotifications(newNotifications);
   };
 
-  const generateUpcomingEvents = () => {
+  const generateUpcomingEvents = (events) => {
     const now = new Date();
     const tomorrow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000); // Jutro
 

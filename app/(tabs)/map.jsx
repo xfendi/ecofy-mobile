@@ -2,84 +2,82 @@ import React, { useState, useRef, useEffect } from "react";
 import { SafeAreaView, View, StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useFocusEffect } from "@react-navigation/native";
+import { useLocalSearchParams } from "expo-router";
+import { collection, onSnapshot } from "firebase/firestore";
+
+import { db } from "../../firebase";
 import EventListItem from "../../components/EventListItem";
 import useGeoLocation from "../../context/GeoLocationContext";
-import { useLocalSearchParams } from "expo-router";
-
-import { events } from "../../test-variables";
 import { primaryColor } from "../../config.json";
 
 const Map = () => {
-  const { region } = useGeoLocation();
+  const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
+
   const mapRef = useRef(null);
+  const { region } = useGeoLocation();
   const params = useLocalSearchParams();
 
-  let eventId;
-  if (params.eventId && !isNaN(parseInt(params.eventId, 10))) {
-    eventId = parseInt(params.eventId, 10);
-  }
+  let eventId = params.eventId
+    ? parseInt(params.eventId, 10)
+    : selectedEvent?.id;
 
-  const markers = [
-    {
-      id: 1,
-      coordinates: { latitude: 53.3331, longitude: 15.0305 },
-      title: "Sprzątanie Parku",
-      address: "ul. Leśna 456, Kraków",
-      date: "2024-11-10",
-      description: "Wydarzenie sprzątania w Parku Chrobrego.",
-    },
-    {
-      id: 2,
-      coordinates: { latitude: 53.332, longitude: 15.0325 },
-      title: "Sadzenie Drzew",
-      date: "2024-11-10",
-      address: "ul. Leśna 456, Kraków",
-      description: "Inicjatywa sadzenia drzew wzdłuż rzeki Iny.",
-    },
-    {
-      id: 3,
-      coordinates: { latitude: 53.335, longitude: 15.029 },
-      title: "Warsztaty Ekologiczne",
-      address: "ul. Leśna 456, Kraków",
-      date: "2024-11-10",
-      description: "Warsztaty na temat zrównoważonego rozwoju.",
-    },
-    {
-      id: 4,
-      coordinates: { latitude: 53.334, longitude: 15.028 },
-      title: "Zbiórka Plastiku",
-      address: "ul. Leśna 456, Kraków",
-      date: "2024-11-10",
-      description: "Zbiórka plastiku w okolicach jeziora Miedwie.",
-    },
-    {
-      id: 5,
-      coordinates: { latitude: 53.3315, longitude: 15.034 },
-      title: "Eko-Market",
-      address: "ul. Leśna 456, Kraków",
-      date: "2024-11-10",
-      description: "Targ z lokalnymi, ekologicznymi produktami.",
-    },
-  ];
+  console.log("selectedEventID:", selectedEvent?.id);
 
   useEffect(() => {
-    if (eventId !== undefined) {
-      const event = markers.find((marker) => marker.id === eventId);
-      if (event) {
-        setSelectedEvent(eventId);
-        mapRef.current?.animateToRegion(
-          {
-            latitude: event.coordinates.latitude,
-            longitude: event.coordinates.longitude,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
-          },
-          1000
-        );
+    const unsubscribe = onSnapshot(
+      collection(db, "events"),
+      (querySnapshot) => {
+        const docsArray = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          docsArray.push({
+            ...data,
+            date: data.date.toDate().toLocaleDateString(),
+          });
+        });
+
+        setEvents(docsArray);
       }
-    }
-  }, [eventId]);
+    );
+
+    return () => unsubscribe();
+  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (eventId) {
+        const event = events.find((marker) => marker.id === eventId);
+        if (event) {
+          setSelectedEvent(event);
+          mapRef.current?.animateToRegion(
+            {
+              latitude: event.coordinates.latitude,
+              longitude: event.coordinates.longitude,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            },
+            1000
+          );
+        } else {
+          console.log("Invalid eventId");
+        }
+      }
+    }, [eventId, events])
+  );
+
+  const animate = (coordinates) => {
+    mapRef.current?.animateToRegion(
+      {
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      },
+      1000
+    );
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -91,28 +89,28 @@ const Map = () => {
           style={styles.map}
           provider="google"
         >
-          {markers.map((marker) => (
+          {events.map((marker) => (
             <Marker
               tracksViewChanges={false}
               key={marker.id}
               coordinate={marker.coordinates}
-              title={marker.title}
               onPress={() => {
-                setSelectedEvent(marker.id);
+                setSelectedEvent(marker);
+                animate(marker.coordinates);
               }}
             >
               <FontAwesome
                 name="map-marker"
-                size={selectedEvent === marker.id ? 40 : 35}
-                color={selectedEvent === marker.id ? primaryColor : "black"}
+                size={selectedEvent?.id === marker.id ? 40 : 35}
+                color={selectedEvent?.id === marker.id ? primaryColor : "black"}
               />
             </Marker>
           ))}
         </MapView>
 
-        {selectedEvent !== null && (
+        {selectedEvent && (
           <EventListItem
-            eventData={markers[selectedEvent]}
+            eventData={selectedEvent}
             onClose={() => setSelectedEvent(null)}
           />
         )}

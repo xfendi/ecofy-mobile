@@ -1,24 +1,24 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Image } from "react-native";
 import React from "react";
 
 import { AntDesign } from "@expo/vector-icons";
 
 import { primaryColor } from "../config.json";
-import {useRouter} from "expo-router";
+import { useRouter } from "expo-router";
 
 const EventItem = ({ event, deleteFunction }) => {
-    const router = useRouter();
-  const handleShowOnMap = (event) => {
-      router.push({
-          pathname: "/(tabs)/map",
-          params: { eventId: String(event.id) },
-      });
+  const router = useRouter();
 
+  const handleShowOnMap = () => {
+    router.push({
+      pathname: "/map",
+      params: { eventId: event.id },
+    });
   };
 
   const handleDelete = (event) => {
     deleteFunction(event.id);
-  }
+  };
 
   return (
     <View key={event.id} className="flex flex-col gap-5">
@@ -26,11 +26,11 @@ const EventItem = ({ event, deleteFunction }) => {
         <Text className="text-xl font-semibold" style={{ color: primaryColor }}>
           {event.title}
         </Text>
-          {deleteFunction && (
-              <TouchableOpacity onPress={() => handleDelete(event)}>
-                  <AntDesign name="delete" size={24} color="red" />
-              </TouchableOpacity>
-          )}
+        {deleteFunction && (
+          <TouchableOpacity onPress={() => handleDelete(event)}>
+            <AntDesign name="delete" size={24} color="red" />
+          </TouchableOpacity>
+        )}
       </View>
       <View>
         <Text className="text-gray-400">{event.date}</Text>
@@ -41,7 +41,7 @@ const EventItem = ({ event, deleteFunction }) => {
         </Text>
       </View>
       <TouchableOpacity
-        onPress={() => handleShowOnMap(event)}
+        onPress={handleShowOnMap}
         className="p-4 rounded-xl"
         style={{ backgroundColor: "#8b5cf6" }}
       >

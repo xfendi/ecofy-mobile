@@ -35,7 +35,10 @@ const CreateEvent = () => {
   const [date, setDate] = useState(new Date());
   const [address, setAddress] = useState("");
   const [description, setDescription] = useState("");
-  const [coordinates, setCoordinates] = useState({ lat: null, lon: null });
+  const [coordinates, setCoordinates] = useState({
+    latitude: null,
+    longitude: null,
+  });
   const [image, setImage] = useState(null);
 
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -48,7 +51,7 @@ const CreateEvent = () => {
     setDate(new Date());
     setAddress("");
     setDescription("");
-    setCoordinates({ lat: null, lon: null });
+    setCoordinates({ latitude: null, longitude: null });
     setImage(null);
     setShowDatePicker(false);
   };
@@ -68,7 +71,10 @@ const CreateEvent = () => {
 
   const handleMapPress = async (event) => {
     const { coordinate } = event.nativeEvent;
-    setCoordinates({ lat: coordinate.latitude, lon: coordinate.longitude });
+    setCoordinates({
+      latitude: coordinate.latitude,
+      longitude: coordinate.longitude,
+    });
     setAddress(""); // Clear address when selecting a new location on the map
     setMapRegion({
       latitude: coordinate.latitude,
@@ -76,7 +82,7 @@ const CreateEvent = () => {
     });
     try {
       const response = await axios.get(
-        `https://api.geoapify.com/v1/geocode/reverse?lat=${coordinates.lat}&lon=${coordinates.lon}&apiKey=${apiKey}`
+        `https://api.geoapify.com/v1/geocode/reverse?lat=${coordinates.latitude}&lon=${coordinates.longitude}&apiKey=${apiKey}`
       );
       const formattedAddress = response.data.features[0].properties.formatted;
       setAddress(formattedAddress);
@@ -104,13 +110,11 @@ const CreateEvent = () => {
     let codeid;
 
     while (!isUnique) {
-      const code = Math.floor(Math.random() * 0xffffff)
-        .toString(16)
-        .padStart(6, "0");
+      const code = Math.floor(Math.random() * 1000000);
 
       codeid = code;
 
-      const docRef = doc(db, "projects", codeid);
+      const docRef = doc(db, "events", codeid.toString());
       const docSnap = await getDoc(docRef);
       const data = docSnap.data();
       if (!data) {
@@ -124,8 +128,8 @@ const CreateEvent = () => {
 
   const handleSubmit = async () => {
     if (
-      !coordinates.lat ||
-      !coordinates.lon ||
+      !coordinates.latitude ||
+      !coordinates.longitude ||
       !name ||
       !date ||
       !description
@@ -143,18 +147,19 @@ const CreateEvent = () => {
       const response = await fetch(image);
       const blob = await response.blob();
 
-      const fileRef = ref(storage, `events/${codeid}`);
+      const fileRef = ref(storage, `events/${codeid.toString()}`);
       await uploadBytes(fileRef, blob);
       const photoURL = await getDownloadURL(fileRef);
 
-      await setDoc(doc(db, "events", codeid), {
-        name: name,
+      await setDoc(doc(db, "events", codeid.toString()), {
+        title: name,
         date: date,
         address: address,
         description: description,
         coordinates: coordinates,
         host: user.uid,
         photoURL: photoURL,
+        id: codeid,
       });
       Alert.alert("Sukces", "Pomyślnie utworzono wydarzenie: " + name);
       router.replace("/create");
@@ -237,11 +242,11 @@ const CreateEvent = () => {
             onPress={handleMapPress} // Allow selecting a location on the map
             showsUserLocation={true}
           >
-            {coordinates.lat && coordinates.lon && (
+            {coordinates.latitude && coordinates.longitude && (
               <Marker
                 coordinate={{
-                  latitude: coordinates.lat,
-                  longitude: coordinates.lon,
+                  latitude: coordinates.latitude,
+                  longitude: coordinates.longitude,
                 }}
               >
                 <FontAwesome name="map-marker" size={40} color="black" />
@@ -268,11 +273,11 @@ const CreateEvent = () => {
                 <Text>{description}</Text>
               </View>
             )}
-            {coordinates.lat && coordinates.lon && (
+            {coordinates.latitude && coordinates.longitude && (
               <View className="flex flex-row items-center" style={{ gap: 5 }}>
                 <Text className="text-lg font-semibold">Koordynaty:</Text>
                 <Text>
-                  {coordinates.lat}, {coordinates.lon}
+                  {coordinates.latitude}, {coordinates.longitude}
                 </Text>
               </View>
             )}

@@ -96,10 +96,10 @@ const EventItem = ({ event, deleteFunction }) => {
           </TouchableOpacity>
         )}
       </View>
+      <Text>{event.description}</Text>
       <View>
+        <Text>{event.address}</Text>
         <Text className="text-gray-400">{event.date}</Text>
-        <Text className="text-gray-600">{event.address}</Text>
-        <Text>{event.description}</Text>
         <Text className="text-gray-400">
           {event.coordinates.latitude.toFixed(3)},{" "}
           {event.coordinates.longitude.toFixed(3)}

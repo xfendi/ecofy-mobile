@@ -76,7 +76,7 @@ const EventListItem = ({ eventData, onClose, deleteFunction }) => {
           >
             {eventData?.title}
           </Text>
-          <View className="flex flex-row items-center gap-5" >
+          <View className="flex flex-row items-center gap-5">
             {!isHost ? (
               <TouchableOpacity onPress={checkAndToggleLike}>
                 {isLike ? (
@@ -95,10 +95,8 @@ const EventListItem = ({ eventData, onClose, deleteFunction }) => {
             </TouchableOpacity>
           </View>
         </View>
-        <View>
-          <Text className="text-gray-600">{eventData?.address}</Text>
-          <Text>{eventData?.description}</Text>
-        </View>
+        <Text>{eventData?.description}</Text>
+        <Text>{eventData?.address}</Text>
       </View>
       <TouchableOpacity
         onPress={() => {

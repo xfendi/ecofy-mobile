@@ -1,12 +1,26 @@
-import React from 'react';
-import { View, Text } from 'react-native';
+import React from "react";
+import { TouchableOpacity } from "react-native";
+import { View, Text } from "react-native";
+import { UseMap } from "../context/MapContext";
+import { useRouter } from "expo-router";
 
 const NotificationItem = ({ notification }) => {
-    return (
-        <View className="p-5 flex flex-col gap-2 bg-white rounded-xl shadow mb-2">
-            <Text className="text-gray-500">{notification.message}</Text>
-        </View>
-    );
+  const { setSelectedEvent } = UseMap();
+  const router = useRouter();
+
+  const handleShowOnMap = () => {
+    setSelectedEvent(notification.event);
+    router.replace("/(tabs)/map");
+  };
+
+  return (
+    <TouchableOpacity
+      onPress={handleShowOnMap}
+      className="border-b border-gray-200 pb-5"
+    >
+      <Text className="text-gray-500">{notification.message}</Text>
+    </TouchableOpacity>
+  );
 };
 
 export default NotificationItem;

@@ -1,51 +1,39 @@
 // components/EcoChallengeItem.jsx
-import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import React from "react";
+import { View, Text } from "react-native";
+
+import { primaryColor } from "../config.json";
+import { TouchableOpacity } from "react-native";
 
 const EcoChallengeItem = ({ challenge }) => {
-    const { title, description, startTime, endTime } = challenge;
+  const { title, description, startTime, endTime } = challenge;
 
-    const handleJoinChallenge = () => {
-        // Tutaj dodaj logikę, aby użytkownik mógł wziąć udział w wyzwaniu
-        alert(`Dołączyłeś do wyzwania: ${title}`);
-    };
+  const handleJoinChallenge = () => {
+    alert(`Dołączyłeś do wyzwania: ${title}`);
+  };
 
-    return (
-        <View style={styles.container}>
-            <Text style={styles.title}>{title}</Text>
-            <Text style={styles.description}>{description}</Text>
-            <Text style={styles.dates}>
-                Rozpoczęcie: {new Date(startTime).toLocaleString()}{"\n"}
-                Zakończenie: {new Date(endTime).toLocaleString()}
-            </Text>
-            <Button title="Weź udział" onPress={handleJoinChallenge} />
-        </View>
-    );
+  return (
+    <View className="flex flex-col gap-5">
+      <Text className="text-xl font-semibold" style={{ color: primaryColor }}>
+        {title}
+      </Text>
+      <Text>{description}</Text>
+      <Text className="text-gray-400">
+        Rozpoczęcie: {new Date(startTime).toLocaleString()}
+        {"\n"}
+        Zakończenie: {new Date(endTime).toLocaleString()}
+      </Text>
+      <TouchableOpacity
+        onPress={handleJoinChallenge}
+        className="p-4 rounded-xl"
+        style={{ backgroundColor: "#8b5cf6" }}
+      >
+        <Text className="text-white text-xl font-semibold text-center">
+          Weź udział
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: '#fff',
-        borderRadius: 8,
-        padding: 15,
-        marginBottom: 15,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 3,
-        elevation: 3,
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    description: {
-        marginVertical: 5,
-    },
-    dates: {
-        marginBottom: 10,
-        color: 'gray',
-    },
-});
 
 export default EcoChallengeItem;

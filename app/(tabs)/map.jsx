@@ -3,8 +3,8 @@ import { SafeAreaView, View, StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFocusEffect } from "@react-navigation/native";
-import { useLocalSearchParams } from "expo-router";
 import { collection, onSnapshot } from "firebase/firestore";
+import { useMap } from "../../context/MapContext";
 
 import { db } from "../../firebase";
 import EventListItem from "../../components/EventListItem";
@@ -14,14 +14,11 @@ import { primaryColor } from "../../config.json";
 const Map = () => {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const { selectedE, setSelectedE } = useMap();
+  {console.log(selectedE)}
 
   const mapRef = useRef(null);
   const { region } = useGeoLocation();
-  const params = useLocalSearchParams();
-
-  let eventId = params.eventId
-    ? parseInt(params.eventId, 10)
-    : selectedEvent?.id;
 
   console.log("selectedEventID:", selectedEvent?.id);
 
@@ -47,8 +44,8 @@ const Map = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      if (eventId) {
-        const event = events.find((marker) => marker.id === eventId);
+      if (selectedE) {
+        const event = events.find((marker) => marker.id === selectedE);
         if (event) {
           setSelectedEvent(event);
           mapRef.current?.animateToRegion(
@@ -63,8 +60,9 @@ const Map = () => {
         } else {
           console.log("Invalid eventId");
         }
+        setSelectedE(null);
       }
-    }, [eventId, events])
+    }, [selectedE, events])
   );
 
   const animate = (coordinates) => {

@@ -7,6 +7,7 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../../firebase";
 import EventItem from "../../components/EventItem";
 
+
 const Events = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [highlightedEvent, setHighlightedEvent] = useState(null);

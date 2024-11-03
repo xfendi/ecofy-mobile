@@ -13,7 +13,7 @@ const Index = () => {
 
   const { user } = UserAuth();
   const router = useRouter();
-  const firstName = user?.displayName.split(" ")[0];
+  const firstName = user?.displayName;
 
   const onRefresh = () => {
     setIsRefreshing(true);

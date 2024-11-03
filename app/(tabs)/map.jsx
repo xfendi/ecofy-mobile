@@ -97,7 +97,6 @@ const Map = () => {
               key={marker.id}
               coordinate={marker.coordinates}
               title={marker.title}
-              description={marker.description}
               onPress={() => {
                 setSelectedEvent(marker.id);
               }}

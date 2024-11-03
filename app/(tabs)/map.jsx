@@ -1,22 +1,36 @@
 import React, { useState, useRef, useEffect } from "react";
-import { SafeAreaView, View, StyleSheet } from "react-native";
+import { SafeAreaView, View, StyleSheet, Alert, Text } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFocusEffect } from "@react-navigation/native";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 
 import { db } from "../../firebase";
 import EventListItem from "../../components/EventListItem";
 import useGeoLocation from "../../context/GeoLocationContext";
 import { UseMap } from "../../context/MapContext";
 import { primaryColor } from "../../config.json";
+import { TouchableOpacity } from "react-native";
 
 const Map = () => {
   const [events, setEvents] = useState([]);
+  const [isDeleteModal, setIsDeleteModal] = useState();
+  const [idToDelete, setIdToDelete] = useState();
   const { selectedEvent, setSelectedEvent } = UseMap();
 
   const mapRef = useRef(null);
   const { region } = useGeoLocation();
+
+  const handleDelete = async () => {
+    setIsDeleteModal(false);
+    try {
+      await deleteDoc(doc(db, "events", idToDelete.toString()));
+      Alert.alert("Event został usunięty!");
+    } catch (e) {
+      console.error("Błąd przy usuwaniu eventu:", e);
+      Alert.alert("Błąd", "Nie udało się usunąć eventu: ", e.message);
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -70,6 +84,34 @@ const Map = () => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      {isDeleteModal && (
+        <View
+          className="absolute flex items-center w-full bottom-0 top-0 z-40"
+          style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
+        >
+          <View className="bg-gray-100 p-5 w-80 m-auto rounded-xl flex flex-col gap-5 z-50">
+            <Text className="text-2xl font-semibold">Potwierdź Usunięcie</Text>
+
+            <TouchableOpacity
+              onPress={handleDelete}
+              className="p-4 rounded-xl w-full bg-red-500"
+            >
+              <Text className="text-white text-xl font-semibold text-center">
+                Potwierdź
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setIsDeleteModal(false)}
+              className="p-4 rounded-xl w-full bg-gray-500"
+            >
+              <Text className="text-white text-xl font-semibold text-center">
+                Anuluj
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
       <View style={{ flex: 1 }}>
         <MapView
           ref={mapRef}
@@ -101,6 +143,10 @@ const Map = () => {
           <EventListItem
             eventData={selectedEvent}
             onClose={() => setSelectedEvent(null)}
+            deleteFunction={() => {
+              setIsDeleteModal(true);
+              setIdToDelete(selectedEvent.id);
+            }}
           />
         )}
       </View>

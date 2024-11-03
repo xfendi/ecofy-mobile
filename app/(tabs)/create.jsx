@@ -30,6 +30,7 @@ const CreateEvent = () => {
   const router = useRouter();
 
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [name, setName] = useState("");
   const [date, setDate] = useState(new Date());
@@ -80,16 +81,6 @@ const CreateEvent = () => {
       latitude: coordinate.latitude,
       longitude: coordinate.longitude,
     });
-    try {
-      const response = await axios.get(
-        `https://api.geoapify.com/v1/geocode/reverse?lat=${coordinates.latitude}&lon=${coordinates.longitude}&apiKey=${apiKey}`
-      );
-      const formattedAddress = response.data.features[0].properties.formatted;
-      setAddress(formattedAddress);
-    } catch (error) {
-      console.error("Error fetching address from coordinates:", error);
-      Alert.alert("Błąd", error.message);
-    }
   };
 
   const pickImage = async () => {
@@ -142,6 +133,15 @@ const CreateEvent = () => {
     }
 
     try {
+      setIsLoading(true);
+
+      const addressResponse = await axios.get(
+        `https://api.geoapify.com/v1/geocode/reverse?lat=${coordinates.latitude}&lon=${coordinates.longitude}&apiKey=${apiKey}`
+      );
+      const formattedAddress =
+        addressResponse.data.features[0].properties.formatted;
+      setAddress(formattedAddress);
+
       const codeid = await GenerateCode();
 
       const response = await fetch(image);
@@ -154,7 +154,7 @@ const CreateEvent = () => {
       await setDoc(doc(db, "events", codeid.toString()), {
         title: name,
         date: date,
-        address: address,
+        address: formattedAddress,
         description: description,
         coordinates: coordinates,
         host: user.uid,
@@ -162,6 +162,7 @@ const CreateEvent = () => {
         id: codeid,
       });
       Alert.alert("Sukces", "Pomyślnie utworzono wydarzenie: " + name);
+      setIsLoading(false);
       router.replace("/create");
       resetAllStates();
       console.log("Project document created successfully with codeId:", codeid);
@@ -173,6 +174,19 @@ const CreateEvent = () => {
 
   return (
     <SafeAreaView>
+      {isLoading && (
+        <View
+          className="absolute flex items-center w-full bottom-0 top-0 z-40"
+          style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
+        >
+          <View className="bg-gray-100 p-5 w-80 m-auto rounded-xl flex flex-col gap-5 z-50">
+            <Text className="text-2xl font-semibold">
+              Tworzenie Projektu...
+            </Text>
+          </View>
+        </View>
+      )}
+
       <ScrollView
         className="p-5"
         refreshControl={
@@ -254,29 +268,29 @@ const CreateEvent = () => {
             )}
           </MapView>
           <Text className="text-2xl font-semibold">Podsumowanie</Text>
-          <View className="flex flex-col gap-5 p-5 bg-white rounded-xl">
+          <View className="flex flex-col gap-5 p-5 bg-white rounded-xl w-full">
             {name && (
               <View className="flex flex-row items-center" style={{ gap: 5 }}>
                 <Text className="text-lg font-semibold">Nazwa:</Text>
-                <Text>{name}</Text>
+                <Text className="w-80">{name}</Text>
               </View>
             )}
             {date && (
               <View className="flex flex-row items-center" style={{ gap: 5 }}>
                 <Text className="text-lg font-semibold">Data:</Text>
-                <Text>{date.toLocaleDateString()}</Text>
+                <Text className="w-80">{date.toLocaleDateString()}</Text>
               </View>
             )}
             {description && (
               <View className="flex flex-row items-center" style={{ gap: 5 }}>
                 <Text className="text-lg font-semibold">Opis:</Text>
-                <Text>{description}</Text>
+                <Text className="w-80">{description}</Text>
               </View>
             )}
             {coordinates.latitude && coordinates.longitude && (
               <View className="flex flex-row items-center" style={{ gap: 5 }}>
                 <Text className="text-lg font-semibold">Koordynaty:</Text>
-                <Text>
+                <Text className="w-60">
                   {coordinates.latitude}, {coordinates.longitude}
                 </Text>
               </View>
@@ -284,7 +298,7 @@ const CreateEvent = () => {
             {address && (
               <View className="flex flex-row items-center" style={{ gap: 5 }}>
                 <Text className="text-lg font-semibold">Adres:</Text>
-                <Text>{address}</Text>
+                <Text className="w-80">{address}</Text>
               </View>
             )}
           </View>

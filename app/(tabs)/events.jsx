@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, RefreshControl } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  RefreshControl,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 
 import { db } from "../../firebase";
 import EventItem from "../../components/EventItem";
@@ -11,9 +18,22 @@ const Events = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [highlightedEvent, setHighlightedEvent] = useState(null);
   const [events, setEvents] = useState([]);
+  const [isDeleteModal, setIsDeleteModal] = useState();
+  const [idToDelete, setIdToDelete] = useState();
 
   const router = useRouter();
   const params = useLocalSearchParams();
+
+  const handleDelete = async () => {
+    setIsDeleteModal(false);
+    try {
+      await deleteDoc(doc(db, "events", idToDelete.toString()));
+      Alert.alert("Event został usunięty!");
+    } catch (e) {
+      console.error("Błąd przy usuwaniu eventu:", e);
+      Alert.alert("Błąd", "Nie udało się usunąć eventu: ", e.message);
+    }
+  };
 
   const onRefresh = () => {
     setIsRefreshing(true);
@@ -55,7 +75,35 @@ const Events = () => {
   }, []);
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ height: "100%" }}>
+      {isDeleteModal && (
+        <View
+          className="absolute flex items-center w-full bottom-0 top-0 z-40"
+          style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
+        >
+          <View className="bg-gray-100 p-5 w-80 m-auto rounded-xl flex flex-col gap-5 z-50">
+            <Text className="text-2xl font-semibold">Potwierdź Usunięcie</Text>
+
+            <TouchableOpacity
+              onPress={handleDelete}
+              className="p-4 rounded-xl w-full bg-red-500"
+            >
+              <Text className="text-white text-xl font-semibold text-center">
+                Potwierdź
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setIsDeleteModal(false)}
+              className="p-4 rounded-xl w-full bg-gray-500"
+            >
+              <Text className="text-white text-xl font-semibold text-center">
+                Anuluj
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
       <ScrollView
         className="p-5"
         refreshControl={
@@ -66,21 +114,24 @@ const Events = () => {
           <Text className="text-2xl font-semibold mb-5">
             Lista Wszystkich Wydarzeń
           </Text>
-          {events.length > 0 ? (
-            <View className="p-5 flex flex-col gap-5 bg-white rounded-xl">
-              {events.map((event) => (
+          <View className="p-5 flex flex-col gap-5 bg-white rounded-xl">
+            {events.length > 0 ? (
+              events.map((event) => (
                 <EventItem
-                  event={event}
                   key={event.id}
-                  isHighlight={highlightedEvent === event.id}
+                  event={event}
+                  deleteFunction={() => {
+                    setIsDeleteModal(true);
+                    setIdToDelete(event.id);
+                  }}
                 />
-              ))}
-            </View>
-          ) : (
-            <Text className="text-gray-500 text-xl font-semibold">
-              Brak wydarzeń
-            </Text>
-          )}
+              ))
+            ) : (
+              <Text className="text-gray-500 text-xl font-semibold">
+                Brak wydarzeń.
+              </Text>
+            )}
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

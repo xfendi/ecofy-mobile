@@ -207,7 +207,7 @@ const Index = () => {
               ))
             ) : (
               <Text className="text-gray-500 text-xl font-semibold">
-                Brak wydarzeń
+                Brak wydarzeń.
               </Text>
             )}
           </View>
@@ -219,7 +219,7 @@ const Index = () => {
               news.map((item) => <NewsItem key={item.id} news={item} />)
             ) : (
               <Text className="text-gray-500 text-xl font-semibold">
-                Brak aktualności
+                Brak aktualności.
               </Text>
             )}
           </View>

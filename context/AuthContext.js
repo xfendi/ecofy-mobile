@@ -47,6 +47,7 @@ export const AuthContextProvider = ({ children }) => {
     onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         console.log("Adres Email:", currentUser.email);
+        console.log("User ID:", currentUser.uid)
         console.log("Zdjęcie Profilowe:", currentUser.photoURL);
         console.log("Nazwa użytkownika: ", currentUser.displayName);
         console.log("Email Zweryfikowany: ", currentUser.emailVerified);

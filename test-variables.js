@@ -130,3 +130,27 @@ export const faq = [
     answer: "Główne źródła to transport, przemysł i spalanie paliw kopalnych.",
   },
 ];
+
+export const challenges = [
+  {
+    id: 1,
+    title: "Dzień bez plastiku",
+    description: "Spróbuj nie używać żadnych plastikowych produktów przez jeden dzień.",
+    startTime: new Date().toISOString(), // Obecny czas jako czas rozpoczęcia
+    endTime: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 dni później jako czas zakończenia
+  },
+  {
+    id: 2,
+    title: "Zielony tydzień",
+    description: "Codziennie wykonaj jedną ekologiczną czynność, np. segreguj odpady.",
+    startTime: new Date().toISOString(),
+    endTime: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 3,
+    title: "Dieta roślinna",
+    description: "Wypróbuj tygodniową dietę opartą na roślinach i zmniejszaj spożycie mięsa.",
+    startTime: new Date().toISOString(),
+    endTime: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+];

@@ -4,23 +4,19 @@ import MapView, { Marker } from "react-native-maps";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFocusEffect } from "@react-navigation/native";
 import { collection, onSnapshot } from "firebase/firestore";
-import { useMap } from "../../context/MapContext";
 
 import { db } from "../../firebase";
 import EventListItem from "../../components/EventListItem";
 import useGeoLocation from "../../context/GeoLocationContext";
+import { UseMap } from "../../context/MapContext";
 import { primaryColor } from "../../config.json";
 
 const Map = () => {
   const [events, setEvents] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const { selectedE, setSelectedE } = useMap();
-  {console.log(selectedE)}
+  const { selectedEvent, setSelectedEvent } = UseMap();
 
   const mapRef = useRef(null);
   const { region } = useGeoLocation();
-
-  console.log("selectedEventID:", selectedEvent?.id);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -44,10 +40,9 @@ const Map = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      if (selectedE) {
-        const event = events.find((marker) => marker.id === selectedE);
+      if (selectedEvent) {
+        const event = events.find((marker) => marker.id === selectedEvent?.id);
         if (event) {
-          setSelectedEvent(event);
           mapRef.current?.animateToRegion(
             {
               latitude: event.coordinates.latitude,
@@ -58,11 +53,10 @@ const Map = () => {
             1000
           );
         } else {
-          console.log("Invalid eventId");
+          setSelectedEvent(null);
         }
-        setSelectedE(null);
       }
-    }, [selectedE, events])
+    }, [selectedEvent, events])
   );
 
   const animate = (coordinates) => {

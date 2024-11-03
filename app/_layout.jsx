@@ -4,11 +4,11 @@ import { onAuthStateChanged } from "firebase/auth";
 import { Stack } from "expo-router";
 
 import { AuthContextProvider } from "../context/AuthContext";
+import { MapContextProvider } from "../context/MapContext";
 import { primaryColor } from "../config.json";
 import { auth } from "../firebase";
 
 import "../global.css";
-import {MapProvider} from "../context/MapContext";
 
 const _layout = () => {
   const [isLogin, setIsLogin] = useState(null);
@@ -30,15 +30,15 @@ const _layout = () => {
 
   return (
     <AuthContextProvider>
-      <MapProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        {isLogin ? (
-          <Stack.Screen name="(tabs)" />
-        ) : (
-          <Stack.Screen name="(auth)" />
-        )}
-      </Stack>
-      </MapProvider>
+      <MapContextProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          {isLogin ? (
+            <Stack.Screen name="(tabs)" />
+          ) : (
+            <Stack.Screen name="(auth)" />
+          )}
+        </Stack>
+      </MapContextProvider>
     </AuthContextProvider>
   );
 };

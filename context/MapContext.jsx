@@ -1,18 +1,15 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from "react";
 
-// Create the context
 const MapContext = createContext();
 
-// Create a provider component to wrap your application and make the state available
-export const MapProvider = ({ children }) => {
-    const [selectedE, setSelectedE] = useState(null);
+export const MapContextProvider = ({ children }) => {
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
-    return (
-        <MapContext.Provider value={{ selectedE, setSelectedE }}>
-            {children}
-        </MapContext.Provider>
-    );
+  return (
+    <MapContext.Provider value={{ selectedEvent, setSelectedEvent }}>
+      {children}
+    </MapContext.Provider>
+  );
 };
 
-// Custom hook to use the MapContext easily
-export const useMap = () => useContext(MapContext);
+export const UseMap = () => useContext(MapContext);

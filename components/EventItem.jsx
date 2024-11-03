@@ -3,15 +3,14 @@ import React from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { primaryColor } from "../config.json";
 import { useRouter } from "expo-router";
-import { useMap } from "../context/MapContext"; // Import the custom hook
+import { UseMap } from "../context/MapContext"; // Import the custom hook
 
 const EventItem = ({ event, deleteFunction }) => {
     const router = useRouter();
-    const { selectedE, setSelectedE } = useMap(); // Access the context
+    const { selectedEvent, setSelectedEvent } = UseMap(); // Access the context
 
     const handleShowOnMap = () => {
-        setSelectedE(event.id); // Update the shared state
-        console.log(selectedE);
+        setSelectedEvent(event);
         router.replace("/(tabs)/map");
     };
 

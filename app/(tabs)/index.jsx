@@ -33,7 +33,7 @@ const Index = () => {
 
   const { user } = UserAuth();
   const router = useRouter();
-  const firstName = user?.displayName;
+  const firstName = user?.displayName ? user.displayName.split(" ")[0] : null;
 
   const handleDelete = async () => {
     setIsDeleteModal(false);
@@ -165,7 +165,7 @@ const Index = () => {
         <View className="flex flex-col gap-5">
           {/* Logo aplikacji */}
           <View className="flex flex-row justify-between items-center">
-            <Text className="text-3xl font-bold">Witaj, {firstName} 👋</Text>
+            <Text className="text-3xl font-bold w-80">Witaj, {firstName} 👋</Text>
             <TouchableOpacity onPress={() => router.replace("/profile")}>
               <Image
                 source={{ uri: user.photoURL }}

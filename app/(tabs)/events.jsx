@@ -7,7 +7,6 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../../firebase";
 import EventItem from "../../components/EventItem";
 
-
 const Events = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [highlightedEvent, setHighlightedEvent] = useState(null);
@@ -45,10 +44,7 @@ const Events = () => {
         const docsArray = [];
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          docsArray.push({
-            ...data,
-            date: data.date.toDate().toLocaleDateString(),
-          });
+          docsArray.push({ ...data });
         });
 
         setEvents(docsArray); // Zapisujemy dokumenty do stanu

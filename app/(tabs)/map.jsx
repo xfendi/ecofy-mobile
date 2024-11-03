@@ -25,10 +25,7 @@ const Map = () => {
         const docsArray = [];
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          docsArray.push({
-            ...data,
-            date: data.date.toDate().toLocaleDateString(),
-          });
+          docsArray.push({ ...data });
         });
 
         setEvents(docsArray);

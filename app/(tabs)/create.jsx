@@ -7,26 +7,30 @@ import {
   ScrollView,
   Alert,
   Image,
+  Dimensions,
 } from "react-native";
 import axios from "axios";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import MapView, { Marker } from "react-native-maps";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import AppTextInput from "../../components/AppTextInput";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { primaryColor } from "../../config.json";
-import useGeoLocation from "../../context/GeoLocationContext"; // Adjust the path as necessary
-import { UserAuth } from "../../context/AuthContext";
-import { db, storage } from "../../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 
+import { primaryColor } from "../../config.json";
+import AppTextInput from "../../components/AppTextInput";
+import useGeoLocation from "../../context/GeoLocationContext"; // Adjust the path as necessary
+import { UserAuth } from "../../context/AuthContext";
+import { db, storage } from "../../firebase";
+
 const CreateEvent = () => {
   const { user } = UserAuth();
-  const { region } = useGeoLocation(); // Use the custom hook
+  const { region } = useGeoLocation();
+  const { width } = Dimensions.get("window");
   const router = useRouter();
 
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -34,6 +38,7 @@ const CreateEvent = () => {
 
   const [name, setName] = useState("");
   const [date, setDate] = useState(new Date());
+  const [time, setTime] = useState(new Date());
   const [address, setAddress] = useState("");
   const [description, setDescription] = useState("");
   const [coordinates, setCoordinates] = useState({
@@ -43,6 +48,7 @@ const CreateEvent = () => {
   const [image, setImage] = useState(null);
 
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [mapRegion, setMapRegion] = useState(region); // Track region for the map
 
   const apiKey = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY;
@@ -123,6 +129,7 @@ const CreateEvent = () => {
       !coordinates.longitude ||
       !name ||
       !date ||
+      !time ||
       !description
     ) {
       Alert.alert(
@@ -140,6 +147,8 @@ const CreateEvent = () => {
       );
       const formattedAddress =
         addressResponse.data.features[0].properties.formatted;
+      const formattedDate =
+        date.toLocaleDateString() + " " + time.toLocaleTimeString();
       setAddress(formattedAddress);
 
       const codeid = await GenerateCode();
@@ -153,7 +162,7 @@ const CreateEvent = () => {
 
       await setDoc(doc(db, "events", codeid.toString()), {
         title: name,
-        date: date,
+        date: formattedDate,
         address: formattedAddress,
         description: description,
         coordinates: coordinates,
@@ -201,16 +210,50 @@ const CreateEvent = () => {
             onChangeText={setName}
             full
           />
-          <TouchableOpacity
-            className="p-5 flex flex-row gap-5 items-center rounded-xl"
-            style={{ backgroundColor: primaryColor }}
-            onPress={() => setShowDatePicker(true)}
-          >
-            <FontAwesome name="calendar" size={20} color="#fff" />
-            <Text className="text-white text-xl font-semibold">
-              {date.toLocaleDateString()}
-            </Text>
-          </TouchableOpacity>
+          <View className="flex flex-row gap-5">
+            <TouchableOpacity
+              className="p-5 flex flex-row gap-5 items-center rounded-xl w-1/2"
+              style={{ backgroundColor: primaryColor, width: width * 0.5 - 27 }}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <FontAwesome name="calendar" size={20} color="#fff" />
+              <Text className="text-white text-xl font-semibold">
+                {date.toLocaleDateString()}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="p-5 flex flex-row gap-5 items-center rounded-xl w-1/2"
+              style={{ backgroundColor: primaryColor, width: width * 0.5 - 27 }}
+              onPress={() => setShowTimePicker(true)}
+            >
+              <FontAwesome6 name="clock" size={20} color="#fff" />
+              <Text className="text-white text-xl font-semibold">
+                {time.toLocaleTimeString()}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <DateTimePickerModal
+            isVisible={showDatePicker}
+            mode="date"
+            onConfirm={(selectedDate) => {
+              setShowDatePicker(false);
+              setDate(selectedDate);
+            }}
+            onCancel={() => setShowDatePicker(false)}
+            minimumDate={new Date()} // Przykład minimalnej daty
+            maximumDate={new Date(2100, 11, 31)} // Przykład maksymalnej daty
+          />
+          <DateTimePickerModal
+            isVisible={showTimePicker}
+            mode="time"
+            onConfirm={(selectedDate) => {
+              setShowTimePicker(false);
+              setTime(selectedDate);
+            }}
+            onCancel={() => setShowTimePicker(false)}
+            minimumDate={new Date()} // Przykład minimalnej daty
+            maximumDate={new Date(2100, 11, 31)} // Przykład maksymalnej daty
+          />
           <TouchableOpacity
             onPress={pickImage}
             className="p-4 rounded-xl"
@@ -226,19 +269,6 @@ const CreateEvent = () => {
               className="w-full h-[355px] rounded-xl"
             />
           )}
-          {showDatePicker && (
-            <DateTimePicker
-              value={date}
-              mode="date"
-              display="default"
-              onChange={(event, selectedDate) => {
-                setShowDatePicker(false);
-                if (selectedDate) {
-                  setDate(selectedDate);
-                }
-              }}
-            />
-          )}
           <AppTextInput
             placeholder="Opis wydarzenia"
             value={description}
@@ -250,7 +280,12 @@ const CreateEvent = () => {
             Wybierz Miejsce Wydarzenia
           </Text>
           <MapView
-            style={{ width: "100%", height: 355, borderRadius: "120px" }}
+            style={{
+              width: "100%",
+              height: 355,
+              borderRadius: 200,
+              overflow: "hidden",
+            }}
             region={mapRegion}
             onRegionChangeComplete={(region) => setMapRegion(region)}
             onPress={handleMapPress} // Allow selecting a location on the map
@@ -278,7 +313,9 @@ const CreateEvent = () => {
             {date && (
               <View className="flex flex-row items-center" style={{ gap: 5 }}>
                 <Text className="text-lg font-semibold">Data:</Text>
-                <Text className="w-80">{date.toLocaleDateString()}</Text>
+                <Text className="w-80">
+                  {date.toLocaleDateString() + " " + time.toLocaleTimeString()}
+                </Text>
               </View>
             )}
             {description && (
@@ -290,8 +327,9 @@ const CreateEvent = () => {
             {coordinates.latitude && coordinates.longitude && (
               <View className="flex flex-row items-center" style={{ gap: 5 }}>
                 <Text className="text-lg font-semibold">Koordynaty:</Text>
-                <Text className="w-60">
-                  {coordinates.latitude}, {coordinates.longitude}
+                <Text className="w-80">
+                  {coordinates.latitude.toFixed(3)},{" "}
+                  {coordinates.longitude.toFixed(3)}
                 </Text>
               </View>
             )}

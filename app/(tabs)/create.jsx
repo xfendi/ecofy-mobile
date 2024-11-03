@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import axios from "axios";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -30,6 +30,13 @@ import { db, storage } from "../../firebase";
 const CreateEvent = () => {
   const { user } = UserAuth();
   const { region } = useGeoLocation();
+  const [mapRegion, setMapRegion] = useState({
+    latitude: region?.latitude || 37.78825, // Default latitude
+    longitude: region?.longitude || -122.4324, // Default longitude
+    latitudeDelta: 0.0922, // Default delta
+    longitudeDelta: 0.0421, // Default delta
+  });
+  const [isMapLoading, setIsMapLoading] = useState(true);
   const { width } = Dimensions.get("window");
   const router = useRouter();
 
@@ -49,7 +56,6 @@ const CreateEvent = () => {
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [mapRegion, setMapRegion] = useState(region); // Track region for the map
 
   const apiKey = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY;
 
@@ -65,7 +71,13 @@ const CreateEvent = () => {
 
   useEffect(() => {
     if (region) {
-      setMapRegion(region);
+      setMapRegion({
+        latitude: region.latitude,
+        longitude: region.longitude,
+        latitudeDelta: region.latitudeDelta,
+        longitudeDelta: region.longitudeDelta,
+      });
+      setIsMapLoading(false);
     }
   }, [region]);
 
@@ -279,29 +291,34 @@ const CreateEvent = () => {
           <Text className="text-2xl font-semibold">
             Wybierz Miejsce Wydarzenia
           </Text>
-          <MapView
-            style={{
-              width: "100%",
-              height: 355,
-              borderRadius: 200,
-              overflow: "hidden",
-            }}
-            region={mapRegion}
-            onRegionChangeComplete={(region) => setMapRegion(region)}
-            onPress={handleMapPress} // Allow selecting a location on the map
-            showsUserLocation={true}
-          >
-            {coordinates.latitude && coordinates.longitude && (
-              <Marker
-                coordinate={{
-                  latitude: coordinates.latitude,
-                  longitude: coordinates.longitude,
-                }}
+          {!isMapLoading && (
+              <MapView
+                  style={{
+                    width: "100%",
+                    height: 355,
+                    borderRadius: 200,
+                    overflow: "hidden",
+                  }}
+                  region={mapRegion}
+                  onRegionChangeComplete={(region) => setMapRegion(region)}
+                  onPress={handleMapPress}
+                  showsUserLocation={true}
+                  loadingEnabled={true} // This prop enables a loading indicator while loading the map.
+                  provider={MapView.PROVIDER_GOOGLE} // If you have Google Maps API key, use this for better performance
               >
-                <FontAwesome name="map-marker" size={40} color="black" />
-              </Marker>
-            )}
-          </MapView>
+
+              {coordinates.latitude && coordinates.longitude && (
+                    <Marker
+                        coordinate={{
+                          latitude: coordinates.latitude,
+                          longitude: coordinates.longitude,
+                        }}
+                    >
+                      <FontAwesome name="map-marker" size={40} color="black" />
+                    </Marker>
+                )}
+              </MapView>
+          )}
           <Text className="text-2xl font-semibold">Podsumowanie</Text>
           <View className="flex flex-col gap-5 p-5 bg-white rounded-xl w-full">
             {name && (

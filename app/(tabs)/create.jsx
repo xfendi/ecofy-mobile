@@ -137,16 +137,16 @@ const CreateEvent = () => {
 
   const handleSubmit = async () => {
     if (
-      !coordinates.latitude ||
-      !coordinates.longitude ||
-      !name ||
-      !date ||
-      !time ||
-      !description
+        !coordinates.latitude ||
+        !coordinates.longitude ||
+        !name ||
+        !date ||
+        !time ||
+        !description
     ) {
       Alert.alert(
-        "Błąd",
-        "Proszę uzupełnić każde pole oraz wybrac lokalizację wydarzenia."
+          "Błąd",
+          "Proszę uzupełnić każde pole oraz wybrać lokalizację wydarzenia."
       );
       return;
     }
@@ -154,44 +154,66 @@ const CreateEvent = () => {
     try {
       setIsLoading(true);
 
+      // Fetch the address using coordinates
       const addressResponse = await axios.get(
-        `https://api.geoapify.com/v1/geocode/reverse?lat=${coordinates.latitude}&lon=${coordinates.longitude}&apiKey=${apiKey}`
+          `https://api.geoapify.com/v1/geocode/reverse?lat=${coordinates.latitude}&lon=${coordinates.longitude}&apiKey=${apiKey}`
       );
-      const formattedAddress =
-        addressResponse.data.features[0].properties.formatted;
-      const formattedDate =
-        date.toLocaleDateString() + " " + time.toLocaleTimeString();
+
+      if (!addressResponse.data || !addressResponse.data.features.length) {
+        throw new Error("Nie udało się uzyskać prawidłowego adresu.");
+      }
+
+      const formattedAddress = addressResponse.data.features[0].properties.formatted;
+      const formattedDate = date.toLocaleDateString() + " " + time.toLocaleTimeString();
       setAddress(formattedAddress);
 
+      // Generate a unique code ID for the event
       const codeid = await GenerateCode();
 
-      const response = await fetch(image);
-      const blob = await response.blob();
+      let photoURL = null;
 
-      const fileRef = ref(storage, `events/${codeid.toString()}`);
-      await uploadBytes(fileRef, blob);
-      const photoURL = await getDownloadURL(fileRef);
+      // Only upload the image if it is provided
+      if (image) {
+        const response = await fetch(image);
+        if (!response.ok) {
+          throw new Error(`Nie udało się pobrać obrazu. Kod statusu: ${response.status}`);
+        }
+        const blob = await response.blob();
+        const fileRef = ref(storage, `events/${codeid.toString()}`);
+        await uploadBytes(fileRef, blob);
+        photoURL = await getDownloadURL(fileRef);
+      }
 
-      await setDoc(doc(db, "events", codeid.toString()), {
+      // Save event details to Firestore
+      const eventDetails = {
         title: name,
         date: formattedDate,
         address: formattedAddress,
         description: description,
         coordinates: coordinates,
         host: user.uid,
-        photoURL: photoURL,
         id: codeid,
-      });
+      };
+      if (photoURL) {
+        eventDetails.photoURL = photoURL;
+      }
+
+      await setDoc(doc(db, "events", codeid.toString()), eventDetails);
+
       Alert.alert("Sukces", "Pomyślnie utworzono wydarzenie: " + name);
       setIsLoading(false);
+
+      // Navigate and reset states
       router.replace("/create");
       resetAllStates();
-      console.log("Project document created successfully with codeId:", codeid);
     } catch (error) {
-      console.error("Błąd podczas tworzenia wydarzenia:", error);
       Alert.alert("Błąd", error.message);
     }
   };
+
+
+
+
 
   return (
     <SafeAreaView>

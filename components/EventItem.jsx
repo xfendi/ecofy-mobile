@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity, Image} from "react-native";
+import { View, Text, TouchableOpacity, Image, Dimensions } from "react-native";
 import React, { useState, useEffect } from "react";
 import { AntDesign, Feather } from "@expo/vector-icons";
 import { primaryColor } from "../config.json";
@@ -21,10 +21,15 @@ const EventItem = ({ event, deleteFunction }) => {
   const router = useRouter();
   const { setSelectedEvent } = UseMap(); // Access the context
   const { user } = UserAuth();
+  const { width } = Dimensions.get("window");
 
   const handleShowOnMap = () => {
     setSelectedEvent(event);
     router.replace("/(tabs)/map");
+  };
+
+  const handleShowDetails = () => {
+    router.push("/(tabs)/details", { event });
   };
 
   const handleDelete = (event) => {
@@ -79,10 +84,8 @@ const EventItem = ({ event, deleteFunction }) => {
   return (
     <View key={event.id} className="flex flex-col gap-5">
       <View className="flex flex-row justify-between">
-        <Text className="text-xl font-semibold" style={{ color: primaryColor }}>
-          {event.title}
-        </Text>
-        {deleteFunction ? (
+        <Text className="text-xl font-semibold">{event.title}</Text>
+        {deleteFunction && event.host === user.uid ? (
           <TouchableOpacity onPress={() => handleDelete(event)}>
             <AntDesign name="delete" size={24} color="red" />
           </TouchableOpacity>
@@ -96,25 +99,38 @@ const EventItem = ({ event, deleteFunction }) => {
           </TouchableOpacity>
         )}
       </View>
-      <Text>{event.description}</Text>
-      {event.photoURL && <Image source={{ uri: event.photoURL }} style={{height: 100, width: 100}} resizeMode="cover"/>}
+      <Text className="text-gray-500">{event.address}</Text>
+      {event.photoURL && (
+        <Image
+          source={{ uri: event.photoURL }}
+          className="rounded-xl w-full"
+          style={{ height: width - 80 }}
+        />
+      )}
       <View>
-        <Text>{event.address}</Text>
-        <Text className="text-gray-400">{event.date}</Text>
-        <Text className="text-gray-400">
-          {event.coordinates.latitude.toFixed(3)},{" "}
-          {event.coordinates.longitude.toFixed(3)}
-        </Text>
+        <Text className="font-semibold">Data</Text>
+        <Text className="text-gray-500">{event.date}</Text>
       </View>
-      <TouchableOpacity
-        onPress={handleShowOnMap}
-        className="p-4 rounded-xl"
-        style={{ backgroundColor: "#8b5cf6" }}
-      >
-        <Text className="text-white text-xl font-semibold text-center">
-          Pokaż na mapie
-        </Text>
-      </TouchableOpacity>
+      <View className="flex flex-row gap-5">
+        <TouchableOpacity
+          onPress={handleShowOnMap}
+          className="p-4 rounded-xl"
+          style={{ backgroundColor: primaryColor, width: width * 0.5 - 43 }}
+        >
+          <Text className="text-white text-lg font-semibold text-center">
+            Pokaż na mapie
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={handleShowDetails}
+          className="p-4 rounded-xl bg-black"
+          style={{ width: width * 0.5 - 43 }}
+        >
+          <Text className="text-white text-lg font-semibold text-center">
+            Szczegóły
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

@@ -72,7 +72,6 @@ const EventListItem = ({ eventData, onClose, deleteFunction }) => {
         <View className="flex flex-row justify-between items-center">
           <Text
             className="text-xl font-semibold"
-            style={{ color: primaryColor }}
           >
             {eventData?.title}
           </Text>
@@ -95,18 +94,17 @@ const EventListItem = ({ eventData, onClose, deleteFunction }) => {
             </TouchableOpacity>
           </View>
         </View>
-        <Text>{eventData?.description}</Text>
-        <Text>{eventData?.address}</Text>
+        <Text className="text-gray-500">{eventData?.address}</Text>
+        <Text>{eventData?.date}</Text>
       </View>
       <TouchableOpacity
         onPress={() => {
           showDetails(eventData.id);
         }}
-        className="p-4 rounded-xl"
-        style={{ backgroundColor: "#8b5cf6" }}
+        className="p-4 rounded-xl bg-black"
       >
         <Text className="text-white text-xl font-semibold text-center">
-          Dowiedz się więcej
+          Szczegóły
         </Text>
       </TouchableOpacity>
     </View>

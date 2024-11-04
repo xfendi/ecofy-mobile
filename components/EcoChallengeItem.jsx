@@ -14,19 +14,26 @@ const EcoChallengeItem = ({ challenge }) => {
 
   return (
     <View className="flex flex-col gap-5">
-      <Text className="text-xl font-semibold" style={{ color: primaryColor }}>
-        {title}
-      </Text>
+      <Text className="text-xl font-semibold">{title}</Text>
       <Text>{description}</Text>
-      <Text className="text-gray-400">
-        Rozpoczęcie: {new Date(startTime).toLocaleString()}
-        {"\n"}
-        Zakończenie: {new Date(endTime).toLocaleString()}
-      </Text>
+      <View className="flex flex-row gap-5">
+        <View>
+          <Text className="font-semibold">Rozpoczęcie</Text>
+          <Text className="text-gray-500">
+            {new Date(startTime).toLocaleString()}
+          </Text>
+        </View>
+        <View>
+          <Text className="font-semibold">Zakończenie</Text>
+          <Text className="text-gray-500">
+            {new Date(endTime).toLocaleString()}
+          </Text>
+        </View>
+      </View>
       <TouchableOpacity
         onPress={handleJoinChallenge}
         className="p-4 rounded-xl"
-        style={{ backgroundColor: "#8b5cf6" }}
+        style={{ backgroundColor: primaryColor }}
       >
         <Text className="text-white text-xl font-semibold text-center">
           Weź udział

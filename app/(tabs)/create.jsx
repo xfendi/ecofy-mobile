@@ -137,16 +137,16 @@ const CreateEvent = () => {
 
   const handleSubmit = async () => {
     if (
-        !coordinates.latitude ||
-        !coordinates.longitude ||
-        !name ||
-        !date ||
-        !time ||
-        !description
+      !coordinates.latitude ||
+      !coordinates.longitude ||
+      !name ||
+      !date ||
+      !time ||
+      !description
     ) {
       Alert.alert(
-          "Błąd",
-          "Proszę uzupełnić każde pole oraz wybrać lokalizację wydarzenia."
+        "Błąd",
+        "Proszę uzupełnić każde pole oraz wybrać lokalizację wydarzenia."
       );
       return;
     }
@@ -156,15 +156,17 @@ const CreateEvent = () => {
 
       // Fetch the address using coordinates
       const addressResponse = await axios.get(
-          `https://api.geoapify.com/v1/geocode/reverse?lat=${coordinates.latitude}&lon=${coordinates.longitude}&apiKey=${apiKey}`
+        `https://api.geoapify.com/v1/geocode/reverse?lat=${coordinates.latitude}&lon=${coordinates.longitude}&apiKey=${apiKey}`
       );
 
       if (!addressResponse.data || !addressResponse.data.features.length) {
         throw new Error("Nie udało się uzyskać prawidłowego adresu.");
       }
 
-      const formattedAddress = addressResponse.data.features[0].properties.formatted;
-      const formattedDate = date.toLocaleDateString() + " " + time.toLocaleTimeString();
+      const formattedAddress =
+        addressResponse.data.features[0].properties.formatted;
+      const formattedDate =
+        date.toLocaleDateString() + " " + time.toLocaleTimeString();
       setAddress(formattedAddress);
 
       // Generate a unique code ID for the event
@@ -176,7 +178,9 @@ const CreateEvent = () => {
       if (image) {
         const response = await fetch(image);
         if (!response.ok) {
-          throw new Error(`Nie udało się pobrać obrazu. Kod statusu: ${response.status}`);
+          throw new Error(
+            `Nie udało się pobrać obrazu. Kod statusu: ${response.status}`
+          );
         }
         const blob = await response.blob();
         const fileRef = ref(storage, `events/${codeid.toString()}`);
@@ -211,10 +215,6 @@ const CreateEvent = () => {
     }
   };
 
-
-
-
-
   return (
     <SafeAreaView>
       {isLoading && (
@@ -246,7 +246,7 @@ const CreateEvent = () => {
           />
           <View className="flex flex-row gap-5">
             <TouchableOpacity
-              className="p-5 flex flex-row gap-5 items-center rounded-xl w-1/2"
+              className="p-5 flex flex-row gap-5 items-center rounded-xl"
               style={{ backgroundColor: primaryColor, width: width * 0.5 - 27 }}
               onPress={() => setShowDatePicker(true)}
             >
@@ -256,7 +256,7 @@ const CreateEvent = () => {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="p-5 flex flex-row gap-5 items-center rounded-xl w-1/2"
+              className="p-5 flex flex-row gap-5 items-center rounded-xl"
               style={{ backgroundColor: primaryColor, width: width * 0.5 - 27 }}
               onPress={() => setShowTimePicker(true)}
             >
@@ -290,8 +290,7 @@ const CreateEvent = () => {
           />
           <TouchableOpacity
             onPress={pickImage}
-            className="p-4 rounded-xl"
-            style={{ backgroundColor: primaryColor }}
+            className="p-4 rounded-xl bg-black"
           >
             <Text className="text-white text-xl font-semibold">
               Wybierz Zdjęcie
@@ -314,75 +313,74 @@ const CreateEvent = () => {
             Wybierz Miejsce Wydarzenia
           </Text>
           {!isMapLoading && (
-              <MapView
-                  style={{
-                    width: "100%",
-                    height: 355,
-                    borderRadius: 200,
-                    overflow: "hidden",
-                  }}
-                  region={mapRegion}
-                  onRegionChangeComplete={(region) => setMapRegion(region)}
-                  onPress={handleMapPress}
-                  showsUserLocation={true}
-                  loadingEnabled={true} // This prop enables a loading indicator while loading the map.
-                  provider={MapView.PROVIDER_GOOGLE} // If you have Google Maps API key, use this for better performance
-              >
-
+            <MapView
+              style={{
+                width: "100%",
+                height: 355,
+                borderRadius: 200,
+                overflow: "hidden",
+              }}
+              region={mapRegion}
+              onRegionChangeComplete={(region) => setMapRegion(region)}
+              onPress={handleMapPress}
+              showsUserLocation={true}
+              loadingEnabled={true} // This prop enables a loading indicator while loading the map.
+              provider={MapView.PROVIDER_GOOGLE} // If you have Google Maps API key, use this for better performance
+            >
               {coordinates.latitude && coordinates.longitude && (
-                    <Marker
-                        coordinate={{
-                          latitude: coordinates.latitude,
-                          longitude: coordinates.longitude,
-                        }}
-                    >
-                      <FontAwesome name="map-marker" size={40} color="black" />
-                    </Marker>
-                )}
-              </MapView>
+                <Marker
+                  coordinate={{
+                    latitude: coordinates.latitude,
+                    longitude: coordinates.longitude,
+                  }}
+                >
+                  <FontAwesome name="map-marker" size={40} color="black" />
+                </Marker>
+              )}
+            </MapView>
           )}
           <Text className="text-2xl font-semibold">Podsumowanie</Text>
           <View className="flex flex-col gap-5 p-5 bg-white rounded-xl w-full">
             {name && (
-              <View className="flex flex-row items-center" style={{ gap: 5 }}>
-                <Text className="text-lg font-semibold">Nazwa:</Text>
-                <Text className="w-80">{name}</Text>
+              <View>
+                <Text className="font-semibold">Nazwa</Text>
+                <Text className="text-gray-500">{name}</Text>
               </View>
             )}
             {date && (
-              <View className="flex flex-row items-center" style={{ gap: 5 }}>
-                <Text className="text-lg font-semibold">Data:</Text>
-                <Text className="w-80">
+              <View>
+                <Text className="font-semibold">Data</Text>
+                <Text className="w-80 text-gray-500">
                   {date.toLocaleDateString() + " " + time.toLocaleTimeString()}
                 </Text>
               </View>
             )}
             {description && (
-              <View className="flex flex-row items-center" style={{ gap: 5 }}>
-                <Text className="text-lg font-semibold">Opis:</Text>
-                <Text className="w-80">{description}</Text>
+              <View>
+                <Text className="font-semibold">Opis</Text>
+                <Text className="w-80 text-gray-500">{description}</Text>
               </View>
             )}
             {coordinates.latitude && coordinates.longitude && (
-              <View className="flex flex-row items-center" style={{ gap: 5 }}>
-                <Text className="text-lg font-semibold">Koordynaty:</Text>
-                <Text className="w-80">
+              <View>
+                <Text className="font-semibold">Koordynaty</Text>
+                <Text className="w-80 text-gray-500">
                   {coordinates.latitude.toFixed(3)},{" "}
                   {coordinates.longitude.toFixed(3)}
                 </Text>
               </View>
             )}
             {address && (
-              <View className="flex flex-row items-center" style={{ gap: 5 }}>
-                <Text className="text-lg font-semibold">Adres:</Text>
-                <Text className="w-80">{address}</Text>
+              <View>
+                <Text className="font-semibold">Adres:</Text>
+                <Text className="w-80 text-gray-500">{address}</Text>
               </View>
             )}
           </View>
           <TouchableOpacity
             onPress={handleSubmit}
             className="p-4 rounded-xl mb-[30%]"
-            style={{ backgroundColor: "#8b5cf6" }}
+            style={{ backgroundColor: primaryColor }}
           >
             <Text className="text-white text-xl font-semibold text-center">
               Utwórz Wydarzenie

@@ -19,7 +19,7 @@ import EcoChallengeItem from "../../components/EcoChallengeItem"; // Importujemy
 import NewsItem from "../../components/NewsItem"; // Importujemy komponent aktualności
 import NotificationItem from "../../components/NotificationItem"; // Importujemy komponent powiadomień
 import { tips, faq, challenges } from "../../test-variables";
-import { parse } from 'date-fns';
+import { parse } from "date-fns";
 
 const Index = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -92,14 +92,15 @@ const Index = () => {
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000); // Jutro
 
     const upcomingEvents = events.filter((event) => {
-      const eventDate = parse(event.date, 'dd.MM.yyyy HH:mm:ss', new Date());
+      const eventDate = parse(event.date, "dd.MM.yyyy HH:mm:ss", new Date());
       return eventDate >= now && eventDate <= tomorrow;
     });
 
     const newNotifications = upcomingEvents.map((event) => ({
       id: event.id, // Używamy id wydarzenia jako id powiadomienia
       event: event,
-      message: `Wydarzenie "${event.title}" rozpoczyna się jutro o ${event.date}.`,
+      title: `Wydarzenie`,
+      message: `${event.title} rozpoczyna się ${event.date}`,
     }));
 
     setNotifications(newNotifications);
@@ -110,7 +111,7 @@ const Index = () => {
     const tomorrow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000); // Jutro
 
     const upcomingEvents = events.filter((event) => {
-      const eventDate = parse(event.date, 'dd.MM.yyyy HH:mm:ss', new Date());
+      const eventDate = parse(event.date, "dd.MM.yyyy HH:mm:ss", new Date());
       return eventDate >= now && eventDate <= tomorrow;
     });
 
@@ -165,7 +166,9 @@ const Index = () => {
         <View className="flex flex-col gap-5">
           {/* Logo aplikacji */}
           <View className="flex flex-row justify-between items-center">
-            <Text className="text-3xl font-bold w-80">Witaj, {firstName} 👋</Text>
+            <Text className="text-3xl font-bold w-80">
+              Witaj, {firstName} 👋
+            </Text>
             <TouchableOpacity onPress={() => router.replace("/profile")}>
               <Image
                 source={{ uri: user.photoURL }}

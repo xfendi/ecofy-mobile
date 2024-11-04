@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import {View, Text, TouchableOpacity, Image} from "react-native";
 import React, { useState, useEffect } from "react";
 import { AntDesign, Feather } from "@expo/vector-icons";
 import { primaryColor } from "../config.json";
@@ -97,6 +97,7 @@ const EventItem = ({ event, deleteFunction }) => {
         )}
       </View>
       <Text>{event.description}</Text>
+      {event.photoURL && <Image source={{ uri: event.photoURL }} style={{height: 100, width: 100}} resizeMode="cover"/>}
       <View>
         <Text>{event.address}</Text>
         <Text className="text-gray-400">{event.date}</Text>

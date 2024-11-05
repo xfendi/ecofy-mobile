@@ -3,14 +3,14 @@ import React from "react";
 
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
-import { primaryColor } from "../config.json"
+import { primaryColor } from "../config.json";
 
 const TabBar = ({ state, descriptors, navigation }) => {
   const icons = {
     index: (props) => <FontAwesome name="home" {...props} />,
     create: (props) => <FontAwesome name="plus" {...props} />,
     map: (props) => <FontAwesome name="map" {...props} />,
-    events: (props) => <FontAwesome name="map-marker" {...props} />,
+    community: (props) => <FontAwesome name="comment" {...props} />,
     profile: (props) => <FontAwesome name="user" {...props} />,
   };
 
@@ -25,7 +25,12 @@ const TabBar = ({ state, descriptors, navigation }) => {
             ? options.title
             : route.name;
 
-        if (["_sitemap", "+not-found", "settings"].includes(route.name)) return null;
+        if (
+          ["_sitemap", "+not-found", "settings", "events", "details"].includes(
+            route.name
+          )
+        )
+          return null;
 
         const isFocused = state.index === index;
 

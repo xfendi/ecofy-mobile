@@ -28,8 +28,10 @@ const _layout = () => {
       <Tabs.Screen name="map" options={{ headerShown: false }} />
       <Tabs.Screen name="create" options={{ headerShown: false }} />
       <Tabs.Screen name="events" options={{ headerShown: false }} />
+      <Tabs.Screen name="community" options={{ headerShown: false }} />
       <Tabs.Screen name="profile" options={{ headerShown: false }} />
       <Tabs.Screen name="settings" options={{ headerShown: false }} />
+      <Tabs.Screen name="details" options={{ headerShown: false }} />
     </Tabs>
   );
 };

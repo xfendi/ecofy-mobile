@@ -214,7 +214,7 @@ const Index = () => {
             <Text className="text-2xl font-semibold mb-2">
               Nadchodzące Wydarzenia
             </Text>
-            <View className="p-5 flex flex-col gap-5 bg-white rounded-xl">
+            <View className="flex flex-col gap-5">
               {eventsInThreeDays.length > 0 ? (
                   eventsInThreeDays.map((item) => (
                       <EventItem
@@ -249,7 +249,7 @@ const Index = () => {
             <Text className="text-2xl font-semibold mb-2">
               Wyzwania Ekologiczne
             </Text>
-            <View className="p-5 flex flex-col gap-5 bg-white rounded-xl">
+            <View className="flex flex-col gap-5">
               {challenges.length > 0 ? (
                   challenges.map((item) => (
                       <EcoChallengeItem key={item.id} challenge={item} />

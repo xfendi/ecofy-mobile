@@ -19,7 +19,7 @@ import EcoChallengeItem from "../../components/EcoChallengeItem"; // Importujemy
 import NewsItem from "../../components/NewsItem"; // Importujemy komponent aktualności
 import NotificationItem from "../../components/NotificationItem"; // Importujemy komponent powiadomień
 import { tips, faq } from "../../test-variables";
-import { parse } from 'date-fns';
+import { parse, isBefore } from 'date-fns';
 
 const Index = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -28,6 +28,7 @@ const Index = () => {
   const [news, setNews] = useState([]);
   const [notifications, setNotifications] = useState([]); // Stan na powiadomienia
   const [challenges, setChallenges] = useState([]); // Stan na wyzwania ekologiczne
+  const [selectedTab, setSelectedTab] = useState("upcomingEvents")
 
   const [isDeleteModal, setIsDeleteModal] = useState();
   const [idToDelete, setIdToDelete] = useState();
@@ -56,13 +57,31 @@ const Index = () => {
           querySnapshot.forEach((doc) => {
             const data = doc.data();
             docsArray.push({
-              id: doc.id, // Dodajemy id do obiektu
+              id: doc.id, // Adding id to the object
               ...data,
             });
           });
-          setEvents(docsArray);
-          generateNotifications(docsArray); // Generujemy powiadomienia na podstawie wydarzeń
-          generateUpcomingEvents(docsArray);
+
+          // Filter out events that have already passed and sort by date
+          const now = new Date();
+          const upcomingEvents = docsArray
+              .filter((event) => {
+                // Parse the event date
+                const eventDate = parse(event.date, 'd.M.yyyy HH:mm:ss', new Date());
+                return isBefore(now, eventDate); // Include only future events
+              })
+              .sort((a, b) => {
+                // Sort events by date (from nearest to farthest)
+                const dateA = parse(a.date, 'd.M.yyyy HH:mm:ss', new Date());
+                const dateB = parse(b.date, 'd.M.yyyy HH:mm:ss', new Date());
+                return dateA - dateB; // Sort in ascending order
+              });
+
+          // Limit the length of the array to 5 after filtering and sorting
+          setEvents(upcomingEvents.slice(0, 5));
+
+          generateNotifications(upcomingEvents); // Generate notifications based on upcoming events
+          generateUpcomingEvents(upcomingEvents);
         }
     );
 
@@ -73,12 +92,11 @@ const Index = () => {
           querySnapshot.forEach((doc) => {
             const data = doc.data();
             newsArray.push({
-              id: doc.id, // Dodajemy id do obiektu
+              id: doc.id, // Adding id to the object
               ...data,
             });
           });
           setNews(newsArray);
-          console.log(newsArray)
         }
     );
 
@@ -89,11 +107,11 @@ const Index = () => {
           querySnapshot.forEach((doc) => {
             const data = doc.data();
             challengesArray.push({
-              id: doc.id, // Dodajemy id do obiektu
+              id: doc.id, // Adding id to the object
               ...data,
             });
           });
-          setChallenges(challengesArray); // Ustawiamy wyzwania w stanie
+          setChallenges(challengesArray); // Set challenges in state
         }
     );
 
@@ -103,6 +121,8 @@ const Index = () => {
       unsubscribeChallenges();
     };
   }, []);
+
+
 
   // Funkcja do generowania powiadomień na podstawie nadchodzących wydarzeń
   const generateNotifications = (events) => {
@@ -144,6 +164,10 @@ const Index = () => {
       setIsRefreshing(false);
     }, 1000);
   };
+
+  const showMore = () => {
+    router.push("/(tabs)/events");
+  }
 
   return (
       <SafeAreaView className="flex-1 bg-gray-100">
@@ -211,12 +235,51 @@ const Index = () => {
             </View>
 
             {/* Nadchodzące Wydarzenia */}
-            <Text className="text-2xl font-semibold mb-2">
-              Nadchodzące Wydarzenia
-            </Text>
+          <View className="flex flex-row mb-4">
+            <TouchableOpacity
+                onPress={() => setSelectedTab("upcomingEvents")}
+                className={`flex-1 p-3  ${selectedTab === "upcomingEvents" ? "bg-blue-500" : "bg-gray-300"}`}
+            >
+              <Text className={`text-center ${selectedTab === "upcomingEvents" ? "text-white" : "text-black"}`}>
+                Nadchodzące Wydarzenia
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                onPress={() => setSelectedTab("allEvents")}
+                className={`flex-1 p-3 ${selectedTab === "allEvents" ? "bg-blue-500" : "bg-gray-300"}`}
+            >
+              <Text className={`text-center ${selectedTab === "allEvents" ? "text-white" : "text-black"}`}>
+                Wszystkie Wydarzenia
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {selectedTab === "upcomingEvents" ? (
+              <>
+              <View className="flex flex-col gap-5">
+                {eventsInThreeDays.length > 0 ? (
+                    eventsInThreeDays.map((item) => (
+                        <EventItem
+                            key={item.id}
+                            event={item}
+                            deleteFunction={() => {
+                              setIsDeleteModal(true);
+                              setIdToDelete(item.id);
+                            }}
+                        />
+                    ))
+                ) : (
+                    <Text className="text-gray-500 text-xl font-semibold">
+                      Brak wydarzeń.
+                    </Text>
+                )}
+              </View>
+              </>
+          ) : (
+              <>
             <View className="flex flex-col gap-5">
-              {eventsInThreeDays.length > 0 ? (
-                  eventsInThreeDays.map((item) => (
+              {events.length > 0 ? (
+                  events.map((item) => (
                       <EventItem
                           key={item.id}
                           event={item}
@@ -232,6 +295,10 @@ const Index = () => {
                   </Text>
               )}
             </View>
+            <TouchableOpacity className="flex-1 p-3 bg-blue-500 rounded-2xl" onPress={showMore}><Text className="text-center text-white text-xl">Pokaż więcej</Text></TouchableOpacity>
+            </>
+          )}
+
 
             {/* Aktualności */}
             <Text className="text-2xl font-semibold mb-2">Aktualności</Text>

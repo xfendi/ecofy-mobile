@@ -18,8 +18,8 @@ import EventItem from "../../components/EventItem";
 import EcoChallengeItem from "../../components/EcoChallengeItem"; // Importujemy komponent wyzwań
 import NewsItem from "../../components/NewsItem"; // Importujemy komponent aktualności
 import NotificationItem from "../../components/NotificationItem"; // Importujemy komponent powiadomień
-import { tips, faq, challenges } from "../../test-variables";
-import { parse } from "date-fns";
+import { tips, faq } from "../../test-variables";
+import { parse } from 'date-fns';
 
 const Index = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -27,6 +27,7 @@ const Index = () => {
   const [eventsInThreeDays, setEventsInThreeDays] = useState([]);
   const [news, setNews] = useState([]);
   const [notifications, setNotifications] = useState([]); // Stan na powiadomienia
+  const [challenges, setChallenges] = useState([]); // Stan na wyzwania ekologiczne
 
   const [isDeleteModal, setIsDeleteModal] = useState();
   const [idToDelete, setIdToDelete] = useState();
@@ -46,43 +47,60 @@ const Index = () => {
     }
   };
 
-  // Pobieranie wydarzeń, aktualności i powiadomień z Firestore
+  // Pobieranie wydarzeń, aktualności, powiadomień i wyzwań ekologicznych z Firestore
   useEffect(() => {
     const unsubscribeEvents = onSnapshot(
-      collection(db, "events"),
-      (querySnapshot) => {
-        const docsArray = [];
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          docsArray.push({
-            id: doc.id, // Dodajemy id do obiektu
-            ...data,
+        collection(db, "events"),
+        (querySnapshot) => {
+          const docsArray = [];
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            docsArray.push({
+              id: doc.id, // Dodajemy id do obiektu
+              ...data,
+            });
           });
-        });
-        setEvents(docsArray);
-        generateNotifications(docsArray); // Generujemy powiadomienia na podstawie wydarzeń
-        generateUpcomingEvents(docsArray);
-      }
+          setEvents(docsArray);
+          generateNotifications(docsArray); // Generujemy powiadomienia na podstawie wydarzeń
+          generateUpcomingEvents(docsArray);
+        }
     );
 
     const unsubscribeNews = onSnapshot(
-      collection(db, "news"),
-      (querySnapshot) => {
-        const newsArray = [];
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          newsArray.push({
-            id: doc.id, // Dodajemy id do obiektu
-            ...data,
+        collection(db, "news"),
+        (querySnapshot) => {
+          const newsArray = [];
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            newsArray.push({
+              id: doc.id, // Dodajemy id do obiektu
+              ...data,
+            });
           });
-        });
-        setNews(newsArray);
-      }
+          setNews(newsArray);
+          console.log(newsArray)
+        }
+    );
+
+    const unsubscribeChallenges = onSnapshot(
+        collection(db, "ecoChallenges"),
+        (querySnapshot) => {
+          const challengesArray = [];
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            challengesArray.push({
+              id: doc.id, // Dodajemy id do obiektu
+              ...data,
+            });
+          });
+          setChallenges(challengesArray); // Ustawiamy wyzwania w stanie
+        }
     );
 
     return () => {
       unsubscribeEvents();
       unsubscribeNews();
+      unsubscribeChallenges();
     };
   }, []);
 
@@ -92,7 +110,7 @@ const Index = () => {
     const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000); // Jutro
 
     const upcomingEvents = events.filter((event) => {
-      const eventDate = parse(event.date, "dd.MM.yyyy HH:mm:ss", new Date());
+      const eventDate = parse(event.date, 'dd.MM.yyyy HH:mm:ss', new Date());
       return eventDate >= now && eventDate <= tomorrow;
     });
 
@@ -101,7 +119,7 @@ const Index = () => {
       event: event,
       title: `Wydarzenie`,
       message: `${event.title} rozpoczyna się ${event.date}`,
-    }));
+  }));
 
     setNotifications(newNotifications);
   };
@@ -128,23 +146,23 @@ const Index = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
-      {isDeleteModal && (
-        <View
-          className="absolute flex items-center w-full bottom-0 top-0 z-40"
-          style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
-        >
-          <View className="bg-gray-100 p-5 w-80 m-auto rounded-xl flex flex-col gap-5 z-50">
-            <Text className="text-2xl font-semibold">Potwierdź Usunięcie</Text>
-
-            <TouchableOpacity
-              onPress={handleDelete}
-              className="p-4 rounded-xl w-full bg-red-500"
+      <SafeAreaView className="flex-1 bg-gray-100">
+        {isDeleteModal && (
+            <View
+                className="absolute flex items-center w-full bottom-0 top-0 z-40"
+                style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
             >
-              <Text className="text-white text-xl font-semibold text-center">
-                Potwierdź
-              </Text>
-            </TouchableOpacity>
+              <View className="bg-gray-100 p-5 w-80 m-auto rounded-xl flex flex-col gap-5 z-50">
+                <Text className="text-2xl font-semibold">Potwierdź Usunięcie</Text>
+
+                <TouchableOpacity
+                    onPress={handleDelete}
+                    className="p-4 rounded-xl w-full bg-red-500"
+                >
+                  <Text className="text-white text-xl font-semibold text-center">
+                    Potwierdź
+                  </Text>
+                </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => setIsDeleteModal(false)}
@@ -178,91 +196,97 @@ const Index = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Powiadomienia */}
-          <Text className="text-2xl font-semibold mb-2">Powiadomienia</Text>
-          <View className="p-5 flex flex-col gap-5 bg-white rounded-xl">
-            {notifications.length > 0 ? (
-              notifications.map((item) => (
-                <NotificationItem key={item.id} notification={item} />
-              ))
-            ) : (
-              <Text className="text-gray-500 text-xl font-semibold">
-                Brak nowych powiadomień.
-              </Text>
-            )}
-          </View>
+            {/* Powiadomienia */}
+            <Text className="text-2xl font-semibold mb-2">Powiadomienia</Text>
+            <View className="p-5 flex flex-col gap-5 bg-white rounded-xl">
+              {notifications.length > 0 ? (
+                  notifications.map((item) => (
+                      <NotificationItem key={item.id} notification={item} />
+                  ))
+              ) : (
+                  <Text className="text-gray-500 text-xl font-semibold">
+                    Brak nowych powiadomień.
+                  </Text>
+              )}
+            </View>
 
-          {/* Nadchodzące Wydarzenia */}
-          <Text className="text-2xl font-semibold mb-2">
-            Nadchodzące Wydarzenia
-          </Text>
-          <View className="gap-5">
-            {eventsInThreeDays.length > 0 ? (
-              eventsInThreeDays.map((item) => (
-                <EventItem
-                  key={item.id}
-                  event={item}
-                  deleteFunction={() => {
-                    setIsDeleteModal(true);
-                    setIdToDelete(item.id);
-                  }}
-                />
-              ))
-            ) : (
-              <Text className="text-gray-500 text-xl font-semibold">
-                Brak wydarzeń.
-              </Text>
-            )}
-          </View>
+            {/* Nadchodzące Wydarzenia */}
+            <Text className="text-2xl font-semibold mb-2">
+              Nadchodzące Wydarzenia
+            </Text>
+            <View className="p-5 flex flex-col gap-5 bg-white rounded-xl">
+              {eventsInThreeDays.length > 0 ? (
+                  eventsInThreeDays.map((item) => (
+                      <EventItem
+                          key={item.id}
+                          event={item}
+                          deleteFunction={() => {
+                            setIsDeleteModal(true);
+                            setIdToDelete(item.id);
+                          }}
+                      />
+                  ))
+              ) : (
+                  <Text className="text-gray-500 text-xl font-semibold">
+                    Brak wydarzeń.
+                  </Text>
+              )}
+            </View>
 
-          {/* Aktualności */}
-          <Text className="text-2xl font-semibold mb-2">Aktualności</Text>
-          <View className="p-5 flex flex-col gap-5 bg-white rounded-xl">
-            {news.length > 0 ? (
-              news.map((item) => <NewsItem key={item.id} news={item} />)
-            ) : (
-              <Text className="text-gray-500 text-xl font-semibold">
-                Brak aktualności.
-              </Text>
-            )}
-          </View>
+            {/* Aktualności */}
+            <Text className="text-2xl font-semibold mb-2">Aktualności</Text>
+            <View className="p-5 flex flex-col gap-5 bg-white rounded-xl">
+              {news.length > 0 ? (
+                  news.map((item) => <NewsItem key={item.id} news={item} />)
+              ) : (
+                  <Text className="text-gray-500 text-xl font-semibold">
+                    Brak aktualności.
+                  </Text>
+              )}
+            </View>
 
-          {/* Wyzwania Ekologiczne */}
-          <Text className="text-2xl font-semibold mb-2">
-            Wyzwania Ekologiczne
-          </Text>
-          <View className="gap-5">
-            {challenges.map((item) => (
-              <EcoChallengeItem key={item.id} challenge={item} />
-            ))}
-          </View>
+            {/* Wyzwania Ekologiczne */}
+            <Text className="text-2xl font-semibold mb-2">
+              Wyzwania Ekologiczne
+            </Text>
+            <View className="p-5 flex flex-col gap-5 bg-white rounded-xl">
+              {challenges.length > 0 ? (
+                  challenges.map((item) => (
+                      <EcoChallengeItem key={item.id} challenge={item} />
+                  ))
+              ) : (
+                  <Text className="text-gray-500 text-xl font-semibold">
+                    Brak wyzwań ekologicznych.
+                  </Text>
+              )}
+            </View>
 
-          {/* Poradniki Ekologiczne */}
-          <Text className="text-2xl font-semibold mb-2">
-            Poradniki Ekologiczne
-          </Text>
-          <View className="p-5 flex flex-col gap-5 bg-white rounded-xl">
-            {tips.map((item) => (
-              <View key={item.id} className="border-b border-gray-200 pb-5">
-                <Text className="text-xl font-semibold">{item.title}</Text>
-                <Text>{item.description}</Text>
-              </View>
-            ))}
-          </View>
+            {/* Poradniki Ekologiczne */}
+            <Text className="text-2xl font-semibold mb-2">
+              Poradniki Ekologiczne
+            </Text>
+            <View className="p-5 flex flex-col gap-5 bg-white rounded-xl">
+              {tips.map((item) => (
+                  <View key={item.id} className="border-b border-gray-200 pb-5">
+                    <Text className="text-xl font-semibold">{item.title}</Text>
+                    <Text>{item.description}</Text>
+                  </View>
+              ))}
+            </View>
 
-          {/* FAQ Ekologiczne */}
-          <Text className="text-2xl font-semibold mb-2">FAQ Ekologiczne</Text>
-          <View className="p-5 flex flex-col gap-5 bg-white rounded-xl mb-[30%]">
-            {faq.map((item) => (
-              <View key={item.id} className="border-b border-gray-200 pb-5">
-                <Text className="text-xl font-semibold">{item.question}</Text>
-                <Text>{item.answer}</Text>
-              </View>
-            ))}
+            {/* FAQ Ekologiczne */}
+            <Text className="text-2xl font-semibold mb-2">FAQ Ekologiczne</Text>
+            <View className="p-5 flex flex-col gap-5 bg-white rounded-xl mb-[30%]">
+              {faq.map((item) => (
+                  <View key={item.id} className="border-b border-gray-200 pb-5">
+                    <Text className="text-xl font-semibold">{item.question}</Text>
+                    <Text>{item.answer}</Text>
+                  </View>
+              ))}
+            </View>
           </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
   );
 };
 

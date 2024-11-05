@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, Image, Dimensions } from 'react-native';
+import {View, Text, Image, Dimensions} from 'react-native';
+const { width } = Dimensions.get("window");
 
 const NewsItem = ({ news }) => {
     const { width } = Dimensions.get("window");

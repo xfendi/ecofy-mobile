@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, Image } from 'react-native';
+import {View, Text, Image, Dimensions} from 'react-native';
+const { width } = Dimensions.get("window");
 
 const NewsItem = ({ news }) => {
     return (
@@ -9,7 +10,8 @@ const NewsItem = ({ news }) => {
             {news.image && (
                 <Image
                     source={{ uri: news.image }}
-                    className="h-32 w-full rounded-md mt-2"
+                    className="rounded-xl w-full"
+                    style={{ height: width - 80 }}
                     resizeMode="cover"
                 />
             )}

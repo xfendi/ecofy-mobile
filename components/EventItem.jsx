@@ -82,7 +82,17 @@ const EventItem = ({ event, deleteFunction }) => {
   };
 
   return (
-    <View key={event.id} className="flex flex-col gap-5">
+    <View
+      key={event.id}
+      className="flex flex-col gap-5 bg-white rounded-2xl p-5"
+    >
+      {event.photoURL && (
+        <Image
+          source={{ uri: event.photoURL }}
+          className="rounded-2xl w-full"
+          style={{ height: width - 80 }}
+        />
+      )}
       <View className="flex flex-row justify-between">
         <Text className="text-xl font-semibold">{event.title}</Text>
         {deleteFunction && event.host === user.uid ? (
@@ -100,13 +110,6 @@ const EventItem = ({ event, deleteFunction }) => {
         )}
       </View>
       <Text className="text-gray-500">{event.address}</Text>
-      {event.photoURL && (
-        <Image
-          source={{ uri: event.photoURL }}
-          className="rounded-xl w-full"
-          style={{ height: width - 80 }}
-        />
-      )}
       <View>
         <Text className="font-semibold">Data</Text>
         <Text className="text-gray-500">{event.date}</Text>

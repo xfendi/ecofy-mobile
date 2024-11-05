@@ -114,7 +114,7 @@ const Events = () => {
           <Text className="text-2xl font-semibold mb-5">
             Lista Wszystkich Wydarzeń
           </Text>
-          <View className="p-5 flex flex-col gap-5 bg-white rounded-xl">
+          <View className="gap-5">
             {events.length > 0 ? (
               events.map((event) => (
                 <EventItem
@@ -127,7 +127,7 @@ const Events = () => {
                 />
               ))
             ) : (
-              <Text className="text-gray-500 text-xl font-semibold">
+              <Text className="text-gray-500 text-xl font-semibold bg-white p-5 rounded-2xl">
                 Brak wydarzeń.
               </Text>
             )}

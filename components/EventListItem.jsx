@@ -22,11 +22,8 @@ const EventListItem = ({ eventData, onClose, deleteFunction }) => {
 
   const isHost = eventData.host === user.uid;
 
-  const showDetails = (id) => {
-    router.push({
-      pathname: "/events", // Ścieżka do komponentu Events
-      params: { eventId: id }, // Przekaż identyfikator wydarzenia
-    });
+  const handleShowDetails = () => {
+    router.push("/(tabs)/details", { eventData });
   };
 
   const handleDelete = (event) => {
@@ -70,11 +67,7 @@ const EventListItem = ({ eventData, onClose, deleteFunction }) => {
     <View className="absolute bottom-[100px] right-5 left-5 bg-white p-5 rounded-xl flex flex-col gap-5">
       <View className="flex flex-col gap-5">
         <View className="flex flex-row justify-between items-center">
-          <Text
-            className="text-xl font-semibold"
-          >
-            {eventData?.title}
-          </Text>
+          <Text className="text-xl font-semibold">{eventData?.title}</Text>
           <View className="flex flex-row items-center gap-5">
             {!isHost ? (
               <TouchableOpacity onPress={checkAndToggleLike}>
@@ -98,9 +91,7 @@ const EventListItem = ({ eventData, onClose, deleteFunction }) => {
         <Text>{eventData?.date}</Text>
       </View>
       <TouchableOpacity
-        onPress={() => {
-          showDetails(eventData.id);
-        }}
+        onPress={handleShowDetails}
         className="p-4 rounded-xl bg-black"
       >
         <Text className="text-white text-xl font-semibold text-center">

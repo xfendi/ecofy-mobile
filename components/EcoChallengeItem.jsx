@@ -13,7 +13,7 @@ const EcoChallengeItem = ({ challenge }) => {
   };
 
   return (
-    <View className="flex flex-col gap-5">
+    <View className="flex flex-col gap-5 bg-white p-5 rounded-2xl">
       <Text className="text-xl font-semibold">{title}</Text>
       <Text>{description}</Text>
       <View className="flex flex-row gap-5">

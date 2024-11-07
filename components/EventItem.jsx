@@ -27,9 +27,11 @@ const EventItem = ({ event, deleteFunction }) => {
     setSelectedEvent(event);
     router.replace("/(tabs)/map");
   };
-
   const handleShowDetails = () => {
-    router.push("/(tabs)/details", { event });
+    router.push({
+      pathname: "/(tabs)/details", // Ścieżka do której kierujemy
+      params: { eventId: event.id }, // Przekazujemy eventId jako część URL
+    });
   };
 
   const handleDelete = (event) => {

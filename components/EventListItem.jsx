@@ -23,7 +23,10 @@ const EventListItem = ({ eventData, onClose, deleteFunction }) => {
   const isHost = eventData.host === user.uid;
 
   const handleShowDetails = () => {
-    router.push("/(tabs)/details", { eventData });
+    router.push({
+      pathname: "/(tabs)/details", // Ścieżka do której kierujemy
+      params: { eventId: eventData.id }, // Przekazujemy eventId jako część URL
+    });
   };
 
   const handleDelete = (event) => {

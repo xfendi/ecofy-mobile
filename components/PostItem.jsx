@@ -4,10 +4,10 @@ import {
   Text,
   Image,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  TouchableWithoutFeedback
 } from "react-native";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 
@@ -16,11 +16,15 @@ import { UserAuth } from "../context/AuthContext";
 import { FontAwesome } from "@expo/vector-icons";
 import AppTextInput from "./AppTextInput";
 
+import ImageViewing from "react-native-image-viewing";
+
 const Post = ({ post }) => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
 
   const { width } = Dimensions.get("window");
+
+  const [isImageVisible, setIsImageVisible] = useState(false);
   const { user } = UserAuth();
 
   useEffect(() => {
@@ -73,12 +77,21 @@ const Post = ({ post }) => {
       <Text className="text-xl font-semibold">{post.title}</Text>
 
       {post.imageUrl && (
+
+        <TouchableWithoutFeedback onPress={() => setIsImageVisible(true)}>
         <Image
           source={{ uri: post.imageUrl }}
           className="w-full rounded-xl"
           style={{ height: width - 80 }}
         />
+        </TouchableWithoutFeedback>
       )}
+      <ImageViewing
+        images={[{ uri: post.imageUrl }]} // Przekazujemy tylko jeden obraz
+        imageIndex={0}
+        visible={isImageVisible}
+        onRequestClose={() => setIsImageVisible(false)}
+      />
 
       <Text>{post.description}</Text>
 

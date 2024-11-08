@@ -11,7 +11,7 @@ const verify = () => {
   const { user } = UserAuth();
   const router = useRouter();
 
-  if (user.emailVerified) {
+  if (user?.emailVerified) {
     router.replace("/(tabs)"); 
   }
 

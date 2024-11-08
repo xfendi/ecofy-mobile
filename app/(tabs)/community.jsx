@@ -5,13 +5,14 @@ import {
   TouchableOpacity,
   Image,
   Alert,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   Modal,
   RefreshControl,
 } from "react-native";
 import React, { useState, useEffect } from "react";
+
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { addDoc, collection, getDocs } from "firebase/firestore";
@@ -22,7 +23,8 @@ import AppTextInput from "../../components/AppTextInput";
 import { db } from "../../firebase";
 import { UserAuth } from "../../context/AuthContext";
 import Post from "../../components/PostItem";
-import { SafeAreaView } from "react-native-safe-area-context";
+
+import { primaryColor } from "../../config.json";
 
 const Community = () => {
   const [title, setTitle] = useState("");
@@ -156,138 +158,69 @@ const Community = () => {
         visible={createSheet}
         onRequestClose={() => setCreateSheet(false)}
       >
-        <KeyboardAvoidingView
-          style={styles.keyboardAvoidingView}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-          <View style={styles.modalContainer}>
-            <ScrollView contentContainerStyle={styles.bottomSheetContent}>
-              <Text style={styles.header}>Tworzenie posta</Text>
-              <AppTextInput
-                value={title}
-                onChangeText={setTitle}
-                placeholder="Podaj tytuł"
-                style={styles.input}
-              />
-              <AppTextInput
-                value={description}
-                onChangeText={setDescription}
-                placeholder="Dodaj treść"
-                style={[styles.input, { height: 100 }]}
-                multiline
-              />
-
-              <TouchableOpacity onPress={pickImage} style={styles.button}>
-                <Text style={styles.buttonText}>
-                  Wybierz zdjęcie (opcjonalne)
-                </Text>
-              </TouchableOpacity>
-
-              {photo && (
-                <Image
-                  source={{ uri: photo }}
-                  style={styles.image}
-                  resizeMode="cover"
+        <View className="flex-1 justify-end items-center">
+          <KeyboardAvoidingView
+            className="flex-row w-full h-1/2 p-5 bg-white rounded-xl"
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+          >
+            <ScrollView>
+              <View className="flex flex-col gap-5">
+                <View className="flex flex-row justify-between">
+                  <Text className="text-2xl font-semibold">Stwórz post</Text>
+                  <TouchableOpacity onPress={() => setCreateSheet(false)}>
+                    <FontAwesome name="times" size={20} />
+                  </TouchableOpacity>
+                </View>
+                <AppTextInput
+                  value={title}
+                  onChangeText={setTitle}
+                  placeholder="Podaj tytuł"
+                  gray
+                  full
                 />
-              )}
 
-              <TouchableOpacity
-                onPress={handleSubmit}
-                style={styles.submitButton}
-              >
-                <Text style={styles.submitButtonText}>Dodaj</Text>
-              </TouchableOpacity>
+                <AppTextInput
+                  value={description}
+                  onChangeText={setDescription}
+                  placeholder="Dodaj treść"
+                  multiline
+                  gray
+                  full
+                />
 
-              <TouchableOpacity
-                onPress={() => setCreateSheet(false)}
-                style={styles.closeButton}
-              >
-                <FontAwesome name="times" size={14} color="white" />
-              </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={pickImage}
+                  className="p-4 rounded-xl bg-black"
+                >
+                  <Text className="text-white text-xl font-semibold">
+                    Wybierz Zdjęcie
+                  </Text>
+                </TouchableOpacity>
+
+                {photo && (
+                  <Image
+                    source={{ uri: photo }}
+                    resizeMode="cover"
+                    className="w-full h-[355px] rounded-xl"
+                  />
+                )}
+
+                <TouchableOpacity
+                  onPress={handleSubmit}
+                  className="p-4 rounded-xl"
+                  style={{ backgroundColor: primaryColor }}
+                >
+                  <Text className="text-white text-xl font-semibold text-center">
+                    Utwórz Post
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </ScrollView>
-          </View>
-        </KeyboardAvoidingView>
+          </KeyboardAvoidingView>
+        </View>
       </Modal>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  scrollViewContent: {
-    padding: 16,
-  },
-  postsContainer: {
-    marginTop: 20,
-  },
-  addButton: {
-    backgroundColor: "#007bff",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  addButtonText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-  keyboardAvoidingView: {
-    flex: 1,
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: "white",
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    paddingTop: 20,
-    paddingHorizontal: 16,
-  },
-  bottomSheetContent: {
-    paddingBottom: 50,
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 16,
-  },
-  input: {
-    marginBottom: 8,
-  },
-  button: {
-    backgroundColor: "#007bff",
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 16,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "white",
-    textAlign: "center",
-  },
-  image: {
-    width: "100%",
-    height: 200,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  submitButton: {
-    backgroundColor: "#28a745",
-    padding: 10,
-    borderRadius: 8,
-    marginTop: 10,
-    alignItems: "center",
-  },
-  submitButtonText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-  closeButton: {
-    position: "absolute",
-    top: 16,
-    right: 16,
-    backgroundColor: "#dc3545",
-    padding: 8,
-    borderRadius: 16,
-  },
-});
 
 export default Community;

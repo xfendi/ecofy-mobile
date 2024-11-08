@@ -1,11 +1,18 @@
-import { View, Text, TouchableOpacity, Image, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+  TouchableWithoutFeedback
+} from "react-native";
 import React, { useState, useEffect } from "react";
 import { AntDesign, Feather } from "@expo/vector-icons";
+import ImageViewing from "react-native-image-viewing";
 import { primaryColor } from "../config.json";
 import { useRouter } from "expo-router";
 import { UseMap } from "../context/MapContext";
 import { UserAuth } from "../context/AuthContext";
-
 import { db } from "../firebase";
 import {
   doc,
@@ -18,19 +25,22 @@ import {
 
 const EventItem = ({ event, deleteFunction }) => {
   const [isLike, setIsLike] = useState();
+  const [isImageVisible, setIsImageVisible] = useState(false); // Dodaj stan dla widoczności obrazu
   const router = useRouter();
-  const { setSelectedEvent } = UseMap(); // Access the context
+  const { setSelectedEvent } = UseMap();
   const { user } = UserAuth();
   const { width } = Dimensions.get("window");
+  const [likesNumber, setLikesNumber] = useState(0);
 
   const handleShowOnMap = () => {
     setSelectedEvent(event);
     router.replace("/(tabs)/map");
   };
+
   const handleShowDetails = () => {
     router.push({
-      pathname: "/(tabs)/details", // Ścieżka do której kierujemy
-      params: { eventId: event.id }, // Przekazujemy eventId jako część URL
+      pathname: "/(tabs)/details",
+      params: { eventId: event.id },
     });
   };
 
@@ -41,11 +51,11 @@ const EventItem = ({ event, deleteFunction }) => {
   useEffect(() => {
     const postRef = doc(db, "events", event.id.toString());
 
-    // Listener nasłuchujący zmian w dokumencie
     const unsubscribe = onSnapshot(postRef, (docSnapshot) => {
       if (docSnapshot.exists()) {
         const data = docSnapshot.data();
         const likes = data.likes || [];
+        setLikesNumber(likes.length)
         if (likes.includes(user.uid)) {
           setIsLike(true);
         } else {
@@ -84,17 +94,25 @@ const EventItem = ({ event, deleteFunction }) => {
   };
 
   return (
-    <View
-      key={event.id}
-      className="flex flex-col gap-5 bg-white rounded-2xl p-5"
-    >
-      {event.photoURL && (
-        <Image
-          source={{ uri: event.photoURL }}
-          className="rounded-2xl w-full"
-          style={{ height: width - 80 }}
-        />
+    <View key={event.id} className="flex flex-col gap-5 bg-white rounded-2xl p-5">
+       {event.photoURL && (
+        <TouchableWithoutFeedback onPress={() => setIsImageVisible(true)}>
+          <Image
+            source={{ uri: event.photoURL }}
+            className="rounded-2xl w-full"
+            style={{ height: width - 80 }}
+          />
+        </TouchableWithoutFeedback>
       )}
+
+      {/* Modal wyświetlający obraz */}
+      <ImageViewing
+        images={[{ uri: event.photoURL }]} // Przekazujemy tylko jeden obraz
+        imageIndex={0}
+        visible={isImageVisible}
+        onRequestClose={() => setIsImageVisible(false)}
+      />
+
       <View className="flex flex-row justify-between">
         <Text className="text-xl font-semibold">{event.title}</Text>
         {deleteFunction && event.host === user.uid ? (
@@ -102,13 +120,17 @@ const EventItem = ({ event, deleteFunction }) => {
             <AntDesign name="delete" size={24} color="red" />
           </TouchableOpacity>
         ) : (
+          <View className="flex flex-row gap-3">
+          <Text>{likesNumber}</Text>
           <TouchableOpacity onPress={checkAndToggleLike}>
             {isLike ? (
               <AntDesign name="heart" size={24} color="red" />
             ) : (
               <Feather name="heart" size={24} color="black" />
             )}
+            
           </TouchableOpacity>
+          </View>
         )}
       </View>
       <Text className="text-gray-500">{event.address}</Text>

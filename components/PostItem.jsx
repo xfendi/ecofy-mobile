@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity, ScrollView, Dimensions, TouchableWithoutFeedback} from 'react-native';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { UserAuth } from '../context/AuthContext'; // Zakładam, że kontekst jest dostępny
+import ImageViewing from "react-native-image-viewing";
 
 const Post = ({ post }) => {
     const { user } = UserAuth(); // Pobranie danych o użytkowniku z kontekstu
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
+    const [isImageVisible, setIsImageVisible] = useState(false);
+    const { width } = Dimensions.get("window");
 
     useEffect(() => {
         fetchComments();
@@ -50,8 +53,16 @@ const Post = ({ post }) => {
             <Text style={styles.title}>{post.title}</Text>
             <Text style={styles.description}>{post.description}</Text>
             {post.imageUrl ? (
+                <TouchableWithoutFeedback onPress={() => setIsImageVisible(true)}>
                 <Image source={{ uri: post.imageUrl }} style={styles.image} />
+                </TouchableWithoutFeedback>
             ) : null}
+            <ImageViewing
+                images={[{ uri: post.imageUrl }]} // Jeden obraz w tablicy
+                imageIndex={0}
+                visible={isImageVisible}
+                onRequestClose={() => setIsImageVisible(false)}
+            />
             <Text style={styles.date}>
                 {new Date(post.createdAt.seconds * 1000).toLocaleDateString()} {post?.userName || 'anonymous'}
             </Text>

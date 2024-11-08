@@ -17,7 +17,6 @@ import { db } from "../../firebase"; // Upewnij się, że ścieżka jest poprawn
 import { UserAuth } from "../../context/AuthContext";
 import EventItem from "../../components/EventItem";
 import EcoChallengeItem from "../../components/EcoChallengeItem"; // Importujemy komponent wyzwań
-import NewsItem from "../../components/NewsItem"; // Importujemy komponent aktualności
 import NotificationItem from "../../components/NotificationItem"; // Importujemy komponent powiadomień
 import { tips, faq } from "../../test-variables";
 import { primaryColor } from "../../config.json";
@@ -26,7 +25,6 @@ const Index = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [events, setEvents] = useState([]);
   const [eventsInThreeDays, setEventsInThreeDays] = useState([]);
-  const [news, setNews] = useState([]);
   const [notifications, setNotifications] = useState([]); // Stan na powiadomienia
   const [challenges, setChallenges] = useState([]); // Stan na wyzwania ekologiczne
   const [selectedTab, setSelectedTab] = useState("upcomingEvents");
@@ -90,21 +88,6 @@ const Index = () => {
       }
     );
 
-    const unsubscribeNews = onSnapshot(
-      collection(db, "news"),
-      (querySnapshot) => {
-        const newsArray = [];
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          newsArray.push({
-            id: doc.id, // Adding id to the object
-            ...data,
-          });
-        });
-        setNews(newsArray);
-      }
-    );
-
     const unsubscribeChallenges = onSnapshot(
       collection(db, "ecoChallenges"),
       (querySnapshot) => {
@@ -122,7 +105,6 @@ const Index = () => {
 
     return () => {
       unsubscribeEvents();
-      unsubscribeNews();
       unsubscribeChallenges();
     };
   }, []);
@@ -325,18 +307,6 @@ const Index = () => {
               </TouchableOpacity>
             </>
           )}
-
-          {/* Aktualności */}
-          <Text className="text-2xl font-semibold">Aktualności</Text>
-          <View className="p-5 flex flex-col gap-5 bg-white rounded-xl">
-            {news.length > 0 ? (
-              news.map((item) => <NewsItem key={item.id} news={item} />)
-            ) : (
-              <Text className="text-gray-500 text-xl font-semibold">
-                Brak aktualności.
-              </Text>
-            )}
-          </View>
 
           {/* Wyzwania Ekologiczne */}
           <Text className="text-2xl font-semibold">

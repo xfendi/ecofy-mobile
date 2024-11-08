@@ -40,6 +40,7 @@ const Post = ({ post }) => {
       commentsSnapshot.forEach((doc) => {
         fetchedComments.push({ id: doc.id, ...doc.data() });
       });
+      fetchedComments.sort((a, b) => b.createdAt.seconds - a.createdAt.seconds);
       setComments(fetchedComments);
     } catch (error) {
       console.error("Błąd przy pobieraniu komentarzy:", error);

@@ -56,6 +56,7 @@ const Community = () => {
       querySnapshot.forEach((doc) => {
         fetchedPosts.push({ id: doc.id, ...doc.data() });
       });
+      fetchedPosts.sort((a,b) => b.createdAt.seconds - a.createdAt.seconds)
       setPosts(fetchedPosts);
     } catch (error) {
       console.error("Błąd przy pobieraniu postów:", error);

@@ -105,12 +105,12 @@ const Events = () => {
         </View>
       )}
       <ScrollView
-        className="p-5"
+        className="px-5"
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
       >
-        <View className="mb-[30%]">
+        <View className="mb-[53px]">
           <Text className="text-2xl font-semibold mb-5">
             Lista Wszystkich Wydarzeń
           </Text>

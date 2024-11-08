@@ -185,7 +185,7 @@ const Index = () => {
         </View>
       )}
       <ScrollView
-        className="p-5"
+        className="px-5"
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
@@ -339,7 +339,7 @@ const Index = () => {
 
           {/* FAQ Ekologiczne */}
           <Text className="text-2xl font-semibold">FAQ Ekologiczne</Text>
-          <View className="p-5 flex flex-col gap-5 bg-white rounded-xl mb-[30%]">
+          <View className="p-5 flex flex-col gap-5 bg-white rounded-xl mb-[53px]">
             {faq.map((item) => (
               <View key={item.id} className="border-b border-gray-200 pb-5">
                 <Text className="text-xl font-semibold">{item.question}</Text>

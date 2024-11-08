@@ -90,7 +90,7 @@ const Map = () => {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+        <View style={{ flex: 1 }}>
             {isDeleteModal && (
                 <View
                     className="absolute flex items-center w-full bottom-0 top-0 z-40"
@@ -125,7 +125,6 @@ const Map = () => {
                     region={currentRegion} // Use local state for the region
                     showsUserLocation={true}
                     style={styles.map}
-                    provider="google"
                 >
                     {events.map((marker) => (
                         <Marker
@@ -157,7 +156,7 @@ const Map = () => {
                     />
                 )}
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 

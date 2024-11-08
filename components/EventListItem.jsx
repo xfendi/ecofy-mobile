@@ -67,7 +67,7 @@ const EventListItem = ({ eventData, onClose, deleteFunction }) => {
   };
 
   return (
-    <View className="absolute bottom-[100px] right-5 left-5 bg-white p-5 rounded-xl flex flex-col gap-5">
+    <View className="absolute bottom-[86px] right-5 left-5 bg-white p-5 rounded-xl flex flex-col gap-5">
       <View className="flex flex-col gap-5">
         <View className="flex flex-row justify-between items-center">
           <Text className="text-xl font-semibold">{eventData?.title}</Text>
@@ -90,7 +90,7 @@ const EventListItem = ({ eventData, onClose, deleteFunction }) => {
             </TouchableOpacity>
           </View>
         </View>
-        <Text className="text-gray-500">{eventData?.address}</Text>
+        {eventData?.address &&<Text className="text-gray-500">{eventData?.address}</Text>}
         <Text>{eventData?.date}</Text>
       </View>
       <TouchableOpacity

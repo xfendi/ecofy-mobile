@@ -219,14 +219,14 @@ const settings = () => {
       )}
 
       <ScrollView
-        className="p-5 flex flex-col gap-5"
+        className="px-5"
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
       >
-        <View className="flex flex-col gap-5 mb-[30%]">
+        <View className="flex flex-col gap-5 mb-[53px]">
           <View className="flex flex-row justify-between items-center">
-            <Text className="text-2xl font-semibold">Ustawienia Konta</Text>
+            <Text className="text-3xl font-semibold">Ustawienia Konta</Text>
             <TouchableOpacity onPress={handleLogout}>
               <Text className="text-red-500 text-xl font-semibold text-center">
                 Wyloguj

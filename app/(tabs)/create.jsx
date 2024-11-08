@@ -151,10 +151,10 @@ const CreateEvent = () => {
       return;
     }
 
-    try {
-      setIsLoading(true);
+    setIsLoading(true);
 
-      // Fetch the address using coordinates
+    let formattedAddress = null;
+    try {
       const addressResponse = await axios.get(
         `https://api.geoapify.com/v1/geocode/reverse?lat=${coordinates.latitude}&lon=${coordinates.longitude}&apiKey=${apiKey}`
       );
@@ -163,32 +163,52 @@ const CreateEvent = () => {
         throw new Error("Nie udało się uzyskać prawidłowego adresu.");
       }
 
-      const formattedAddress =
-        addressResponse.data.features[0].properties.formatted;
+      formattedAddress = addressResponse.data.features[0].properties.formatted;
+    } catch (error) {
+      setIsLoading(false);
+      Alert.alert("Błąd", "Nie udało się pobrać adresu: " + error.message);
+      return;
+    }
+
+    let codeid = null;
+    try {
+      codeid = await GenerateCode();
+    } catch (error) {
+      setIsLoading(false);
+      Alert.alert(
+        "Błąd",
+        "Nie udało się wygenerować kodu ID: " + error.message
+      );
+      return;
+    }
+
+    let photoURL = null;
+    if (image) {
+      console.log("Uploading image...");
+      console.log(image);
+
+      const response = await fetch(image);
+      const blob = await response.blob();
+
+      const fileRef = ref(storage, `events/${codeid.toString()}`);
+
+      try {
+        console.log("Uploading to Firebase Storage...");
+        await uploadBytes(fileRef, blob);
+
+        photoURL = await getDownloadURL(fileRef);
+        console.log("Image uploaded successfully: ", photoURL);
+      } catch (error) {
+        setIsLoading(false);
+        Alert.alert("Błąd", "Nie udało się przesłać obrazu: " + error.message);
+        return;
+      }
+    }
+
+    try {
       const formattedDate =
         date.toLocaleDateString() + " " + time.toLocaleTimeString();
-      setAddress(formattedAddress);
 
-      // Generate a unique code ID for the event
-      const codeid = await GenerateCode();
-
-      let photoURL = null;
-
-      // Only upload the image if it is provided
-      if (image) {
-        const response = await fetch(image);
-        if (!response.ok) {
-          throw new Error(
-            `Nie udało się pobrać obrazu. Kod statusu: ${response.status}`
-          );
-        }
-        const blob = await response.blob();
-        const fileRef = ref(storage, `events/${codeid.toString()}`);
-        await uploadBytes(fileRef, blob);
-        photoURL = await getDownloadURL(fileRef);
-      }
-
-      // Save event details to Firestore
       const eventDetails = {
         title: name,
         date: formattedDate,
@@ -198,6 +218,7 @@ const CreateEvent = () => {
         host: user.uid,
         id: codeid,
       };
+
       if (photoURL) {
         eventDetails.photoURL = photoURL;
       }
@@ -205,13 +226,12 @@ const CreateEvent = () => {
       await setDoc(doc(db, "events", codeid.toString()), eventDetails);
 
       Alert.alert("Sukces", "Pomyślnie utworzono wydarzenie: " + name);
-      setIsLoading(false);
-
-      // Navigate and reset states
       router.replace("/create");
       resetAllStates();
     } catch (error) {
-      Alert.alert("Błąd", error.message);
+      Alert.alert("Błąd", "Nie udało się zapisać wydarzenia: " + error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -231,7 +251,7 @@ const CreateEvent = () => {
       )}
 
       <ScrollView
-        className="p-5"
+        className="px-5"
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
@@ -317,7 +337,6 @@ const CreateEvent = () => {
               style={{
                 width: "100%",
                 height: 355,
-                borderRadius: 200,
                 overflow: "hidden",
               }}
               region={mapRegion}
@@ -379,7 +398,7 @@ const CreateEvent = () => {
           </View>
           <TouchableOpacity
             onPress={handleSubmit}
-            className="p-4 rounded-xl mb-[30%]"
+            className="p-4 rounded-xl mb-[53px]"
             style={{ backgroundColor: primaryColor }}
           >
             <Text className="text-white text-xl font-semibold text-center">

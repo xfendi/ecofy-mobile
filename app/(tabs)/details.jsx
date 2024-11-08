@@ -118,11 +118,12 @@ const Details = () => {
   return (
     <SafeAreaView className="flex-1">
       <ScrollView
+        className="px-5"
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
       >
-        <View className="flex flex-col gap-5 p-5">
+        <View className="flex flex-col gap-5">
           {event.photoURL && (
             <Image
               source={{ uri: event.photoURL }}
@@ -155,7 +156,9 @@ const Details = () => {
 
           <View className="flex flex-col gap-5 p-5 bg-white rounded-xl w-full">
             {event.description && (
-              <Text className="w-80 text-gray-500 border-b-1 border-b pb-5 border-gray-200">{event.description}</Text>
+              <Text className="w-80 text-gray-500 border-b-1 border-b pb-5 border-gray-200">
+                {event.description}
+              </Text>
             )}
             {event.date && (
               <View>
@@ -174,7 +177,7 @@ const Details = () => {
             )}
           </View>
 
-          <View className="mb-[20%]">
+          <View className="mb-[53px]">
             <TouchableOpacity
               onPress={handleShowOnMap}
               className="p-4 rounded-xl"

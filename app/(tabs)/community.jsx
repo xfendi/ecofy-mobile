@@ -132,12 +132,12 @@ const Community = () => {
   return (
     <SafeAreaView className="flex-1">
       <ScrollView
-        className="p-5"
+        className="px-5"
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
       >
-        <View className="flex flex-col gap-5 mb-[30%]">
+        <View className="flex flex-col gap-5 mb-[53px]">
           <View className="flex flex-row justify-between">
             <Text className="text-3xl font-semibold">Ecofy Forum</Text>
             <TouchableOpacity onPress={openBottomSheet}>

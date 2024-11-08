@@ -127,7 +127,7 @@ const Profile = () => {
         </View>
       )}
       <ScrollView
-        className="flex flex-col gap-5 p-5"
+        className="px-5"
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
@@ -165,7 +165,7 @@ const Profile = () => {
           </View>
         </View>
 
-        <View className="mb-[30%] mt-5">
+        <View className="mb-[53px] mt-5">
           <Text className="text-2xl font-semibold mb-5">Moje wydarzenia</Text>
           <View className="gap-5">
             {myEvents.length > 0 ? (

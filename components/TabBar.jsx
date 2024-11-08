@@ -1,21 +1,32 @@
-import { View, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity, Image } from "react-native";
 import React from "react";
 
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 import { primaryColor } from "../config.json";
+import { UserAuth } from "../context/AuthContext";
 
 const TabBar = ({ state, descriptors, navigation }) => {
+  const { user } = UserAuth();
   const icons = {
     index: (props) => <FontAwesome name="home" {...props} />,
     create: (props) => <FontAwesome name="plus" {...props} />,
     map: (props) => <FontAwesome name="map" {...props} />,
     community: (props) => <FontAwesome name="comment" {...props} />,
-    profile: (props) => <FontAwesome name="user" {...props} />,
+    profile: (props) =>
+      user?.photoURL ? (
+        <Image
+          source={{ uri: user?.photoURL }}
+          className="rounded-full"
+          style={{ height: 32, width: 32 }}
+        />
+      ) : (
+        <FontAwesome name="user" {...props} />
+      ),
   };
 
   return (
-    <View className="absolute bottom-[0px] rounded-xl flex flex-row justify-between items-center p-[15px] bg-white m-[15px]">
+    <View className="absolute bottom-[0px] flex flex-row justify-between items-center p-5 bg-gray-100">
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const label =
@@ -66,7 +77,7 @@ const TabBar = ({ state, descriptors, navigation }) => {
           >
             {icons[route.name]({
               size: 30,
-              color: isFocused ? primaryColor : "black",
+              color: isFocused ? primaryColor : "#6b7280",
             })}
           </TouchableOpacity>
         );

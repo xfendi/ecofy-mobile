@@ -173,7 +173,7 @@ const Index = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
+    <SafeAreaView className="flex-1">
       {isDeleteModal && (
         <View
           className="absolute flex items-center w-full bottom-0 top-0 z-40"

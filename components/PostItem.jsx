@@ -15,6 +15,7 @@ import { db } from "../firebase";
 import { UserAuth } from "../context/AuthContext";
 import { FontAwesome } from "@expo/vector-icons";
 import AppTextInput from "./AppTextInput";
+
 import ImageViewing from "react-native-image-viewing";
 
 const Post = ({ post }) => {
@@ -22,6 +23,7 @@ const Post = ({ post }) => {
   const [newComment, setNewComment] = useState("");
 
   const { width } = Dimensions.get("window");
+
   const [isImageVisible, setIsImageVisible] = useState(false);
   const { user } = UserAuth();
 
@@ -75,6 +77,7 @@ const Post = ({ post }) => {
       <Text className="text-xl font-semibold">{post.title}</Text>
 
       {post.imageUrl && (
+
         <TouchableWithoutFeedback onPress={() => setIsImageVisible(true)}>
         <Image
           source={{ uri: post.imageUrl }}

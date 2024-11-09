@@ -6,6 +6,7 @@ import {
   Dimensions,
   ScrollView,
   RefreshControl,
+  Platform,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { AntDesign, Feather } from "@expo/vector-icons";
@@ -118,7 +119,7 @@ const Details = () => {
   return (
     <SafeAreaView className="flex-1">
       <ScrollView
-        className="px-5"
+        className={Platform.OS === "android" ? "p-5" : "px-5"}
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
@@ -156,9 +157,7 @@ const Details = () => {
 
           <View className="flex flex-col gap-5 p-5 bg-white rounded-3xl w-full">
             {event.description && (
-              <Text className="w-80 text-gray-500">
-                {event.description}
-              </Text>
+              <Text className="w-80 text-gray-500">{event.description}</Text>
             )}
             {event.date && (
               <View>
@@ -177,7 +176,7 @@ const Details = () => {
             )}
           </View>
 
-          <View className="mb-[53px]">
+          <View className={Platform.OS === "ios" ? "mb-[50px]" : "mb-[84px]"}>
             <TouchableOpacity
               onPress={handleShowOnMap}
               className="p-5 rounded-full"

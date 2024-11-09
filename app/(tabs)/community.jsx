@@ -139,12 +139,16 @@ const Community = () => {
   return (
     <SafeAreaView className="flex-1">
       <ScrollView
-        className="px-5"
+        className={Platform.OS === "android" ? "p-5" : "px-5"}
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
       >
-        <View className="flex flex-col gap-5 mb-[53px]">
+        <View
+          className={`flex flex-col gap-5 ${
+            Platform.OS === "ios" ? "mb-[50px]" : "mb-[84px]"
+          }`}
+        >
           <View className="flex flex-row justify-between">
             <Text className="text-3xl font-semibold">Ecofy Forum</Text>
             <TouchableOpacity onPress={openBottomSheet}>
@@ -215,7 +219,7 @@ const Community = () => {
 
                 <TouchableOpacity
                   onPress={handleSubmit}
-                  className="p-5 rounded-full mb-10"
+                  className="p-5 rounded-full"
                   style={{ backgroundColor: primaryColor }}
                 >
                   <Text className="text-white text-xl font-semibold text-center">

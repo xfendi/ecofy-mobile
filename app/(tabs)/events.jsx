@@ -6,6 +6,7 @@ import {
   RefreshControl,
   TouchableOpacity,
   Alert,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -105,12 +106,12 @@ const Events = () => {
         </View>
       )}
       <ScrollView
-        className="px-5"
+        className={Platform.OS === "android" ? "p-5" : "px-5"}
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
       >
-        <View className="mb-[53px]">
+        <View className={Platform.OS === "ios" ? "mb-[50px]" : "mb-[84px]"}>
           <Text className="text-2xl font-semibold mb-5">
             Lista Wszystkich Wydarzeń
           </Text>

@@ -8,6 +8,7 @@ import {
   Alert,
   Image,
   Dimensions,
+  Platform,
 } from "react-native";
 import axios from "axios";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -251,7 +252,7 @@ const CreateEvent = () => {
       )}
 
       <ScrollView
-        className="px-5"
+        className={Platform.OS === "android" ? "p-5" : "px-5"}
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
@@ -277,7 +278,10 @@ const CreateEvent = () => {
               style={{ width: width * 0.5 - 27 }}
               onPress={() => setShowDatePicker(true)}
             >
-              <View className="h-10 w-10 flex-row justify-center items-center rounded-full" style={{ backgroundColor: primaryColor }}>
+              <View
+                className="h-10 w-10 flex-row justify-center items-center rounded-full"
+                style={{ backgroundColor: primaryColor }}
+              >
                 <FontAwesome6 name="calendar" size={20} color="#fff" />
               </View>
               <Text className="text-black text-xl font-semibold">
@@ -289,7 +293,10 @@ const CreateEvent = () => {
               style={{ width: width * 0.5 - 27 }}
               onPress={() => setShowTimePicker(true)}
             >
-              <View className="h-10 w-10 flex-row justify-center items-center rounded-full" style={{ backgroundColor: primaryColor }}>
+              <View
+                className="h-10 w-10 flex-row justify-center items-center rounded-full"
+                style={{ backgroundColor: primaryColor }}
+              >
                 <FontAwesome6 name="clock" size={20} color="#fff" />
               </View>
               <Text className="text-black text-xl font-semibold">
@@ -330,7 +337,7 @@ const CreateEvent = () => {
           {image && (
             <Image
               source={{ uri: image }}
-              className="w-full h-[355px] rounded-xl"
+              className="w-full h-[355px] rounded-3xl"
             />
           )}
           <Text className="text-2xl font-semibold">
@@ -403,7 +410,9 @@ const CreateEvent = () => {
           </View>
           <TouchableOpacity
             onPress={handleSubmit}
-            className="p-5 rounded-full mb-[53px]"
+            className={`p-5 rounded-full ${
+              Platform.OS === "ios" ? "mb-[50px]" : "mb-[84px]"
+            }`}
             style={{ backgroundColor: primaryColor }}
           >
             <Text className="text-white text-xl font-semibold text-center">

@@ -6,6 +6,7 @@ import {
   ScrollView,
   Alert,
   RefreshControl,
+  Platform,
 } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -75,10 +76,16 @@ const settings = () => {
       return;
     } else if (name === user.diaplayName && name !== undefined) {
       console.log(name, user.displayName);
-      Alert.alert("Błąd", "Nazwa uzytkownika nie może być taka sama jak poprzednia.");
+      Alert.alert(
+        "Błąd",
+        "Nazwa uzytkownika nie może być taka sama jak poprzednia."
+      );
       return;
     } else if (!user.emailVerified) {
-      Alert.alert("Błąd", "Zweryfikuj swój adres email przez zmianą ustawień konta.");
+      Alert.alert(
+        "Błąd",
+        "Zweryfikuj swój adres email przez zmianą ustawień konta."
+      );
       return;
     }
 
@@ -122,7 +129,8 @@ const settings = () => {
       if (email) {
         await verifyBeforeUpdateEmail(user, email);
         Alert.alert(
-          "Sukces", "Pomyslnie wysłano wiadomość na nowy adres email. Adres zostanie zmieniony po pomyślniej weryfikacji."
+          "Sukces",
+          "Pomyslnie wysłano wiadomość na nowy adres email. Adres zostanie zmieniony po pomyślniej weryfikacji."
         );
         router.replace("/(auth)/welcome");
         await logout();
@@ -213,12 +221,16 @@ const settings = () => {
       )}
 
       <ScrollView
-        className="px-5"
+        className={Platform.OS === "android" ? "p-5" : "px-5"}
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
       >
-        <View className="flex flex-col gap-5 mb-[53px]">
+        <View
+          className={`flex flex-col gap-5 ${
+            Platform.OS === "ios" ? "mb-[50px]" : "mb-[84px]"
+          }`}
+        >
           <View className="flex flex-row justify-between items-center">
             <Text className="text-3xl font-semibold">Ustawienia Konta</Text>
             <TouchableOpacity onPress={handleLogout}>
@@ -242,7 +254,7 @@ const settings = () => {
             </TouchableOpacity>
           )}
           <View className="flex flex-col gap-5">
-            <View className="flex flex-row gap-5 items-center">
+            <View className="flex-row">
               <TouchableOpacity onPress={pickImage}>
                 <View className="absolute z-50 top-[-15px] right-[-15px] h-9 w-9 flex-row items-center justify-center bg-white rounded-full">
                   <Feather name="camera" size={16} color="black" />

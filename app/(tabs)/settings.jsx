@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, Feather } from "@expo/vector-icons";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {
   EmailAuthProvider,
@@ -38,9 +38,6 @@ const settings = () => {
   const [password, setPassword] = useState();
 
   const [image, setImage] = useState(null);
-
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const { logout, user } = UserAuth();
   const router = useRouter();
@@ -71,17 +68,17 @@ const settings = () => {
   const openModal = () => {
     console.log(user.email, user.displayName, user.emailVerified);
     if (!name && !email && !newpass && !image) {
-      setError("Uzupełnij jakiekolwiek pole.");
+      Alert.alert("Błąd", "Uzupełnij jakiekolwiek pole.");
       return;
     } else if (email === user.email) {
-      setError("Adres email nie może być taki sam jak poprzedni.");
+      Alert.alert("Błąd", "Adres email nie może być taki sam jak poprzedni.");
       return;
     } else if (name === user.diaplayName && name !== undefined) {
       console.log(name, user.displayName);
-      setError("Nazwa uzytkownika nie może być taka sama jak poprzednia.");
+      Alert.alert("Błąd", "Nazwa uzytkownika nie może być taka sama jak poprzednia.");
       return;
     } else if (!user.emailVerified) {
-      setError("Zweryfikuj swój adres email przez zmianą ustawień konta.");
+      Alert.alert("Błąd", "Zweryfikuj swój adres email przez zmianą ustawień konta.");
       return;
     }
 
@@ -114,21 +111,18 @@ const settings = () => {
 
   const handleSubmit = async () => {
     try {
-      setError("");
-      setSuccess("");
-
       const credentials = EmailAuthProvider.credential(user.email, password);
       await reauthenticateWithCredential(user, credentials);
 
       if (name) {
         await updateProfile(user, { displayName: name });
-        setSuccess("Pomyślnie zaktualizowano nazwę.");
+        Alert.alert("Sukces", "Pomyślnie zaktualizowano nazwę.");
       }
 
       if (email) {
         await verifyBeforeUpdateEmail(user, email);
-        setSuccess(
-          "Pomyslnie wysłano wiadomość na nowy adres email. Adres zostanie zmieniony po pomyślniej weryfikacji."
+        Alert.alert(
+          "Sukces", "Pomyslnie wysłano wiadomość na nowy adres email. Adres zostanie zmieniony po pomyślniej weryfikacji."
         );
         router.replace("/(auth)/welcome");
         await logout();
@@ -136,7 +130,7 @@ const settings = () => {
 
       if (newpass) {
         await updatePassword(user, newpass);
-        setSuccess("Pomyślnie zaktualizowano hasło.");
+        Alert.alert("Sukces", "Pomyślnie zaktualizowano hasło.");
       }
 
       if (image) {
@@ -159,7 +153,7 @@ const settings = () => {
           blob.close();
           const DownloadURL = await getDownloadURL(storageRef);
           await updateProfile(user, { photoURL: DownloadURL });
-          setSuccess("Pomyślnie zaktualizowano zdjęcie profilowe.");
+          Alert.alert("Sukces", "Pomyślnie zaktualizowano zdjęcie profilowe.");
         } catch (e) {
           console.error(e);
           Alert.alert(
@@ -172,7 +166,7 @@ const settings = () => {
       closeModal();
     } catch (e) {
       closeModal();
-      setError(e.message);
+      Alert.alert("Błąd", e.message);
       console.log(e);
     }
   };
@@ -228,7 +222,7 @@ const settings = () => {
           <View className="flex flex-row justify-between items-center">
             <Text className="text-3xl font-semibold">Ustawienia Konta</Text>
             <TouchableOpacity onPress={handleLogout}>
-              <Text className="text-red-500 text-xl font-semibold text-center">
+              <Text className="text-red-500 text-lg font-semibold text-center">
                 Wyloguj
               </Text>
             </TouchableOpacity>
@@ -248,28 +242,25 @@ const settings = () => {
             </TouchableOpacity>
           )}
           <View className="flex flex-col gap-5">
-            <Text className="text-lg text-gray-500">Zdjęcie profilowe</Text>
             <View className="flex flex-row gap-5 items-center">
-              {user.photoURL || image ? (
-                <Image
-                  source={{ uri: image || user.photoURL }}
-                  className="h-32 w-32 rounded-full"
-                />
-              ) : (
-                <FontAwesome name="user" size={100} color={primaryColor} />
-              )}
-              <TouchableOpacity
-                onPress={pickImage}
-                className="p-4 rounded-xl"
-                style={{ backgroundColor: primaryColor }}
-              >
-                <Text className="text-white text-xl font-semibold text-center">
-                  Wybierz Zdjęcie
-                </Text>
+              <TouchableOpacity onPress={pickImage}>
+                <View className="absolute z-50 top-[-15px] right-[-15px] h-9 w-9 flex-row items-center justify-center bg-white rounded-full">
+                  <Feather name="camera" size={16} color="black" />
+                </View>
+                {user.photoURL || image ? (
+                  <Image
+                    source={{ uri: image || user.photoURL }}
+                    className="h-32 w-32 rounded-3xl"
+                  />
+                ) : (
+                  <FontAwesome name="user" size={100} color={primaryColor} />
+                )}
               </TouchableOpacity>
             </View>
-            <Text className="text-lg text-gray-500">Imie i Nazwisko</Text>
             <View>
+              <Text className="text-lg font-semibold mb-2">
+                Imie i Nazwisko
+              </Text>
               <AppTextInput
                 placeholder={user.displayName || "Nowa Nazwa..."}
                 onChangeText={setName}
@@ -277,17 +268,17 @@ const settings = () => {
                 full
               />
             </View>
-            <View className="flex flex-row justify-between">
-              <Text className="text-lg text-gray-500">Adres Email</Text>
-              <Text
-                className={`${
-                  user.emailVerified ? "text-green-500" : "text-red-500"
-                } font-semibold`}
-              >
-                {user.emailVerified ? "Zweryfikowany" : "Nie Zweryfikowany"}
-              </Text>
-            </View>
             <View>
+              <View className="flex flex-row justify-between mb-2">
+                <Text className="text-lg font-semibold">Adres Email</Text>
+                <Text
+                  className={`${
+                    user.emailVerified ? "text-green-500" : "text-red-500"
+                  } text-lg font-semibold`}
+                >
+                  {user.emailVerified ? "Zweryfikowany" : "Nie Zweryfikowany"}
+                </Text>
+              </View>
               <AppTextInput
                 placeholder={user.email || "Nowy Email..."}
                 onChangeText={setEmail}
@@ -295,8 +286,8 @@ const settings = () => {
                 full
               />
             </View>
-            <Text className="text-lg text-gray-500">Hasło Konta</Text>
             <View>
+              <Text className="text-lg font-semibold mb-2">Hasło Konta</Text>
               <AppTextInput
                 placeholder="Nowe Hasło..."
                 onChangeText={setNewpass}
@@ -306,16 +297,8 @@ const settings = () => {
               />
             </View>
           </View>
-          {error && (
-            <Text className="text-red-500 text-xl font-semibold">{error}</Text>
-          )}
-          {success && (
-            <Text className="text-green-500 text-xl font-semibold">
-              {success}
-            </Text>
-          )}
           <TouchableOpacity
-            className="p-4 rounded-xl w-full"
+            className="p-5 rounded-full"
             style={{
               backgroundColor:
                 !email && !image && !name && !newpass

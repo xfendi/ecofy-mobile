@@ -11,7 +11,7 @@ import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { UserAuth } from "../../context/AuthContext";
 import { Link, useRouter } from "expo-router";
-import { FontAwesome } from "@expo/vector-icons"; // Importuj ikonę FontAwesome
+import { Feather, FontAwesome } from "@expo/vector-icons"; // Importuj ikonę FontAwesome
 import { primaryColor } from "../../config.json";
 import EventItem from "../../components/EventItem";
 import { db } from "../../firebase";
@@ -132,41 +132,43 @@ const Profile = () => {
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
       >
-        <View className="flex flex-col gap-5">
-          <View className="flex flex-row items-center gap-5">
-            {user.photoURL ? (
-              <Image
-                source={{ uri: user.photoURL }}
-                className="rounded-full"
-                style={{ height: 64, width: 64 }}
-              />
-            ) : (
-              <FontAwesome name="user" size={64} color={primaryColor} />
-            )}
-            <View>
-              <Text className="text-3xl font-bold w-80">
-                {user.displayName}
-              </Text>
-              <Text className="text-lg w-80">{user.email}</Text>
+        <View className="flex-col gap-5">
+          <View className="flex flex-col gap-5">
+            <View className="flex flex-col items-center gap-5">
+              {user.photoURL ? (
+                <Image
+                  source={{ uri: user.photoURL }}
+                  className="rounded-full"
+                  style={{ height: 80, width: 80 }}
+                />
+              ) : (
+                <Feather name="user" size={64} color={primaryColor} />
+              )}
+              <View>
+                <Text className="text-3xl text-center font-bold w-80">
+                  {user.displayName}
+                </Text>
+                <Text className="text-lg text-gray-500 text-center w-80">
+                  {user.email}
+                </Text>
+              </View>
+            </View>
+            <View className="flex flex-row w-full gap-5 justify-center">
+              <TouchableOpacity
+                className="p-5 rounded-full w-full"
+                style={{ backgroundColor: primaryColor }}
+              >
+                <Link
+                  href="/settings"
+                  className="text-white text-xl font-semibold text-center"
+                >
+                  Ustawienia Konta
+                </Link>
+              </TouchableOpacity>
             </View>
           </View>
-          <View className="flex flex-row w-full gap-5 justify-center">
-            <TouchableOpacity
-              className="p-4 rounded-xl w-full"
-              style={{ backgroundColor: primaryColor }}
-            >
-              <Link
-                href="/settings"
-                className="text-white text-xl font-semibold text-center"
-              >
-                Ustawienia Konta
-              </Link>
-            </TouchableOpacity>
-          </View>
-        </View>
 
-        <View className="mb-[53px] mt-5">
-          <Text className="text-2xl font-semibold mb-5">Moje wydarzenia</Text>
+          <Text className="text-2xl font-semibold">Moje wydarzenia</Text>
           <View className="gap-5">
             {myEvents.length > 0 ? (
               myEvents.map((event) => (
@@ -180,14 +182,14 @@ const Profile = () => {
                 />
               ))
             ) : (
-              <Text className="text-gray-500 text-xl font-semibold">Brak utworzonych wydarzeń.</Text>
+              <Text className="text-gray-500 text-xl font-semibold">
+                Brak utworzonych wydarzeń.
+              </Text>
             )}
           </View>
 
-          <Text className="text-2xl font-semibold mt-5 mb-5">
-            Polubione wydarzenia
-          </Text>
-          <View className="gap-5">
+          <Text className="text-2xl font-semibold">Polubione wydarzenia</Text>
+          <View className="gap-5 mb-[53px]">
             {likedEvents.length > 0 ? (
               likedEvents.map((event) => (
                 <EventItem
@@ -197,7 +199,9 @@ const Profile = () => {
                 />
               ))
             ) : (
-              <Text className="text-gray-500 text-xl font-semibold bg-white p-5 rounded-2xl">Brak polubionych wydarzeń.</Text>
+              <Text className="text-gray-500 text-xl font-semibold bg-white p-5 rounded-3xl">
+                Brak polubionych wydarzeń.
+              </Text>
             )}
           </View>
         </View>

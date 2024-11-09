@@ -183,6 +183,7 @@ const Index = () => {
           </View>
         </View>
       )}
+
       <ScrollView
         className="px-5"
         refreshControl={
@@ -206,7 +207,7 @@ const Index = () => {
 
           {/* Powiadomienia */}
           <Text className="text-2xl font-semibold">Powiadomienia</Text>
-          <View className="p-5 flex flex-col gap-5 bg-white rounded-xl">
+          <View className="p-5 flex flex-col gap-5 bg-white rounded-3xl">
             {notifications.length > 0 ? (
               notifications.map((item) => (
                 <NotificationItem key={item.id} notification={item} />
@@ -297,7 +298,7 @@ const Index = () => {
                 )}
               </View>
               <TouchableOpacity
-                className="p-4 rounded-xl bg-black"
+                className="p-5 rounded-full bg-blue-500"
                 onPress={showMore}
               >
                 <Text className="text-white text-lg font-semibold text-center">
@@ -315,7 +316,7 @@ const Index = () => {
                 <EcoChallengeItem key={item.id} challenge={item} />
               ))
             ) : (
-              <Text className="text-gray-500 text-xl font-semibold">
+              <Text className="text-gray-500 text-3xl font-semibold">
                 Brak wyzwań ekologicznych.
               </Text>
             )}
@@ -323,22 +324,22 @@ const Index = () => {
 
           {/* Poradniki Ekologiczne */}
           <Text className="text-2xl font-semibold">Poradniki Ekologiczne</Text>
-          <View className="p-5 flex flex-col gap-5 bg-white rounded-xl">
+          <View className="p-5 flex flex-col gap-5 bg-white rounded-3xl">
             {tips.map((item) => (
               <View key={item.id} className="border-b border-gray-200 pb-5">
                 <Text className="text-xl font-semibold">{item.title}</Text>
-                <Text>{item.description}</Text>
+                <Text className="text-gray-500">{item.description}</Text>
               </View>
             ))}
           </View>
 
           {/* FAQ Ekologiczne */}
           <Text className="text-2xl font-semibold">FAQ Ekologiczne</Text>
-          <View className="p-5 flex flex-col gap-5 bg-white rounded-xl mb-[53px]">
+          <View className="p-5 flex flex-col gap-5 bg-white rounded-3xl mb-[53px]">
             {faq.map((item) => (
               <View key={item.id} className="border-b border-gray-200 pb-5">
                 <Text className="text-xl font-semibold">{item.question}</Text>
-                <Text>{item.answer}</Text>
+                <Text className="text-gray-500">{item.answer}</Text>
               </View>
             ))}
           </View>

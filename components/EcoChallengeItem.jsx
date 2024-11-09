@@ -85,9 +85,9 @@ const EcoChallengeItem = ({ challenge }) => {
 
 
     return (
-        <View className="flex flex-col gap-5 bg-white p-5 rounded-2xl">
+        <View className="flex flex-col gap-5 bg-white p-5 rounded-3xl">
             <Text className="text-xl font-semibold">{title}</Text>
-            <Text>{description}</Text>
+            <Text className="text-gray-500">{description}</Text>
             <View className="flex flex-row gap-5">
                 <View>
                     <Text className="font-semibold">Rozpoczęcie</Text>
@@ -104,12 +104,12 @@ const EcoChallengeItem = ({ challenge }) => {
             </View>
             <TouchableOpacity
                 onPress={isJoined ? handleUnjoinChallenge : handleJoinChallenge}
-                className="p-4 rounded-xl"
-                style={{ backgroundColor: isJoined ? '#FF5733' : primaryColor }} // Color changes based on state
+                className="p-5 rounded-full"
+                style={{ backgroundColor: isJoined ? 'red' : primaryColor }} // Color changes based on state
                 disabled={false} // Make button always active
             >
                 <Text className="text-white text-xl font-semibold text-center">
-                    {isJoined ? "Opuszczam" : "Weź udział"}
+                    {isJoined ? "Opuszczam" : "Biorę udział"}
                 </Text>
             </TouchableOpacity>
         </View>

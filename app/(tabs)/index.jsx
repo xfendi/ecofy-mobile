@@ -56,7 +56,6 @@ const Index = () => {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           docsArray.push({
-            id: doc.id, // Adding id to the object
             ...data,
           });
         });
@@ -309,9 +308,7 @@ const Index = () => {
           )}
 
           {/* Wyzwania Ekologiczne */}
-          <Text className="text-2xl font-semibold">
-            Wyzwania Ekologiczne
-          </Text>
+          <Text className="text-2xl font-semibold">Wyzwania Ekologiczne</Text>
           <View className="flex flex-col gap-5">
             {challenges.length > 0 ? (
               challenges.map((item) => (
@@ -325,9 +322,7 @@ const Index = () => {
           </View>
 
           {/* Poradniki Ekologiczne */}
-          <Text className="text-2xl font-semibold">
-            Poradniki Ekologiczne
-          </Text>
+          <Text className="text-2xl font-semibold">Poradniki Ekologiczne</Text>
           <View className="p-5 flex flex-col gap-5 bg-white rounded-xl">
             {tips.map((item) => (
               <View key={item.id} className="border-b border-gray-200 pb-5">

@@ -30,7 +30,6 @@ const EventItem = ({ event, deleteFunction }) => {
   const { setSelectedEvent } = UseMap();
   const { user } = UserAuth();
   const { width } = Dimensions.get("window");
-  const [likesNumber, setLikesNumber] = useState(0);
 
   const handleShowOnMap = () => {
     setSelectedEvent(event);
@@ -55,7 +54,6 @@ const EventItem = ({ event, deleteFunction }) => {
       if (docSnapshot.exists()) {
         const data = docSnapshot.data();
         const likes = data.likes || [];
-        setLikesNumber(likes.length)
         if (likes.includes(user.uid)) {
           setIsLike(true);
         } else {
@@ -121,7 +119,6 @@ const EventItem = ({ event, deleteFunction }) => {
           </TouchableOpacity>
         ) : (
           <View className="flex flex-row gap-3">
-          <Text>{likesNumber}</Text>
           <TouchableOpacity onPress={checkAndToggleLike}>
             {isLike ? (
               <AntDesign name="heart" size={24} color="red" />

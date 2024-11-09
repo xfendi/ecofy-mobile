@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from "react-native";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 
@@ -67,7 +67,7 @@ const Post = ({ post }) => {
   };
 
   return (
-    <View className="flex flex-col gap-5 bg-white rounded-2xl p-5">
+    <View className="flex flex-col gap-5 bg-white rounded-3xl p-5">
       <View>
         <Text className="font-semibold">{post?.userName || "anonymous"}</Text>
         <Text className="text-gray-500 text-[12px]">
@@ -78,13 +78,12 @@ const Post = ({ post }) => {
       <Text className="text-xl font-semibold">{post.title}</Text>
 
       {post.imageUrl && (
-
         <TouchableWithoutFeedback onPress={() => setIsImageVisible(true)}>
-        <Image
-          source={{ uri: post.imageUrl }}
-          className="w-full rounded-xl"
-          style={{ height: width - 80 }}
-        />
+          <Image
+            source={{ uri: post.imageUrl }}
+            className="w-full rounded-3xl"
+            style={{ height: width - 80 }}
+          />
         </TouchableWithoutFeedback>
       )}
       <ImageViewing

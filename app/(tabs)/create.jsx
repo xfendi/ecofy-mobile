@@ -257,31 +257,42 @@ const CreateEvent = () => {
         }
       >
         <View className="flex flex-col gap-5">
-          <Text className="text-2xl font-semibold">Stwórz Wydarzenie</Text>
+          <Text className="text-3xl font-semibold">Stwórz Wydarzenie</Text>
           <AppTextInput
             placeholder="Nazwa wydarzenia"
             value={name}
             onChangeText={setName}
             full
           />
+          <AppTextInput
+            placeholder="Opis wydarzenia"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            full
+          />
           <View className="flex flex-row gap-5">
             <TouchableOpacity
-              className="p-5 flex flex-row gap-5 items-center rounded-xl"
-              style={{ backgroundColor: primaryColor, width: width * 0.5 - 27 }}
+              className="p-4 flex flex-row gap-4 bg-white items-center rounded-full"
+              style={{ width: width * 0.5 - 27 }}
               onPress={() => setShowDatePicker(true)}
             >
-              <FontAwesome name="calendar" size={20} color="#fff" />
-              <Text className="text-white text-xl font-semibold">
+              <View className="h-10 w-10 flex-row justify-center items-center rounded-full" style={{ backgroundColor: primaryColor }}>
+                <FontAwesome6 name="calendar" size={20} color="#fff" />
+              </View>
+              <Text className="text-black text-xl font-semibold">
                 {date.toLocaleDateString()}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="p-5 flex flex-row gap-5 items-center rounded-xl"
-              style={{ backgroundColor: primaryColor, width: width * 0.5 - 27 }}
+              className="p-4 flex flex-row gap-4 bg-white items-center rounded-full"
+              style={{ width: width * 0.5 - 27 }}
               onPress={() => setShowTimePicker(true)}
             >
-              <FontAwesome6 name="clock" size={20} color="#fff" />
-              <Text className="text-white text-xl font-semibold">
+              <View className="h-10 w-10 flex-row justify-center items-center rounded-full" style={{ backgroundColor: primaryColor }}>
+                <FontAwesome6 name="clock" size={20} color="#fff" />
+              </View>
+              <Text className="text-black text-xl font-semibold">
                 {time.toLocaleTimeString()}
               </Text>
             </TouchableOpacity>
@@ -310,9 +321,9 @@ const CreateEvent = () => {
           />
           <TouchableOpacity
             onPress={pickImage}
-            className="p-4 rounded-xl bg-black"
+            className="p-5 rounded-full bg-black"
           >
-            <Text className="text-white text-xl font-semibold">
+            <Text className="text-white text-center text-xl font-semibold">
               Wybierz Zdjęcie
             </Text>
           </TouchableOpacity>
@@ -322,13 +333,6 @@ const CreateEvent = () => {
               className="w-full h-[355px] rounded-xl"
             />
           )}
-          <AppTextInput
-            placeholder="Opis wydarzenia"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            full
-          />
           <Text className="text-2xl font-semibold">
             Wybierz Miejsce Wydarzenia
           </Text>
@@ -336,7 +340,8 @@ const CreateEvent = () => {
             <MapView
               style={{
                 width: "100%",
-                height: 355,
+                height: width - 40,
+                borderRadius: 24,
                 overflow: "hidden",
               }}
               region={mapRegion}
@@ -359,7 +364,7 @@ const CreateEvent = () => {
             </MapView>
           )}
           <Text className="text-2xl font-semibold">Podsumowanie</Text>
-          <View className="flex flex-col gap-5 p-5 bg-white rounded-xl w-full">
+          <View className="flex flex-col gap-5 p-5 bg-white rounded-3xl w-full">
             {name && (
               <View>
                 <Text className="font-semibold">Nazwa</Text>
@@ -398,7 +403,7 @@ const CreateEvent = () => {
           </View>
           <TouchableOpacity
             onPress={handleSubmit}
-            className="p-4 rounded-xl mb-[53px]"
+            className="p-5 rounded-full mb-[53px]"
             style={{ backgroundColor: primaryColor }}
           >
             <Text className="text-white text-xl font-semibold text-center">

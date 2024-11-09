@@ -2,6 +2,8 @@ import { View, TouchableOpacity, Image } from "react-native";
 import React from "react";
 
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import Feather from "@expo/vector-icons/Feather";
 
 import { primaryColor } from "../config.json";
 import { UserAuth } from "../context/AuthContext";
@@ -9,10 +11,10 @@ import { UserAuth } from "../context/AuthContext";
 const TabBar = ({ state, descriptors, navigation }) => {
   const { user } = UserAuth();
   const icons = {
-    index: (props) => <FontAwesome name="home" {...props} />,
-    create: (props) => <FontAwesome name="plus" {...props} />,
-    map: (props) => <FontAwesome name="map" {...props} />,
-    community: (props) => <FontAwesome name="comment" {...props} />,
+    index: (props) => <Feather name="home" {...props} />,
+    create: (props) => <Feather name="plus-circle" {...props} />,
+    map: (props) => <Feather name="map-pin" {...props} />,
+    community: (props) => <Feather name="message-circle" {...props} />,
     profile: (props) =>
       user?.photoURL ? (
         <Image
@@ -21,12 +23,12 @@ const TabBar = ({ state, descriptors, navigation }) => {
           style={{ height: 32, width: 32 }}
         />
       ) : (
-        <FontAwesome name="user" {...props} />
+        <Feather name="user" {...props} />
       ),
   };
 
   return (
-    <View className="absolute bottom-[0px] flex flex-row justify-between items-center p-5 bg-gray-100">
+    <View className="absolute bottom-[0px] flex flex-row justify-between items-center p-5 !pb-10 bg-gray-100">
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const label =

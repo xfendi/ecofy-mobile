@@ -127,7 +127,7 @@ const Details = () => {
           {event.photoURL && (
             <Image
               source={{ uri: event.photoURL }}
-              className="w-full rounded-xl"
+              className="w-full rounded-3xl"
               style={{ height: width - 40 }}
             />
           )}
@@ -140,7 +140,7 @@ const Details = () => {
             <View>
               {event.host === user.uid ? (
                 <TouchableOpacity onPress={handleDelete}>
-                  <AntDesign name="delete" size={24} color="red" />
+                  <Feather name="delete" size={24} color="red" />
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity onPress={handleLikeToggle}>
@@ -154,9 +154,9 @@ const Details = () => {
             </View>
           </View>
 
-          <View className="flex flex-col gap-5 p-5 bg-white rounded-xl w-full">
+          <View className="flex flex-col gap-5 p-5 bg-white rounded-3xl w-full">
             {event.description && (
-              <Text className="w-80 text-gray-500 border-b-1 border-b pb-5 border-gray-200">
+              <Text className="w-80 text-gray-500">
                 {event.description}
               </Text>
             )}
@@ -180,7 +180,7 @@ const Details = () => {
           <View className="mb-[53px]">
             <TouchableOpacity
               onPress={handleShowOnMap}
-              className="p-4 rounded-xl"
+              className="p-5 rounded-full"
               style={{ backgroundColor: primaryColor }}
             >
               <Text className="text-white text-lg font-semibold text-center">

@@ -56,7 +56,7 @@ const Community = () => {
       querySnapshot.forEach((doc) => {
         fetchedPosts.push({ id: doc.id, ...doc.data() });
       });
-      fetchedPosts.sort((a,b) => b.createdAt.seconds - a.createdAt.seconds)
+      fetchedPosts.sort((a, b) => b.createdAt.seconds - a.createdAt.seconds);
       setPosts(fetchedPosts);
     } catch (error) {
       console.error("Błąd przy pobieraniu postów:", error);
@@ -129,6 +129,13 @@ const Community = () => {
     setCreateSheet(true);
   };
 
+  const closeBottomSheet = () => {
+    setPhoto(null);
+    setTitle("");
+    setDescription("");
+    setCreateSheet(false);
+  };
+
   return (
     <SafeAreaView className="flex-1">
       <ScrollView
@@ -157,7 +164,7 @@ const Community = () => {
         animationType="slide"
         transparent={true}
         visible={createSheet}
-        onRequestClose={() => setCreateSheet(false)}
+        onRequestClose={closeBottomSheet}
       >
         <View className="flex-1 justify-end items-center">
           <KeyboardAvoidingView
@@ -168,7 +175,7 @@ const Community = () => {
               <View className="flex flex-col gap-5">
                 <View className="flex flex-row justify-between">
                   <Text className="text-2xl font-semibold">Stwórz post</Text>
-                  <TouchableOpacity onPress={() => setCreateSheet(false)}>
+                  <TouchableOpacity onPress={closeBottomSheet}>
                     <FontAwesome name="times" size={20} />
                   </TouchableOpacity>
                 </View>
@@ -191,9 +198,9 @@ const Community = () => {
 
                 <TouchableOpacity
                   onPress={pickImage}
-                  className="p-4 rounded-xl bg-black"
+                  className="p-5 rounded-full bg-black w-max"
                 >
-                  <Text className="text-white text-xl font-semibold">
+                  <Text className="text-white text-xl text-center font-semibold">
                     Wybierz Zdjęcie
                   </Text>
                 </TouchableOpacity>
@@ -202,13 +209,13 @@ const Community = () => {
                   <Image
                     source={{ uri: photo }}
                     resizeMode="cover"
-                    className="w-full h-[355px] rounded-xl"
+                    className="w-full h-[355px] rounded-3xl"
                   />
                 )}
 
                 <TouchableOpacity
                   onPress={handleSubmit}
-                  className="p-4 rounded-xl"
+                  className="p-5 rounded-full mb-10"
                   style={{ backgroundColor: primaryColor }}
                 >
                   <Text className="text-white text-xl font-semibold text-center">

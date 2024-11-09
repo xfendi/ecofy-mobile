@@ -19,7 +19,7 @@ const NotificationItem = ({ notification }) => {
       className="border-b border-gray-200 pb-5"
     >
       <Text className="text-xl font-semibold">{notification.title}</Text>
-      <Text>{notification.message}</Text>
+      <Text className="text-gray-500">{notification.message}</Text>
     </TouchableOpacity>
   );
 };

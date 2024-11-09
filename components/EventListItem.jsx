@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Platform } from "react-native";
 import React, { useEffect, useState } from "react";
 import { AntDesign, Feather, FontAwesome } from "@expo/vector-icons";
 import { useRouter } from "expo-router"; // Importuj useRouter
@@ -67,7 +67,7 @@ const EventListItem = ({ eventData, onClose, deleteFunction }) => {
   };
 
   return (
-    <View className="absolute bottom-[103px] right-5 left-5 bg-white p-5 rounded-3xl flex flex-col gap-5">
+    <View className={`absolute ${Platform.OS === "ios" ? "bottom-[103px]" : "bottom-[88px]"} right-5 left-5 bg-white p-5 rounded-3xl flex flex-col gap-5`}>
       <View className="flex flex-col gap-5">
         <View className="flex flex-row justify-between items-center">
           <Text className="text-2xl font-semibold">{eventData?.title}</Text>

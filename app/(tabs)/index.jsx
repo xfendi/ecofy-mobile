@@ -5,6 +5,7 @@ import {
   RefreshControl,
   Image,
   Alert,
+  Platform,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -185,7 +186,7 @@ const Index = () => {
       )}
 
       <ScrollView
-        className="px-5"
+        className={Platform.OS === "android" ? "p-5" : "px-5"}
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
@@ -335,7 +336,7 @@ const Index = () => {
 
           {/* FAQ Ekologiczne */}
           <Text className="text-2xl font-semibold">FAQ Ekologiczne</Text>
-          <View className="p-5 flex flex-col gap-5 bg-white rounded-3xl mb-[53px]">
+          <View className={`p-5 flex flex-col gap-5 bg-white rounded-3xl ${Platform.OS === "ios" ? "mb-[50px]" : "mb-[84px]"}`}>
             {faq.map((item) => (
               <View key={item.id} className="border-b border-gray-200 pb-5">
                 <Text className="text-xl font-semibold">{item.question}</Text>

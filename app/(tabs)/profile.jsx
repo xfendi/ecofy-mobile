@@ -6,6 +6,7 @@ import {
   Image,
   RefreshControl,
   Alert,
+  Platform,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -127,7 +128,7 @@ const Profile = () => {
         </View>
       )}
       <ScrollView
-        className="px-5"
+        className={Platform.OS === "android" ? "p-5" : "px-5"}
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
@@ -189,7 +190,11 @@ const Profile = () => {
           </View>
 
           <Text className="text-2xl font-semibold">Polubione wydarzenia</Text>
-          <View className="gap-5 mb-[53px]">
+          <View
+            className={`gap-5 ${
+              Platform.OS === "ios" ? "mb-[50px]" : "mb-[84px]"
+            }`}
+          >
             {likedEvents.length > 0 ? (
               likedEvents.map((event) => (
                 <EventItem

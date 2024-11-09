@@ -1,4 +1,4 @@
-import { View, TouchableOpacity, Image } from "react-native";
+import { View, TouchableOpacity, Image, Platform } from "react-native";
 import React from "react";
 
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -28,7 +28,7 @@ const TabBar = ({ state, descriptors, navigation }) => {
   };
 
   return (
-    <View className="absolute bottom-[0px] flex flex-row justify-between items-center p-5 !pb-10 bg-gray-100">
+    <View className={`absolute bottom-[0px] flex flex-row justify-between items-center p-5 ${Platform.OS === "ios" && "!pb-10"} bg-gray-100`}>
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const label =

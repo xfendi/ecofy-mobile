@@ -7,11 +7,13 @@ import { AuthContextProvider } from "../context/AuthContext";
 import { MapContextProvider } from "../context/MapContext";
 import { primaryColor } from "../config.json";
 import { auth } from "../firebase";
+import registerNNPushToken from 'native-notify';
 
 import "../global.css";
 
 const _layout = () => {
   const [isLogin, setIsLogin] = useState(null);
+  registerNNPushToken(24760, 'yWMd08JhWMihJYHlyMV9so');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {

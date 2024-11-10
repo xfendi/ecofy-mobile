@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
+import { parse } from "date-fns";
 
 import { db } from "../../firebase";
 import EventItem from "../../components/EventItem";
@@ -82,8 +83,15 @@ const Events = () => {
           const data = doc.data();
           docsArray.push({ ...data });
         });
+        
+        const upcomingEvents = docsArray.sort((a, b) => {
+          // Sort events by date (from nearest to farthest)
+          const dateA = parse(a.date, "d.M.yyyy HH:mm:ss", new Date());
+          const dateB = parse(b.date, "d.M.yyyy HH:mm:ss", new Date());
+          return dateA - dateB; // Sort in ascending order
+        });
 
-        setEvents(docsArray); // Zapisujemy dokumenty do stanu
+        setEvents(upcomingEvents); // Zapisujemy dokumenty do stanu
       }
     );
 

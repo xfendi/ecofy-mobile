@@ -155,11 +155,19 @@ const Community = () => {
               <FontAwesome name="plus" size={24} color="black" />
             </TouchableOpacity>
           </View>
-          <View className="flex flex-col gap-5">
-            {posts.map((post) => (
-              <Post key={post.id} post={post} />
-            ))}
-          </View>
+          {posts.length > 0 ? (
+            <View className="flex flex-col gap-5">
+              {posts.map((post) => (
+                <Post key={post.id} post={post} />
+              ))}
+            </View>
+          ) : (
+            <View className="bg-white rounded-3xl p-5">
+              <Text className="text-gray-500 text-xl font-semibold">
+                Brak postów.
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
 

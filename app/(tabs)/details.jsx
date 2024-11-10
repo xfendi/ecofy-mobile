@@ -7,15 +7,13 @@ import {
   ScrollView,
   RefreshControl,
   Platform,
+  Alert,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import { AntDesign, Feather } from "@expo/vector-icons";
-import { primaryColor } from "../../config.json"; // Ścieżka do config.json
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { UseMap } from "../../context/MapContext"; // Ścieżka do kontekstu MapContext
-import { UserAuth } from "../../context/AuthContext"; // Ścieżka do kontekstu AuthContext
+import { AntDesign, Feather } from "@expo/vector-icons";
 
-import { db } from "../../firebase"; // Ścieżka do pliku firebase
 import {
   doc,
   getDoc,
@@ -24,7 +22,11 @@ import {
   arrayRemove,
   deleteDoc,
 } from "firebase/firestore";
-import { SafeAreaView } from "react-native-safe-area-context";
+
+import { primaryColor } from "../../config.json"; // Ścieżka do config.json
+import { UseMap } from "../../context/MapContext"; // Ścieżka do kontekstu MapContext
+import { UserAuth } from "../../context/AuthContext"; // Ścieżka do kontekstu AuthContext
+import { db } from "../../firebase"; // Ścieżka do pliku firebase
 
 const Details = () => {
   const [event, setEvent] = useState(null);
@@ -62,7 +64,6 @@ const Details = () => {
         const eventDetails = eventSnap.data();
         setEvent(eventDetails);
 
-        // Sprawdzamy, czy użytkownik polubił wydarzenie
         const likes = eventDetails.likes || [];
         setIsLike(likes.includes(user.uid));
       } else {
@@ -101,11 +102,33 @@ const Details = () => {
     }
   };
 
-  const handleDelete = async () => {
-    if (event) {
-      await deleteDoc(doc(db, "events", event.id.toString()));
-      router.replace("/(tabs)/events"); // Po usunięciu przekierowanie do listy wydarzeń
+  const handleDelete = async (id) => {
+    try {
+      await deleteDoc(doc(db, "events", id.toString()));
+      Alert.alert("Sukces", "Pomyślnie usunięto wydarzenie!");
+      router.replace("/");
+    } catch (e) {
+      console.error("Błąd przy usuwaniu wydarzenia:", e);
+      Alert.alert("Błąd", "Nie udało się usunąć wydarzenia: ", e.message);
     }
+  };
+
+  const showDeleteAlert = (id) => {
+    Alert.alert(
+      "Potwierdź usunięcie",
+      "Czy na pewno chcesz usunąć to wydarzenie?",
+      [
+        {
+          text: "Anuluj",
+          style: "cancel",
+        },
+        {
+          text: "Usuń",
+          onPress: () => handleDelete(id),
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   if (!event) {
@@ -140,7 +163,7 @@ const Details = () => {
             </View>
             <View>
               {event.host === user.uid ? (
-                <TouchableOpacity onPress={handleDelete}>
+                <TouchableOpacity onPress={() => showDeleteAlert(event.id)}>
                   <Feather name="delete" size={24} color="red" />
                 </TouchableOpacity>
               ) : (

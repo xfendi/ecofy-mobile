@@ -10,12 +10,9 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { UserAuth } from "../../context/AuthContext";
 import { Link, useRouter } from "expo-router";
-import { Feather, FontAwesome } from "@expo/vector-icons"; // Importuj ikonę FontAwesome
-import { primaryColor } from "../../config.json";
-import EventItem from "../../components/EventItem";
-import { db } from "../../firebase";
+import { Feather } from "@expo/vector-icons";
+
 import {
   collection,
   query,
@@ -27,16 +24,20 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 
-const Profile = () => {
-  const { user, logout } = UserAuth();
-  const router = useRouter();
+import { UserAuth } from "../../context/AuthContext";
+import { primaryColor } from "../../config.json";
+import EventItem from "../../components/EventItem";
+import { db } from "../../firebase";
 
+const Profile = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [myEvents, setMyEvents] = useState([]);
   const [likedEvents, setLikedEvents] = useState([]);
-  const [idToDelete, setIdToDelete] = useState();
-  const [isDeleteModal, setIsDeleteModal] = useState();
+
+  const { user } = UserAuth();
+
+  const router = useRouter();
 
   useEffect(() => {
     const eventsRef = collection(db, "events");
@@ -79,15 +80,32 @@ const Profile = () => {
     }, 1000); // Czas odświeżania w milisekundach
   };
 
-  const handleDeleteCreatedEvent = async () => {
-    setIsDeleteModal(false); // Zamykamy modal po usunięciu
+  const handleDelete = async (id) => {
     try {
-      await deleteDoc(doc(db, "events", idToDelete.toString()));
-      Alert.alert("Event został usunięty!");
+      await deleteDoc(doc(db, "events", id.toString()));
+      Alert.alert("Sukces", "Pomyślnie usunięto wydarzenie!");
     } catch (e) {
-      console.error("Błąd przy usuwaniu eventu:", e);
-      Alert.alert("Błąd", "Nie udało się usunąć eventu: ", e.message);
+      console.error("Błąd przy usuwaniu wydarzenia:", e);
+      Alert.alert("Błąd", "Nie udało się usunąć wydarzenia: ", e.message);
     }
+  };
+
+  const showDeleteAlert = (id) => {
+    Alert.alert(
+      "Potwierdź usunięcie",
+      "Czy na pewno chcesz usunąć to wydarzenie?",
+      [
+        {
+          text: "Anuluj",
+          style: "cancel",
+        },
+        {
+          text: "Usuń",
+          onPress: () => handleDelete(id),
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const handleDeleteInterestedEvent = async (id) => {
@@ -99,34 +117,6 @@ const Profile = () => {
 
   return (
     <SafeAreaView className="flex-1">
-      {isDeleteModal && (
-        <View
-          className="absolute flex items-center w-full bottom-0 top-0 z-40"
-          style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
-        >
-          <View className="bg-gray-100 p-5 w-80 m-auto rounded-xl flex flex-col gap-5 z-50">
-            <Text className="text-2xl font-semibold">Potwierdź Usunięcie</Text>
-
-            <TouchableOpacity
-              onPress={handleDeleteCreatedEvent}
-              className="p-4 rounded-xl w-full bg-red-500"
-            >
-              <Text className="text-white text-xl font-semibold text-center">
-                Potwierdź
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => setIsDeleteModal(false)}
-              className="p-4 rounded-xl w-full bg-gray-500"
-            >
-              <Text className="text-white text-xl font-semibold text-center">
-                Anuluj
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
       <ScrollView
         className={Platform.OS === "android" ? "p-5" : "px-5"}
         refreshControl={
@@ -177,15 +167,16 @@ const Profile = () => {
                   event={event}
                   key={event.id}
                   deleteFunction={() => {
-                    setIsDeleteModal(true);
-                    setIdToDelete(event.id);
+                    showDeleteAlert(event.id);
                   }}
                 />
               ))
             ) : (
-              <Text className="text-gray-500 text-xl font-semibold">
-                Brak utworzonych wydarzeń.
-              </Text>
+              <View className="bg-white rounded-3xl p-5">
+                <Text className="text-gray-500 text-xl font-semibold">
+                  Brak utworzonych wydarzeń.
+                </Text>
+              </View>
             )}
           </View>
 
@@ -204,9 +195,11 @@ const Profile = () => {
                 />
               ))
             ) : (
-              <Text className="text-gray-500 text-xl font-semibold bg-white p-5 rounded-3xl">
-                Brak polubionych wydarzeń.
-              </Text>
+              <View className="bg-white rounded-3xl p-5">
+                <Text className="text-gray-500 text-xl font-semibold">
+                  Brak polubionych wydarzeń.
+                </Text>
+              </View>
             )}
           </View>
         </View>

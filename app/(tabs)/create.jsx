@@ -29,8 +29,6 @@ import { UserAuth } from "../../context/AuthContext";
 import { db, storage } from "../../firebase";
 
 const CreateEvent = () => {
-  const { user } = UserAuth();
-  const { region } = useGeoLocation();
   const [mapRegion, setMapRegion] = useState({
     latitude: region?.latitude || 37.78825, // Default latitude
     longitude: region?.longitude || -122.4324, // Default longitude
@@ -38,8 +36,6 @@ const CreateEvent = () => {
     longitudeDelta: 0.0421, // Default delta
   });
   const [isMapLoading, setIsMapLoading] = useState(true);
-  const { width } = Dimensions.get("window");
-  const router = useRouter();
 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,6 +53,12 @@ const CreateEvent = () => {
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+
+  const { width } = Dimensions.get("window");
+  const { user } = UserAuth();
+  const { region } = useGeoLocation();
+
+  const router = useRouter();
 
   const apiKey = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY;
 
@@ -226,7 +228,7 @@ const CreateEvent = () => {
 
       await setDoc(doc(db, "events", codeid.toString()), eventDetails);
 
-      Alert.alert("Sukces", "Pomyślnie utworzono wydarzenie: " + name);
+      Alert.alert("Sukces", "Pomyślnie utworzono wydarzenie!");
       router.replace("/create");
       resetAllStates();
     } catch (error) {
@@ -243,9 +245,9 @@ const CreateEvent = () => {
           className="absolute flex items-center w-full bottom-0 top-0 z-40"
           style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
         >
-          <View className="bg-gray-100 p-5 w-80 m-auto rounded-xl flex flex-col gap-5 z-50">
+          <View className="bg-white p-5 m-auto rounded-3xl z-50">
             <Text className="text-2xl font-semibold">
-              Tworzenie Projektu...
+              Tworzenie Wydarzenia...
             </Text>
           </View>
         </View>

@@ -209,8 +209,9 @@ const CreateEvent = () => {
     }
 
     try {
-      const formattedDate =
+      let formattedDate =
         date.toLocaleDateString() + " " + time.toLocaleTimeString();
+        formattedDate = formattedDate.replace(/\//g, '.');
 
       const eventDetails = {
         title: name,
@@ -354,11 +355,9 @@ const CreateEvent = () => {
                 overflow: "hidden",
               }}
               region={mapRegion}
-              //onRegionChangeComplete={(region) => setMapRegion(region)}
               onPress={handleMapPress}
               showsUserLocation={true}
-              loadingEnabled={true} // This prop enables a loading indicator while loading the map.
-              provider={MapView.PROVIDER_GOOGLE} // If you have Google Maps API key, use this for better performance
+              loadingEnabled={true}
             >
               {coordinates.latitude && coordinates.longitude && (
                 <Marker

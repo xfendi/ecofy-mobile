@@ -26,11 +26,9 @@ const Index = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [events, setEvents] = useState([]);
-  const [eventsInThreeDays, setEventsInThreeDays] = useState([]);
-  const [notifications, setNotifications] = useState([]); // Stan na powiadomienia
-  const [challenges, setChallenges] = useState([]); // Stan na wyzwania ekologiczne
-  const [selectedTab, setSelectedTab] = useState("upcomingEvents");
-  const [eventsNumber, setEventsNumber] = useState(0);
+
+  const [notifications, setNotifications] = useState([]);
+  const [challenges, setChallenges] = useState([]);
 
   const { user } = UserAuth();
 
@@ -97,12 +95,9 @@ const Index = () => {
             const dateB = parse(b.date, "d.M.yyyy HH:mm:ss", new Date());
             return dateA - dateB; // Sort in ascending order
           });
-        // Limit the length of the array to 5 after filtering and sorting
         setEvents(upcomingEvents.slice(0, 5));
-        setEventsNumber(upcomingEvents.length)
 
-        generateNotifications(upcomingEvents); // Generate notifications based on upcoming events
-        generateUpcomingEvents(upcomingEvents);
+        generateNotifications(upcomingEvents);
       }
     );
 
@@ -145,20 +140,6 @@ const Index = () => {
     }));
 
     setNotifications(newNotifications);
-  };
-
-  const generateUpcomingEvents = (events) => {
-    const now = new Date();
-    const tomorrow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000); // Jutro
-
-    const upcomingEvents = events.filter((event) => {
-      const eventDate = parse(event.date, "dd.MM.yyyy HH:mm:ss", new Date());
-      return eventDate >= now && eventDate <= tomorrow;
-    });
-
-    const newEvents = upcomingEvents.map((event) => ({ ...event }));
-
-    setEventsInThreeDays(newEvents);
   };
 
   const onRefresh = () => {
@@ -210,18 +191,29 @@ const Index = () => {
           </View>
 
           {/* Wydarzenia */}
-          <Text className="text-2xl font-semibold"> Nadchodzące Wydarzenia</Text>
+          <Text className="text-2xl font-semibold">Nadchodzace Wydarzenia</Text>
+
           <View className="flex flex-col gap-5">
-            {eventsInThreeDays.length > 0 ? (
-              eventsInThreeDays.map((item) => (
-                <EventItem
-                  key={item.id}
-                  event={item}
-                  deleteFunction={() => {
-                    showDeleteAlert(item.id);
-                  }}
-                />
-              ))
+            {events.length > 0 ? (
+              <>
+                {events.map((item) => (
+                  <EventItem
+                    key={item.id}
+                    event={item}
+                    deleteFunction={() => {
+                      showDeleteAlert(item.id);
+                    }}
+                  />
+                ))}
+                <TouchableOpacity
+                  className="p-5 rounded-full bg-blue-500"
+                  onPress={showMore}
+                >
+                  <Text className="text-white text-lg font-semibold text-center">
+                    Pokaż wszystkie wydarzenia
+                  </Text>
+                </TouchableOpacity>
+              </>
             ) : (
               <View className="bg-white rounded-3xl p-5">
                 <Text className="text-gray-500 text-xl font-semibold">
@@ -230,16 +222,6 @@ const Index = () => {
               </View>
             )}
           </View>
-              {eventsNumber > 5 && (
-                <TouchableOpacity
-                  className="p-5 rounded-full bg-blue-500"
-                  onPress={showMore}
-                >
-                  <Text className="text-white text-lg font-semibold text-center">
-                    Pokaż więcej
-                  </Text>
-                </TouchableOpacity>
-              )}
 
           {/* Wyzwania Ekologiczne */}
           <Text className="text-2xl font-semibold">Wyzwania Ekologiczne</Text>

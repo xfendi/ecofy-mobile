@@ -115,7 +115,7 @@ const EventItem = ({ event, deleteFunction }) => {
         <Text className="text-xl font-semibold">{event.title}</Text>
         {deleteFunction && event.host === user.uid ? (
           <TouchableOpacity onPress={() => handleDelete(event)}>
-            <Feather name="delete" size={24} color="red" />
+            <Feather name="trash" size={24} color="red" />
           </TouchableOpacity>
         ) : (
           <View className="flex flex-row gap-3">

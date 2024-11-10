@@ -20,6 +20,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from 'expo-image-manipulator';
 import { useRouter } from "expo-router";
 
 import { primaryColor } from "../../config.json";
@@ -113,7 +114,22 @@ const CreateEvent = () => {
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      const { uri } = result.assets[0];
+
+    // Uzyskaj wymiary obrazu
+    const image = await ImageManipulator.manipulateAsync(
+      uri, 
+      [], 
+      { 
+        compress: 0.5, // Zmieniaj kompresję, jeśli chcesz zmniejszyć wagę
+        format: ImageManipulator.SaveFormat.JPEG, // Możesz zmienić na PNG, jeśli chcesz
+        maxWidth: 1000, // Maksymalna szerokość
+        maxHeight: 1000, // Maksymalna wysokość
+      }
+    );
+
+    // Ustaw zaktualizowane zdjęcie po manipulacji
+    setImage(image.uri);
     }
   };
 

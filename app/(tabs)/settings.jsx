@@ -24,6 +24,7 @@ import {
 import { useRouter } from "expo-router";
 
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from 'expo-image-manipulator';
 
 import { primaryColor } from "../../config.json";
 import { UserAuth } from "../../context/AuthContext";
@@ -114,7 +115,20 @@ const settings = () => {
     console.log(result);
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      const { uri } = result.assets[0];
+
+      const image = await ImageManipulator.manipulateAsync(
+        uri, 
+        [], 
+        { 
+          compress: 0.5, // Zmieniaj kompresję, jeśli chcesz zmniejszyć wagę
+          format: ImageManipulator.SaveFormat.JPEG, // Możesz zmienić na PNG, jeśli chcesz
+          maxWidth: 1000, // Maksymalna szerokość
+          maxHeight: 1000, // Maksymalna wysokość
+        }
+      );
+
+      setImage(image.uri);
     }
   };
 
@@ -149,7 +163,7 @@ const settings = () => {
         const response = await fetch(image);
         const blob = await response.blob();
 
-        const fileRef = ref(storage, `events/${codeid.toString()}`);
+        const fileRef = ref(storage, `profiles/${user.uid}`);
 
         try {
           console.log("Uploading to Firebase Storage...");

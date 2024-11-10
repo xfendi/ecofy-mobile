@@ -15,7 +15,7 @@ import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { addDoc, collection, getDocs } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, onSnapshot } from "firebase/firestore";
 import * as ImagePicker from "expo-image-picker";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
@@ -45,24 +45,52 @@ const Community = () => {
     }, 1000);
   };
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const fetchPosts = async () => {
+  const handleDelete = async (id) => {
     try {
-      const querySnapshot = await getDocs(collection(db, "posts"));
-      const fetchedPosts = [];
-      querySnapshot.forEach((doc) => {
-        fetchedPosts.push({ id: doc.id, ...doc.data() });
-      });
-      fetchedPosts.sort((a, b) => b.createdAt.seconds - a.createdAt.seconds);
-      setPosts(fetchedPosts);
-    } catch (error) {
-      console.error("Błąd przy pobieraniu postów:", error);
-      Alert.alert("Błąd", "Nie udało się pobrać postów.");
+      await deleteDoc(doc(db, "posts", id.toString()));
+      Alert.alert("Sukces", "Pomyślnie usunięto post!");
+    } catch (e) {
+      console.error("Błąd przy usuwaniu postu:", e);
+      Alert.alert("Błąd", "Nie udało się usunąć postu:" + e.message);
     }
   };
+
+  const showDeleteAlert = (id) => {
+    Alert.alert(
+      "Potwierdź usunięcie",
+      "Czy na pewno chcesz usunąć ten post?",
+      [
+        {
+          text: "Anuluj",
+          style: "cancel",
+        },
+        {
+          text: "Usuń",
+          onPress: () => handleDelete(id),
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  useEffect(() => {
+    const unsubscribePosts = onSnapshot(
+      collection(db, "posts"),
+      (querySnapshot) => {
+        const postsArray = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          postsArray.push({
+            id: doc.id, // Adding id to the object
+            ...data,
+          });
+        });
+        setPosts(postsArray); // Set challenges in state
+      }
+    );
+
+    return () => unsubscribePosts();
+  })
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -106,11 +134,14 @@ const Community = () => {
       const post = {
         title,
         description,
-        imageUrl: imageUrl || "",
         createdAt: new Date(),
-        userId: user?.uid || "anonymous",
-        userName: user?.displayName || "anonymous",
+        author: user?.uid,
+        displayName: user?.displayName || "anonymous",
       };
+
+      if (imageUrl) {
+        post.photoURL = imageUrl;
+      }
 
       await addDoc(collection(db, "posts"), post);
       Alert.alert("Sukces", "Post został dodany pomyślnie!");
@@ -118,9 +149,8 @@ const Community = () => {
       setDescription("");
       setPhoto(null);
       setCreateSheet(false);
-      fetchPosts();
-    } catch (error) {
-      console.error("Błąd przy dodawaniu posta:", error);
+    } catch (e) {
+      console.error("Błąd przy dodawaniu posta: ", e);
       Alert.alert("Błąd", "Nie udało się dodać posta.");
     }
   };
@@ -158,7 +188,11 @@ const Community = () => {
           {posts.length > 0 ? (
             <View className="flex flex-col gap-5">
               {posts.map((post) => (
-                <Post key={post.id} post={post} />
+                <Post
+                  key={post.id}
+                  post={post}
+                  deleteFunction={() => showDeleteAlert(post.id)}
+                />
               ))}
             </View>
           ) : (
@@ -227,7 +261,7 @@ const Community = () => {
 
                 <TouchableOpacity
                   onPress={handleSubmit}
-                  className="p-5 rounded-full"
+                  className="p-5 rounded-full mb-10"
                   style={{ backgroundColor: primaryColor }}
                 >
                   <Text className="text-white text-xl font-semibold text-center">

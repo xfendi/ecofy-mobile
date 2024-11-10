@@ -24,7 +24,6 @@ import { primaryColor } from "../../config.json";
 
 const Index = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
-
   const [events, setEvents] = useState([]);
 
   const [notifications, setNotifications] = useState([]);

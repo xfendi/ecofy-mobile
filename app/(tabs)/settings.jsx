@@ -7,6 +7,8 @@ import {
   Alert,
   RefreshControl,
   Platform,
+  Modal,
+  KeyboardAvoidingView,
 } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -123,7 +125,6 @@ const settings = () => {
 
       if (name) {
         await updateProfile(user, { displayName: name });
-        Alert.alert("Sukces", "Pomyślnie zaktualizowano nazwę.");
       }
 
       if (email) {
@@ -142,26 +143,20 @@ const settings = () => {
       }
 
       if (image) {
-        const blob = await new Promise((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-          xhr.onload = function () {
-            resolve(xhr.response);
-          };
-          xhr.onerror = function () {
-            reject(new TypeError("Network request failed"));
-          };
-          xhr.responseType = "blob";
-          xhr.open("GET", image, true);
-          xhr.send(null);
-        });
+        console.log("Uploading image...");
+        console.log(image);
+
+        const response = await fetch(image);
+        const blob = await response.blob();
+
+        const fileRef = ref(storage, `events/${codeid.toString()}`);
 
         try {
-          const storageRef = ref(storage, `profiles/${user.uid}`);
-          const result = await uploadBytes(storageRef, blob);
-          blob.close();
-          const DownloadURL = await getDownloadURL(storageRef);
+          console.log("Uploading to Firebase Storage...");
+          await uploadBytes(fileRef, blob);
+          
+          const DownloadURL = await getDownloadURL(fileRef);
           await updateProfile(user, { photoURL: DownloadURL });
-          Alert.alert("Sukces", "Pomyślnie zaktualizowano zdjęcie profilowe.");
         } catch (e) {
           console.error(e);
           Alert.alert(
@@ -171,6 +166,7 @@ const settings = () => {
         }
       }
 
+      Alert.alert("Sukces", "Pomyślnie zaktualizowano ustawienia konta.");
       closeModal();
     } catch (e) {
       closeModal();
@@ -181,44 +177,50 @@ const settings = () => {
 
   return (
     <SafeAreaView className="flex-1">
-      {isModal && (
-        <View
-          className="absolute flex items-center w-full bottom-0 top-0 z-40"
-          style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
-        >
-          <View className="bg-gray-100 p-5 w-80 m-auto rounded-xl flex flex-col gap-5 z-50">
-            <Text className="text-2xl font-semibold">Potwierdź Hasło</Text>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModal}
+        onRequestClose={closeModal}
+      >
+        <View className="flex-1 justify-end items-center">
+          <KeyboardAvoidingView
+            className="flex-row w-full h-1/2 p-5 bg-white rounded-t-3xl"
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+          >
+            <ScrollView>
+              <View className="flex flex-col gap-5">
+                <View className="flex flex-row justify-between">
+                  <Text className="text-2xl font-semibold">
+                    Potwierdź hasło
+                  </Text>
+                  <TouchableOpacity onPress={closeModal}>
+                    <FontAwesome name="times" size={20} />
+                  </TouchableOpacity>
+                </View>
+                <AppTextInput
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Aktualne Hasło"
+                  multiline
+                  gray
+                  full
+                />
 
-            <Text className="text-gray-500">Aktualne Hasło</Text>
-            <AppTextInput
-              placeholder="Wpisz Hasło..."
-              onChangeText={setPassword}
-              value={password}
-              secureTextEntry
-              full
-            />
-
-            <TouchableOpacity
-              onPress={handleSubmit}
-              style={{ backgroundColor: primaryColor }}
-              className="p-4 rounded-xl w-full"
-            >
-              <Text className="text-white text-xl font-semibold text-center">
-                Potwierdź
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={closeModal}
-              className="p-4 rounded-xl w-full bg-gray-500"
-            >
-              <Text className="text-white text-xl font-semibold text-center">
-                Anuluj
-              </Text>
-            </TouchableOpacity>
-          </View>
+                <TouchableOpacity
+                  onPress={handleSubmit}
+                  className="p-5 rounded-full mb-10"
+                  style={{ backgroundColor: primaryColor }}
+                >
+                  <Text className="text-white text-xl font-semibold text-center">
+                    Potwierdź
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
         </View>
-      )}
+      </Modal>
 
       <ScrollView
         className={Platform.OS === "android" ? "p-5" : "px-5"}

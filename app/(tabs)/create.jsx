@@ -354,7 +354,7 @@ const CreateEvent = () => {
                 overflow: "hidden",
               }}
               region={mapRegion}
-              onRegionChangeComplete={(region) => setMapRegion(region)}
+              //onRegionChangeComplete={(region) => setMapRegion(region)}
               onPress={handleMapPress}
               showsUserLocation={true}
               loadingEnabled={true} // This prop enables a loading indicator while loading the map.

@@ -3,49 +3,68 @@ import {
   View,
   Text,
   Image,
-  StyleSheet,
   TouchableOpacity,
   ScrollView,
   Dimensions,
   TouchableWithoutFeedback,
+  TextInput,
+  Alert,
 } from "react-native";
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import { AntDesign, Feather, FontAwesome } from "@expo/vector-icons";
+import ImageViewing from "react-native-image-viewing";
+
+import {
+  collection,
+  addDoc,
+  getDocs,
+  getDoc,
+  doc,
+  updateDoc,
+  arrayRemove,
+  arrayUnion,
+  onSnapshot,
+} from "firebase/firestore";
 
 import { db } from "../firebase";
 import { UserAuth } from "../context/AuthContext";
-import { FontAwesome } from "@expo/vector-icons";
-import AppTextInput from "./AppTextInput";
 
-import ImageViewing from "react-native-image-viewing";
+import { primaryColor } from "../config.json";
 
-const Post = ({ post }) => {
+const Post = ({ post, deleteFunction }) => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const [isImageVisible, setIsImageVisible] = useState(false);
+  const [isLike, setIsLike] = useState();
+  const [likesLength, setLikesLength] = useState(0);
+  const [focused, setFocused] = useState(false);
 
   const { width } = Dimensions.get("window");
-
-  const [isImageVisible, setIsImageVisible] = useState(false);
   const { user } = UserAuth();
 
-  useEffect(() => {
-    fetchComments();
-  }, []);
-
-  const fetchComments = async () => {
-    try {
-      const commentsSnapshot = await getDocs(
-        collection(db, `posts/${post.id}/comments`)
-      );
-      const fetchedComments = [];
-      commentsSnapshot.forEach((doc) => {
-        fetchedComments.push({ id: doc.id, ...doc.data() });
-      });
-      fetchedComments.sort((a, b) => b.createdAt.seconds - a.createdAt.seconds);
-      setComments(fetchedComments);
-    } catch (error) {
-      console.error("Błąd przy pobieraniu komentarzy:", error);
-    }
+  const handleDelete = (event) => {
+    deleteFunction(event.id);
   };
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, `posts/${post.id}/comments`),
+      (snapshot) => {
+        const fetchedComments = [];
+        snapshot.forEach((doc) => {
+          fetchedComments.push({ id: doc.id, ...doc.data() });
+        });
+        fetchedComments.sort(
+          (a, b) => b.createdAt.seconds - a.createdAt.seconds
+        );
+        setComments(fetchedComments);
+      },
+      (error) => {
+        console.error("Błąd przy nasłuchiwaniu komentarzy:", error);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
 
   const addComment = async () => {
     if (!newComment.trim()) return;
@@ -53,34 +72,91 @@ const Post = ({ post }) => {
     const comment = {
       text: newComment,
       createdAt: new Date(),
-      userId: user?.uid || "anonymous", // Dodanie userId do komentarza
-      userName: user?.displayName || "anonymous",
+      author: user?.uid,
+      displayName: user?.displayName || "anonymous",
     };
 
     try {
       await addDoc(collection(db, `posts/${post.id}/comments`), comment);
+      Alert.alert("Sukces", "Pomyślnie dodano komentarz!");
       setNewComment("");
-      fetchComments();
-    } catch (error) {
-      console.error("Błąd przy dodawaniu komentarza:", error);
+    } catch (e) {
+      console.error("Błąd przy dodawaniu komentarza:", e);
+      Alert.alert("Błąd", "Nie udało się dodać komentarza: " + e.message);
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      doc(db, "posts", post.id.toString()),
+      (doc) => {
+        if (doc.exists) {
+          const likes = doc.data()?.likes || [];
+          setLikesLength(likes.length);
+        }
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
+  const checkAndToggleLike = async () => {
+    const eventRef = doc(db, "posts", post.id.toString());
+    const eventSnap = await getDoc(eventRef);
+
+    if (eventSnap.exists()) {
+      const eventData = eventSnap.data();
+      const likes = eventData.likes || [];
+
+      if (likes.includes(user.uid)) {
+        await updateDoc(eventRef, {
+          likes: arrayRemove(user.uid),
+        });
+        setIsLike(false);
+      } else {
+        await updateDoc(eventRef, {
+          likes: arrayUnion(user.uid),
+        });
+        setIsLike(true);
+      }
+    } else {
+      console.log("Event nie istnieje.");
     }
   };
 
   return (
     <View className="flex flex-col gap-5 bg-white rounded-3xl p-5">
-      <View>
-        <Text className="font-semibold">{post?.userName || "anonymous"}</Text>
-        <Text className="text-gray-500 text-[12px]">
-          {new Date(post.createdAt.seconds * 1000).toLocaleDateString()}
-        </Text>
+      <View className="flex-row justify-between">
+        <View>
+          <Text className="font-semibold">{post?.userName || "anonymous"}</Text>
+          <Text className="text-gray-500 text-[12px]">
+            {new Date(post.createdAt.seconds * 1000).toLocaleDateString()}
+          </Text>
+        </View>
+        {deleteFunction && post.author === user.uid ? (
+          <TouchableOpacity onPress={() => handleDelete(post)}>
+            <Feather name="delete" size={24} color="red" />
+          </TouchableOpacity>
+        ) : (
+          <View className="flex flex-row gap-3 items-center">
+            <Text>{likesLength !== 0 && likesLength}</Text>
+            <TouchableOpacity onPress={checkAndToggleLike}>
+              {isLike ? (
+                <AntDesign name="heart" size={24} color="red" />
+              ) : (
+                <Feather name="heart" size={24} color="black" />
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       <Text className="text-xl font-semibold">{post.title}</Text>
 
-      {post.imageUrl && (
+      {post.photoURL && (
         <TouchableWithoutFeedback onPress={() => setIsImageVisible(true)}>
           <Image
-            source={{ uri: post.imageUrl }}
+            source={{ uri: post.photoURL }}
             className="w-full rounded-3xl"
             style={{ height: width - 80 }}
           />
@@ -102,9 +178,7 @@ const Post = ({ post }) => {
             {comments.length > 0 ? (
               comments.map((comment) => (
                 <View key={comment.id}>
-                  <Text className="font-semibold">
-                    {comment.userName || "anonymous"}
-                  </Text>
+                  <Text className="font-semibold">{comment.displayName}</Text>
                   <Text>{comment.text}</Text>
                 </View>
               ))
@@ -115,90 +189,27 @@ const Post = ({ post }) => {
         </ScrollView>
 
         <View className="flex flex-row justify-between items-center">
-          <AppTextInput
+          <TextInput
+            className={`w-80 px-5 py-3 rounded-full bg-gray-100 border-2 ${
+              focused ? "border-green-500 border-solid" : "border-transparent"
+            }`}
             value={newComment}
             onChangeText={setNewComment}
             placeholder="Dodaj komentarz ..."
-            gray
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
           />
           <TouchableOpacity onPress={addComment}>
-            <FontAwesome name="send" size={32} color="black" />
+            <FontAwesome
+              name="send"
+              size={24}
+              color={newComment ? primaryColor : "#e5e7eb"}
+            />
           </TouchableOpacity>
         </View>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  postContainer: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  description: {
-    fontSize: 14,
-    marginBottom: 8,
-  },
-  image: {
-    width: "100%",
-    height: 200,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  date: {
-    fontSize: 12,
-    color: "#888",
-  },
-  commentsSection: {
-    marginTop: 16,
-  },
-  commentsTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  commentsList: {
-    maxHeight: 150,
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  comment: {
-    fontSize: 14,
-    color: "#333",
-    marginBottom: 4,
-  },
-  commentUser: {
-    fontWeight: "bold",
-  },
-  commentInput: {
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 8,
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  addCommentButton: {
-    backgroundColor: "#007bff",
-    padding: 10,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  addCommentButtonText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-});
 
 export default Post;

@@ -94,7 +94,7 @@ const Index = () => {
             const dateB = parse(b.date, "d.M.yyyy HH:mm:ss", new Date());
             return dateA - dateB; // Sort in ascending order
           });
-        
+
         setEvents(upcomingEvents.slice(0, 5));
 
         generateNotifications(upcomingEvents);

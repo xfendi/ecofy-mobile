@@ -9,6 +9,9 @@ import {
   TouchableWithoutFeedback,
   TextInput,
   Alert,
+  Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { AntDesign, Feather, FontAwesome } from "@expo/vector-icons";
 import ImageViewing from "react-native-image-viewing";
@@ -36,7 +39,9 @@ const Post = ({ post, deleteFunction }) => {
   const [isImageVisible, setIsImageVisible] = useState(false);
   const [isLike, setIsLike] = useState();
   const [likesLength, setLikesLength] = useState(0);
+  const [commentsLength, setCommentsLength] = useState(0);
   const [focused, setFocused] = useState(false);
+  const [commentSheet, setCommentSheet] = useState(false);
 
   const { width } = Dimensions.get("window");
   const { user } = UserAuth();
@@ -57,6 +62,7 @@ const Post = ({ post, deleteFunction }) => {
           (a, b) => b.createdAt.seconds - a.createdAt.seconds
         );
         setComments(fetchedComments);
+        setCommentsLength(fetchedComments.length);
       },
       (error) => {
         console.error("Błąd przy nasłuchiwaniu komentarzy:", error);
@@ -126,33 +132,6 @@ const Post = ({ post, deleteFunction }) => {
 
   return (
     <View className="flex flex-col gap-5 bg-white rounded-3xl p-5">
-      <View className="flex-row justify-between">
-        <View>
-          <Text className="font-semibold">{post?.userName || "anonymous"}</Text>
-          <Text className="text-gray-500 text-[12px]">
-            {new Date(post.createdAt.seconds * 1000).toLocaleDateString()}
-          </Text>
-        </View>
-        {deleteFunction && post.author === user.uid ? (
-          <TouchableOpacity onPress={() => handleDelete(post)}>
-            <Feather name="delete" size={24} color="red" />
-          </TouchableOpacity>
-        ) : (
-          <View className="flex flex-row gap-3 items-center">
-            <Text>{likesLength !== 0 && likesLength}</Text>
-            <TouchableOpacity onPress={checkAndToggleLike}>
-              {isLike ? (
-                <AntDesign name="heart" size={24} color="red" />
-              ) : (
-                <Feather name="heart" size={24} color="black" />
-              )}
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-
-      <Text className="text-xl font-semibold">{post.title}</Text>
-
       {post.photoURL && (
         <TouchableWithoutFeedback onPress={() => setIsImageVisible(true)}>
           <Image
@@ -162,6 +141,23 @@ const Post = ({ post, deleteFunction }) => {
           />
         </TouchableWithoutFeedback>
       )}
+
+      <View className="flex-row justify-between">
+        <View>
+          <Text className="font-semibold">{post?.userName || "anonymous"}</Text>
+          <Text className="text-gray-500 text-[12px]">
+            {new Date(post.createdAt.seconds * 1000).toLocaleDateString()}
+          </Text>
+        </View>
+        {deleteFunction && post.author === user.uid && (
+          <TouchableOpacity onPress={() => handleDelete(post)}>
+            <Feather name="delete" size={24} color="red" />
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <Text className="text-xl font-semibold">{post.title}</Text>
+
       <ImageViewing
         images={[{ uri: post.imageUrl }]} // Przekazujemy tylko jeden obraz
         imageIndex={0}
@@ -171,43 +167,99 @@ const Post = ({ post, deleteFunction }) => {
 
       <Text>{post.description}</Text>
 
-      <Text className="text-xl font-semibold">Komentarze</Text>
-      <View className="flex flex-col gap-5">
-        <ScrollView>
-          <View className="flex flex-col gap-5">
-            {comments.length > 0 ? (
-              comments.map((comment) => (
-                <View key={comment.id}>
-                  <Text className="font-semibold">{comment.displayName}</Text>
-                  <Text>{comment.text}</Text>
-                </View>
-              ))
+      <View className={`border-t-2 pt-5 ${post.author !== user.uid ? "justify-between" : "justify-end"} border-gray-100 flex flex-row`}>
+        {post.author !== user.uid && (
+          <TouchableOpacity
+            onPress={checkAndToggleLike}
+            className="flex flex-row gap-3 items-center"
+          >
+            {isLike ? (
+              <AntDesign name="heart" size={20} color="#ef4444" />
             ) : (
-              <Text className="text-gray-500">Brak komentarzy</Text>
+              <Feather name="heart" size={20} color="#6b7280" />
             )}
-          </View>
-        </ScrollView>
-
-        <View className="flex flex-row justify-between items-center">
-          <TextInput
-            className={`w-80 px-5 py-3 rounded-full bg-gray-100 border-2 ${
-              focused ? "border-green-500 border-solid" : "border-transparent"
-            }`}
-            value={newComment}
-            onChangeText={setNewComment}
-            placeholder="Dodaj komentarz ..."
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-          />
-          <TouchableOpacity onPress={addComment}>
-            <FontAwesome
-              name="send"
-              size={24}
-              color={newComment ? primaryColor : "#e5e7eb"}
-            />
+            <Text className={isLike ? "text-red-500" : "text-gray-500"}>
+              {likesLength}
+            </Text>
           </TouchableOpacity>
-        </View>
+        )}
+        <TouchableOpacity
+          onPress={() => setCommentSheet(true)}
+          className="flex flex-row gap-3 items-center"
+        >
+          <Feather name="message-circle" size={20} color="#6b7280" />
+          <Text className="text-gray-500">{commentsLength}</Text>
+        </TouchableOpacity>
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={commentSheet}
+        onRequestClose={() => setCommentSheet(false)}
+      >
+        <View className="flex-1 justify-end items-center">
+          <KeyboardAvoidingView
+            className="flex-row w-full h-1/2 p-5 bg-white rounded-t-3xl"
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+          >
+            <View className="flex flex-col gap-5 w-full">
+              <View className="flex flex-row justify-between">
+                <Text className="text-2xl font-semibold">Komentarze</Text>
+                <TouchableOpacity onPress={() => setCommentSheet(false)}>
+                  <FontAwesome name="times" size={20} />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView>
+                <View className="flex flex-col gap-5">
+                  {comments.length > 0 ? (
+                    comments.map((comment) => (
+                      <View key={comment.id}>
+                        <Text className="font-semibold">
+                          {comment.displayName}
+                        </Text>
+                        <Text>{comment.text}</Text>
+                      </View>
+                    ))
+                  ) : (
+                    <Text className="text-gray-500">Brak komentarzy</Text>
+                  )}
+                </View>
+              </ScrollView>
+
+              <View className="flex flex-row justify-between items-center mb-10">
+                <TextInput
+                  className={`w-80 px-5 py-3 rounded-full bg-gray-100 border-2 ${
+                    focused
+                      ? "border-green-500 border-solid"
+                      : "border-transparent"
+                  }`}
+                  value={newComment}
+                  onChangeText={setNewComment}
+                  placeholder="Dodaj komentarz ..."
+                  onFocus={() => setFocused(true)}
+                  onBlur={() => setFocused(false)}
+                />
+                <TouchableOpacity
+                  onPress={addComment}
+                  className={`flex flex-row items-center justify-center w-12 h-12 rounded-full bg-gray-100 border-2 ${
+                    newComment
+                      ? "border-green-500 border-solid"
+                      : "border-transparent"
+                  }`}
+                >
+                  <FontAwesome
+                    name="send"
+                    size={20}
+                    color={newComment ? primaryColor : "#d1d5db"}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </KeyboardAvoidingView>
+        </View>
+      </Modal>
     </View>
   );
 };

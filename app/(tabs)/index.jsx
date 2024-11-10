@@ -24,28 +24,45 @@ import { primaryColor } from "../../config.json";
 
 const Index = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
+
   const [events, setEvents] = useState([]);
   const [eventsInThreeDays, setEventsInThreeDays] = useState([]);
   const [notifications, setNotifications] = useState([]); // Stan na powiadomienia
   const [challenges, setChallenges] = useState([]); // Stan na wyzwania ekologiczne
   const [selectedTab, setSelectedTab] = useState("upcomingEvents");
 
-  const [isDeleteModal, setIsDeleteModal] = useState();
-  const [idToDelete, setIdToDelete] = useState();
-
   const { user } = UserAuth();
+
   const router = useRouter();
+
   const firstName = user?.displayName ? user.displayName.split(" ")[0] : null;
 
-  const handleDelete = async () => {
-    setIsDeleteModal(false);
+  const handleDelete = async (id) => {
     try {
-      await deleteDoc(doc(db, "events", idToDelete.toString()));
-      Alert.alert("Event został usunięty!");
+      await deleteDoc(doc(db, "events", id.toString()));
+      Alert.alert("Sukces", "Pomyślnie usunięto wydarzenie!");
     } catch (e) {
-      console.error("Błąd przy usuwaniu eventu:", e);
-      Alert.alert("Błąd", "Nie udało się usunąć eventu: ", e.message);
+      console.error("Błąd przy usuwaniu wydarzenia:", e);
+      Alert.alert("Błąd", "Nie udało się usunąć wydarzenia: ", e.message);
     }
+  };
+
+  const showDeleteAlert = (id) => {
+    Alert.alert(
+      "Potwierdź usunięcie",
+      "Czy na pewno chcesz usunąć to wydarzenie?",
+      [
+        {
+          text: "Anuluj",
+          style: "cancel",
+        },
+        {
+          text: "Usuń",
+          onPress: () => handleDelete(id),
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   // Pobieranie wydarzeń, aktualności, powiadomień i wyzwań ekologicznych z Firestore
@@ -156,35 +173,6 @@ const Index = () => {
 
   return (
     <SafeAreaView className="flex-1">
-      {isDeleteModal && (
-        <View
-          className="absolute flex items-center w-full bottom-0 top-0 z-40"
-          style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
-        >
-          <View className="bg-gray-100 p-5 w-80 m-auto rounded-xl flex flex-col gap-5 z-50">
-            <Text className="text-2xl font-semibold">Potwierdź Usunięcie</Text>
-
-            <TouchableOpacity
-              onPress={handleDelete}
-              className="p-4 rounded-xl w-full bg-red-500"
-            >
-              <Text className="text-white text-xl font-semibold text-center">
-                Potwierdź
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => setIsDeleteModal(false)}
-              className="p-4 rounded-xl w-full bg-gray-500"
-            >
-              <Text className="text-white text-xl font-semibold text-center">
-                Anuluj
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
-
       <ScrollView
         className={Platform.OS === "android" ? "p-5" : "px-5"}
         refreshControl={
@@ -266,15 +254,16 @@ const Index = () => {
                       key={item.id}
                       event={item}
                       deleteFunction={() => {
-                        setIsDeleteModal(true);
-                        setIdToDelete(item.id);
+                        showDeleteAlert(item.id);
                       }}
                     />
                   ))
                 ) : (
-                  <Text className="text-gray-500 bg-white rounded-xl p-5 text-xl font-semibold">
-                    Brak nadchodzacych wydarzeń.
-                  </Text>
+                  <View className="bg-white rounded-3xl p-5">
+                    <Text className="text-gray-500 text-xl font-semibold">
+                      Brak nadchodzacych wydarzeń.
+                    </Text>
+                  </View>
                 )}
               </View>
             </>
@@ -287,25 +276,28 @@ const Index = () => {
                       key={item.id}
                       event={item}
                       deleteFunction={() => {
-                        setIsDeleteModal(true);
-                        setIdToDelete(item.id);
+                        showDeleteAlert(item.id);
                       }}
                     />
                   ))
                 ) : (
-                  <Text className="text-gray-500 bg-white rounded-xl p-5 text-xl font-semibold">
-                    Brak wydarzeń.
-                  </Text>
+                  <View className="bg-white rounded-3xl p-5">
+                    <Text className="text-gray-500 text-xl font-semibold">
+                      Brak wydarzeń.
+                    </Text>
+                  </View>
                 )}
               </View>
-              <TouchableOpacity
-                className="p-5 rounded-full bg-blue-500"
-                onPress={showMore}
-              >
-                <Text className="text-white text-lg font-semibold text-center">
-                  Pokaż więcej
-                </Text>
-              </TouchableOpacity>
+              {events.length > 5 && (
+                <TouchableOpacity
+                  className="p-5 rounded-full bg-blue-500"
+                  onPress={showMore}
+                >
+                  <Text className="text-white text-lg font-semibold text-center">
+                    Pokaż więcej
+                  </Text>
+                </TouchableOpacity>
+              )}
             </>
           )}
 
@@ -336,7 +328,11 @@ const Index = () => {
 
           {/* FAQ Ekologiczne */}
           <Text className="text-2xl font-semibold">FAQ Ekologiczne</Text>
-          <View className={`p-5 flex flex-col gap-5 bg-white rounded-3xl ${Platform.OS === "ios" ? "mb-[50px]" : "mb-[84px]"}`}>
+          <View
+            className={`p-5 flex flex-col gap-5 bg-white rounded-3xl ${
+              Platform.OS === "ios" ? "mb-[50px]" : "mb-[84px]"
+            }`}
+          >
             {faq.map((item) => (
               <View key={item.id} className="border-b border-gray-200 pb-5">
                 <Text className="text-xl font-semibold">{item.question}</Text>

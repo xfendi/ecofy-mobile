@@ -17,6 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { addDoc, collection, deleteDoc, doc, getDocs, onSnapshot } from "firebase/firestore";
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from 'expo-image-manipulator';
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 import AppTextInput from "../../components/AppTextInput";
@@ -101,7 +102,22 @@ const Community = () => {
     });
 
     if (!result.canceled) {
-      setPhoto(result.assets[0].uri);
+      const { uri } = result.assets[0];
+
+    // Uzyskaj wymiary obrazu
+    const image = await ImageManipulator.manipulateAsync(
+      uri, 
+      [], 
+      { 
+        compress: 0.5, // Zmieniaj kompresję, jeśli chcesz zmniejszyć wagę
+        format: ImageManipulator.SaveFormat.JPEG, // Możesz zmienić na PNG, jeśli chcesz
+        maxWidth: 1000, // Maksymalna szerokość
+        maxHeight: 1000, // Maksymalna wysokość
+      }
+    );
+
+    // Ustaw zaktualizowane zdjęcie po manipulacji
+    setPhoto(image.uri);
     }
   };
 

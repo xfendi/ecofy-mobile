@@ -26,10 +26,8 @@ const Index = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [events, setEvents] = useState([]);
-  const [eventsInThreeDays, setEventsInThreeDays] = useState([]);
-  const [notifications, setNotifications] = useState([]); // Stan na powiadomienia
-  const [challenges, setChallenges] = useState([]); // Stan na wyzwania ekologiczne
-  const [selectedTab, setSelectedTab] = useState("upcomingEvents");
+  const [notifications, setNotifications] = useState([]);
+  const [challenges, setChallenges] = useState([]);
 
   const { user } = UserAuth();
 
@@ -97,11 +95,9 @@ const Index = () => {
             return dateA - dateB; // Sort in ascending order
           });
 
-        // Limit the length of the array to 5 after filtering and sorting
         setEvents(upcomingEvents.slice(0, 5));
 
-        generateNotifications(upcomingEvents); // Generate notifications based on upcoming events
-        generateUpcomingEvents(upcomingEvents);
+        generateNotifications(upcomingEvents);
       }
     );
 
@@ -144,20 +140,6 @@ const Index = () => {
     }));
 
     setNotifications(newNotifications);
-  };
-
-  const generateUpcomingEvents = (events) => {
-    const now = new Date();
-    const tomorrow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000); // Jutro
-
-    const upcomingEvents = events.filter((event) => {
-      const eventDate = parse(event.date, "dd.MM.yyyy HH:mm:ss", new Date());
-      return eventDate >= now && eventDate <= tomorrow;
-    });
-
-    const newEvents = upcomingEvents.map((event) => ({ ...event }));
-
-    setEventsInThreeDays(newEvents);
   };
 
   const onRefresh = () => {
@@ -209,97 +191,37 @@ const Index = () => {
           </View>
 
           {/* Wydarzenia */}
-          <Text className="text-2xl font-semibold">Wydarzenia</Text>
-          <View className="flex flex-row gap-5">
-            <TouchableOpacity
-              onPress={() => setSelectedTab("upcomingEvents")}
-              className="flex-1 p-5 rounded-full"
-              style={{
-                backgroundColor:
-                  selectedTab === "upcomingEvents" ? primaryColor : "white",
-              }}
-            >
-              <Text
-                className={`text-lg font-semibold text-center ${
-                  selectedTab === "upcomingEvents" ? "text-white" : "text-black"
-                }`}
-              >
-                Nadchodzące
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setSelectedTab("allEvents")}
-              className="flex-1 p-5 rounded-full"
-              style={{
-                backgroundColor:
-                  selectedTab === "allEvents" ? primaryColor : "white",
-              }}
-            >
-              <Text
-                className={`text-lg font-semibold text-center ${
-                  selectedTab === "allEvents" ? "text-white" : "text-black"
-                }`}
-              >
-                Wszystkie
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <Text className="text-2xl font-semibold">Nadchodzace Wydarzenia</Text>
 
-          {selectedTab === "upcomingEvents" ? (
-            <>
-              <View className="flex flex-col gap-5">
-                {eventsInThreeDays.length > 0 ? (
-                  eventsInThreeDays.map((item) => (
-                    <EventItem
-                      key={item.id}
-                      event={item}
-                      deleteFunction={() => {
-                        showDeleteAlert(item.id);
-                      }}
-                    />
-                  ))
-                ) : (
-                  <View className="bg-white rounded-3xl p-5">
-                    <Text className="text-gray-500 text-xl font-semibold">
-                      Brak nadchodzacych wydarzeń.
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </>
-          ) : (
-            <>
-              <View className="flex flex-col gap-5">
-                {events.length > 0 ? (
-                  events.map((item) => (
-                    <EventItem
-                      key={item.id}
-                      event={item}
-                      deleteFunction={() => {
-                        showDeleteAlert(item.id);
-                      }}
-                    />
-                  ))
-                ) : (
-                  <View className="bg-white rounded-3xl p-5">
-                    <Text className="text-gray-500 text-xl font-semibold">
-                      Brak wydarzeń.
-                    </Text>
-                  </View>
-                )}
-              </View>
-              {events.length > 5 && (
+          <View className="flex flex-col gap-5">
+            {events.length > 0 ? (
+              <>
+                {events.map((item) => (
+                  <EventItem
+                    key={item.id}
+                    event={item}
+                    deleteFunction={() => {
+                      showDeleteAlert(item.id);
+                    }}
+                  />
+                ))}
                 <TouchableOpacity
                   className="p-5 rounded-full bg-blue-500"
                   onPress={showMore}
                 >
                   <Text className="text-white text-lg font-semibold text-center">
-                    Pokaż więcej
+                    Pokaż wszystkie wydarzenia
                   </Text>
                 </TouchableOpacity>
-              )}
-            </>
-          )}
+              </>
+            ) : (
+              <View className="bg-white rounded-3xl p-5">
+                <Text className="text-gray-500 text-xl font-semibold">
+                  Brak nadchodzacych wydarzeń.
+                </Text>
+              </View>
+            )}
+          </View>
 
           {/* Wyzwania Ekologiczne */}
           <Text className="text-2xl font-semibold">Wyzwania Ekologiczne</Text>

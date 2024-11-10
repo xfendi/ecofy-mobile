@@ -164,7 +164,7 @@ const Details = () => {
             <View>
               {event.host === user.uid ? (
                 <TouchableOpacity onPress={() => showDeleteAlert(event.id)}>
-                  <Feather name="delete" size={24} color="red" />
+                  <Feather name="trash" size={24} color="red" />
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity onPress={handleLikeToggle}>

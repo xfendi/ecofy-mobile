@@ -82,7 +82,7 @@ const EventListItem = ({ eventData, onClose, deleteFunction }) => {
               </TouchableOpacity>
             ) : (
               <TouchableOpacity onPress={handleDelete}>
-                <Feather name="delete" size={24} color="red" />
+                <Feather name="trash" size={24} color="red" />
               </TouchableOpacity>
             )}
           </View>

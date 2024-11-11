@@ -11,18 +11,21 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
-import { parse } from "date-fns";
+import { isAfter, isBefore, parse } from "date-fns";
 
 import { db } from "../../firebase";
 import EventItem from "../../components/EventItem";
+import { primaryColor } from "../../config.json";
 
 const Events = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [highlightedEvent, setHighlightedEvent] = useState(null);
+
   const [events, setEvents] = useState([]);
+  const [archiveEvents, setArchiveEvents] = useState([]);
+
+  const [tab, setTab] = useState("active");
 
   const router = useRouter();
-  const params = useLocalSearchParams();
 
   const handleDelete = async (id) => {
     try {
@@ -62,19 +65,6 @@ const Events = () => {
   };
 
   useEffect(() => {
-    const eventId = parseInt(params.eventId, 10);
-    if (!isNaN(eventId) && events.some((event) => event.id === eventId)) {
-      setHighlightedEvent(eventId);
-
-      const timer = setTimeout(() => {
-        setHighlightedEvent(null);
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [params.eventId]);
-
-  useEffect(() => {
     const unsubscribe = onSnapshot(
       collection(db, "events"),
       (querySnapshot) => {
@@ -83,15 +73,39 @@ const Events = () => {
           const data = doc.data();
           docsArray.push({ ...data });
         });
-        
-        const upcomingEvents = docsArray.sort((a, b) => {
-          // Sort events by date (from nearest to farthest)
-          const dateA = parse(a.date, "d.M.yyyy HH:mm:ss", new Date());
-          const dateB = parse(b.date, "d.M.yyyy HH:mm:ss", new Date());
-          return dateA - dateB; // Sort in ascending order
-        });
 
-        setEvents(upcomingEvents); // Zapisujemy dokumenty do stanu
+        const activeEvents = docsArray
+          .filter((event) => {
+            const eventDate = parse(
+              event.date,
+              "d.M.yyyy HH:mm:ss",
+              new Date()
+            );
+            return isBefore(new Date(), eventDate);
+          })
+          .sort((a, b) => {
+            const dateA = parse(a.date, "d.M.yyyy HH:mm:ss", new Date());
+            const dateB = parse(b.date, "d.M.yyyy HH:mm:ss", new Date());
+            return dateA - dateB;
+          });
+
+        const inactiveEvents = docsArray
+          .filter((event) => {
+            const eventDate = parse(
+              event.date,
+              "d.M.yyyy HH:mm:ss",
+              new Date()
+            );
+            return isAfter(new Date(), eventDate);
+          })
+          .sort((a, b) => {
+            const dateA = parse(a.date, "d.M.yyyy HH:mm:ss", new Date());
+            const dateB = parse(b.date, "d.M.yyyy HH:mm:ss", new Date());
+            return dateA - dateB;
+          });
+
+        setArchiveEvents(inactiveEvents); // Zapisujemy dokumenty do stanu
+        setEvents(activeEvents); // Zapisujemy dokumenty do stanu
       }
     );
 
@@ -106,13 +120,65 @@ const Events = () => {
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
       >
-        <View className={Platform.OS === "ios" ? "mb-[50px]" : "mb-[84px]"}>
-          <Text className="text-2xl font-semibold mb-5">
-            Lista Wszystkich Wydarzeń
-          </Text>
+        <View
+          className={`flex flex-col gap-5 ${
+            Platform.OS === "ios" ? "mb-[50px]" : "mb-[84px]"
+          }`}
+        >
+          <Text className="text-3xl font-semibold">Lista Wydarzeń</Text>
+          <View className="flex flex-row gap-5">
+            <TouchableOpacity
+              onPress={() => setTab("active")}
+              className="p-5 rounded-full flex-1"
+              style={{
+                backgroundColor: tab === "active" ? primaryColor : "white",
+              }}
+            >
+              <Text
+                className={`${
+                  tab === "active" ? "text-white" : "text-black"
+                } text-xl font-semibold text-center`}
+              >
+                Aktywne
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setTab("archive")}
+              className="p-5 rounded-full flex-1"
+              style={{
+                backgroundColor: tab === "archive" ? primaryColor : "white",
+              }}
+            >
+              <Text
+                className={`${
+                  tab === "archive" ? "text-white" : "text-black"
+                } text-xl font-semibold text-center`}
+              >
+                Archiwum
+              </Text>
+            </TouchableOpacity>
+          </View>
           <View className="gap-5">
-            {events.length > 0 ? (
-              events.map((event) => (
+            {tab === "active" ? (
+              events.length > 0 ? (
+                events.map((event) => (
+                  <EventItem
+                    key={event.id}
+                    event={event}
+                    deleteFunction={() => {
+                      showDeleteAlert(event.id);
+                    }}
+                  />
+                ))
+              ) : (
+                <View className="bg-white rounded-3xl p-5">
+                  <Text className="text-gray-500 text-xl font-semibold">
+                    Brak aktywnych wydarzeń.
+                  </Text>
+                </View>
+              )
+            ) : archiveEvents.length > 0 ? (
+              archiveEvents.map((event) => (
                 <EventItem
                   key={event.id}
                   event={event}
@@ -122,9 +188,11 @@ const Events = () => {
                 />
               ))
             ) : (
-              <Text className="text-gray-500 text-xl font-semibold bg-white p-5 rounded-2xl">
-                Brak wydarzeń.
-              </Text>
+              <View className="bg-white rounded-3xl p-5">
+                <Text className="text-gray-500 text-xl font-semibold">
+                  Brak archiwalnych wydarzeń.
+                </Text>
+              </View>
             )}
           </View>
         </View>

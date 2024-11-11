@@ -28,11 +28,16 @@ import { UserAuth } from "../../context/AuthContext";
 import { primaryColor } from "../../config.json";
 import EventItem from "../../components/EventItem";
 import { db } from "../../firebase";
+import { isAfter, isBefore, parse } from "date-fns";
 
 const Profile = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const [myEvents, setMyEvents] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [archiveEvents, setArchiveEvents] = useState([]);
+
+  const [tab, setTab] = useState("active");
+
   const [likedEvents, setLikedEvents] = useState([]);
 
   const { user } = UserAuth();
@@ -49,7 +54,31 @@ const Profile = () => {
       querySnapshot.forEach((doc) => {
         eventsList.push({ ...doc.data() });
       });
-      setMyEvents(eventsList); // aktualizacja stanu eventów
+
+      const activeEvents = eventsList
+        .filter((event) => {
+          const eventDate = parse(event.date, "d.M.yyyy HH:mm:ss", new Date());
+          return isBefore(new Date(), eventDate);
+        })
+        .sort((a, b) => {
+          const dateA = parse(a.date, "d.M.yyyy HH:mm:ss", new Date());
+          const dateB = parse(b.date, "d.M.yyyy HH:mm:ss", new Date());
+          return dateA - dateB;
+        });
+
+      const inactiveEvents = eventsList
+        .filter((event) => {
+          const eventDate = parse(event.date, "d.M.yyyy HH:mm:ss", new Date());
+          return isAfter(new Date(), eventDate);
+        })
+        .sort((a, b) => {
+          const dateA = parse(a.date, "d.M.yyyy HH:mm:ss", new Date());
+          const dateB = parse(b.date, "d.M.yyyy HH:mm:ss", new Date());
+          return dateA - dateB;
+        });
+
+      setEvents(activeEvents);
+      setArchiveEvents(inactiveEvents);
     });
 
     // Czyścimy listener przy demontażu komponentu
@@ -65,7 +94,19 @@ const Profile = () => {
       querySnapshot.forEach((doc) => {
         eventsList.push({ ...doc.data() });
       });
-      setLikedEvents(eventsList); // Aktualizacja stanu z polubionymi eventami
+
+      const activeLikedEvents = eventsList
+        .filter((event) => {
+          const eventDate = parse(event.date, "d.M.yyyy HH:mm:ss", new Date());
+          return isBefore(new Date(), eventDate);
+        })
+        .sort((a, b) => {
+          const dateA = parse(a.date, "d.M.yyyy HH:mm:ss", new Date());
+          const dateB = parse(b.date, "d.M.yyyy HH:mm:ss", new Date());
+          return dateA - dateB;
+        });
+
+      setLikedEvents(activeLikedEvents);
     });
 
     return () => unsubscribe();
@@ -160,12 +201,63 @@ const Profile = () => {
           </View>
 
           <Text className="text-2xl font-semibold">Moje wydarzenia</Text>
+          <View className="flex flex-row gap-5">
+            <TouchableOpacity
+              onPress={() => setTab("active")}
+              className="p-5 rounded-full flex-1"
+              style={{
+                backgroundColor: tab === "active" ? primaryColor : "white",
+              }}
+            >
+              <Text
+                className={`${
+                  tab === "active" ? "text-white" : "text-black"
+                } text-xl font-semibold text-center`}
+              >
+                Aktywne
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setTab("archive")}
+              className="p-5 rounded-full flex-1"
+              style={{
+                backgroundColor: tab === "archive" ? primaryColor : "white",
+              }}
+            >
+              <Text
+                className={`${
+                  tab === "archive" ? "text-white" : "text-black"
+                } text-xl font-semibold text-center`}
+              >
+                Archiwum
+              </Text>
+            </TouchableOpacity>
+          </View>
+
           <View className="gap-5">
-            {myEvents.length > 0 ? (
-              myEvents.map((event) => (
+            {tab === "active" ? (
+              events.length > 0 ? (
+                events.map((event) => (
+                  <EventItem
+                    key={event.id}
+                    event={event}
+                    deleteFunction={() => {
+                      showDeleteAlert(event.id);
+                    }}
+                  />
+                ))
+              ) : (
+                <View className="bg-white rounded-3xl p-5">
+                  <Text className="text-gray-500 text-xl font-semibold">
+                    Brak aktywnych wydarzeń.
+                  </Text>
+                </View>
+              )
+            ) : archiveEvents.length > 0 ? (
+              archiveEvents.map((event) => (
                 <EventItem
-                  event={event}
                   key={event.id}
+                  event={event}
                   deleteFunction={() => {
                     showDeleteAlert(event.id);
                   }}
@@ -174,7 +266,7 @@ const Profile = () => {
             ) : (
               <View className="bg-white rounded-3xl p-5">
                 <Text className="text-gray-500 text-xl font-semibold">
-                  Brak utworzonych wydarzeń.
+                  Brak archiwalnych wydarzeń.
                 </Text>
               </View>
             )}

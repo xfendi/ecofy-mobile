@@ -23,19 +23,28 @@ const welcome = () => {
           </Text>
         </View>
         <View className="flex flex-row gap-5">
-          <Link
-            href="/login"
-            className="p-4 rounded-xl w-1/2 text-white text-xl font-semibold text-center"
+          <View
+            className="p-5 rounded-xl w-1/2"
             style={{ backgroundColor: primaryColor }}
           >
-            Zaloguj się
-          </Link>
-          <Link
-            href="/register"
-            className="p-4 rounded-xl w-1/2 bg-white text-xl font-semibold text-center"
+            <Link
+              href="/register"
+              className="text-white text-xl font-semibold text-center"
+            >
+              Zarejestruj się
+            </Link>
+          </View>
+          <View
+            className="p-5 rounded-xl w-1/2"
+            style={{ backgroundColor: "white" }}
           >
-            Zarejestruj się
-          </Link>
+            <Link
+              href="/login"
+              className="text-black text-xl font-semibold text-center"
+            >
+              Zaloguj się
+            </Link>
+          </View>
         </View>
       </View>
     </SafeAreaView>

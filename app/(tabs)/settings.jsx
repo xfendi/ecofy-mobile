@@ -216,7 +216,7 @@ const settings = () => {
                   value={password}
                   onChangeText={setPassword}
                   placeholder="Aktualne Hasło"
-                  multiline
+                  secureTextEntry
                   gray
                   full
                 />

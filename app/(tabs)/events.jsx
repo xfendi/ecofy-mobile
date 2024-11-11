@@ -26,7 +26,6 @@ const Events = () => {
   const [tab, setTab] = useState("active");
 
   const router = useRouter();
-  const params = useLocalSearchParams();
 
   const handleDelete = async (id) => {
     try {
@@ -90,7 +89,7 @@ const Events = () => {
             return dateA - dateB;
           });
 
-          const inactiveEvents = docsArray
+        const inactiveEvents = docsArray
           .filter((event) => {
             const eventDate = parse(
               event.date,
@@ -126,9 +125,7 @@ const Events = () => {
             Platform.OS === "ios" ? "mb-[50px]" : "mb-[84px]"
           }`}
         >
-          <Text className="text-3xl font-semibold">
-            Lista Wydarzeń
-          </Text>
+          <Text className="text-3xl font-semibold">Lista Wydarzeń</Text>
           <View className="flex flex-row gap-5">
             <TouchableOpacity
               onPress={() => setTab("active")}
@@ -174,26 +171,28 @@ const Events = () => {
                   />
                 ))
               ) : (
-                <Text className="text-gray-500 text-xl font-semibold bg-white p-5 rounded-2xl">
-                  Brak wydarzeń.
-                </Text>
+                <View className="bg-white rounded-3xl p-5">
+                  <Text className="text-gray-500 text-xl font-semibold">
+                    Brak aktywnych wydarzeń.
+                  </Text>
+                </View>
               )
+            ) : archiveEvents.length > 0 ? (
+              archiveEvents.map((event) => (
+                <EventItem
+                  key={event.id}
+                  event={event}
+                  deleteFunction={() => {
+                    showDeleteAlert(event.id);
+                  }}
+                />
+              ))
             ) : (
-              archiveEvents.length > 0 ? (
-                archiveEvents.map((event) => (
-                  <EventItem
-                    key={event.id}
-                    event={event}
-                    deleteFunction={() => {
-                      showDeleteAlert(event.id);
-                    }}
-                  />
-                ))
-              ) : (
-                <Text className="text-gray-500 text-xl font-semibold bg-white p-5 rounded-2xl">
-                  Brak wydarzeń.
+              <View className="bg-white rounded-3xl p-5">
+                <Text className="text-gray-500 text-xl font-semibold">
+                  Brak archiwalnych wydarzeń.
                 </Text>
-              )
+              </View>
             )}
           </View>
         </View>

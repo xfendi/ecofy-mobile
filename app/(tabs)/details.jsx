@@ -13,7 +13,6 @@ import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { AntDesign, Feather } from "@expo/vector-icons";
-
 import {
   doc,
   getDoc,
@@ -23,22 +22,27 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 
-import { primaryColor } from "../../config.json"; // Ścieżka do config.json
-import { UseMap } from "../../context/MapContext"; // Ścieżka do kontekstu MapContext
-import { UserAuth } from "../../context/AuthContext"; // Ścieżka do kontekstu AuthContext
-import { db } from "../../firebase"; // Ścieżka do pliku firebase
+import { primaryColor } from "../../config.json"; 
+import { UseMap } from "../../context/MapContext"; 
+import { UserAuth } from "../../context/AuthContext"; 
+import { db } from "../../firebase"; 
+import { parse } from "date-fns";
+import useGeoLocation from "../../context/GeoLocationContext"
 
 const Details = () => {
+  const { location } = useGeoLocation(); 
   const [event, setEvent] = useState(null);
   const [isLike, setIsLike] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showConfirmButton, setShowConfirmButton] = useState(false);
+  const [distance, setDistance] = useState(null); 
+  const [isConfirmed, setIsConfirmed] = useState(false); // New state for attendance confirmation
 
   const params = useLocalSearchParams();
   const router = useRouter();
-
-  const { eventId } = params; // Parametr eventId
-  const { setSelectedEvent } = UseMap(); // Access the context
-  const { user } = UserAuth(); // Pobieranie użytkownika z AuthContext
+  const { eventId } = params; 
+  const { setSelectedEvent } = UseMap(); 
+  const { user } = UserAuth(); 
   const { width } = Dimensions.get("window");
 
   useEffect(() => {
@@ -47,13 +51,24 @@ const Details = () => {
     }
   }, [eventId]);
 
+  useEffect(() => {
+    if (event?.date) {
+      checkShowConfirmButton();
+    }
+  }, [event]);
+
+  useEffect(() => {
+    if (event && location) {
+      calculateDistance();
+    }
+  }, [event, location]);
+
   const onRefresh = () => {
     setIsRefreshing(true);
-
     router.replace("/details", { eventId });
     setTimeout(() => {
-      setIsRefreshing(false); // Zatrzymanie odświeżania
-    }, 1000); // Czas odświeżania w milisekundach
+      setIsRefreshing(false); 
+    }, 1000);
   };
 
   const fetchEventDetails = async (id) => {
@@ -63,7 +78,7 @@ const Details = () => {
       if (eventSnap.exists()) {
         const eventDetails = eventSnap.data();
         setEvent(eventDetails);
-
+        setIsConfirmed(eventDetails.confirmedUsers?.includes(user.uid) || false);
         const likes = eventDetails.likes || [];
         setIsLike(likes.includes(user.uid));
       } else {
@@ -71,6 +86,49 @@ const Details = () => {
       }
     } catch (error) {
       console.error("Błąd podczas ładowania szczegółów wydarzenia:", error);
+    }
+  };
+
+  const calculateDistance = () => {
+    const toRadians = (degrees) => (degrees * Math.PI) / 180;
+    const { latitude: lat1, longitude: lon1 } = location.coords;
+    const { latitude: lat2, longitude: lon2 } = event.coordinates;
+
+    const R = 6371; 
+    const dLat = toRadians(lat2 - lat1);
+    const dLon = toRadians(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+
+    setDistance(distance.toFixed(2)); 
+  };
+
+  const checkShowConfirmButton = () => {
+    const currentTime = new Date();
+    const eventDate = parse(event.date, "d.M.yyyy HH:mm:ss", new Date());
+    const timeDifferenceInHours = (eventDate - currentTime) / (1000 * 60 * 60);
+    setShowConfirmButton(timeDifferenceInHours <= 1 && timeDifferenceInHours > 0);
+  };
+
+  const handleConfirmAttendance = async () => {
+    if (distance <= 0.1) {
+      try {
+        const eventRef = doc(db, "events", event.id.toString());
+        await updateDoc(eventRef, {
+          confirmedUsers: arrayUnion(user.uid), // Add user ID to confirmed users array
+        });
+        setIsConfirmed(true); // Update local state
+        Alert.alert("Potwierdzono przybycie", `Potwierdziłeś swoje przybycie na ${event.title}`);
+      } catch (error) {
+        console.error("Błąd przy potwierdzaniu przybycia:", error);
+        Alert.alert("Błąd", "Nie udało się potwierdzić przybycia. Spróbuj ponownie.");
+      }
+    } else {
+      Alert.alert("Za daleko", "Musisz być w promieniu 100 metrów od wydarzenia, aby potwierdzić przybycie.");
     }
   };
 
@@ -87,7 +145,6 @@ const Details = () => {
     if (eventSnap.exists()) {
       const eventData = eventSnap.data();
       const likes = eventData.likes || [];
-
       if (likes.includes(user.uid)) {
         await updateDoc(eventRef, {
           likes: arrayRemove(user.uid),
@@ -100,35 +157,6 @@ const Details = () => {
         setIsLike(true);
       }
     }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await deleteDoc(doc(db, "events", id.toString()));
-      Alert.alert("Sukces", "Pomyślnie usunięto wydarzenie!");
-      router.replace("/");
-    } catch (e) {
-      console.error("Błąd przy usuwaniu wydarzenia:", e);
-      Alert.alert("Błąd", "Nie udało się usunąć wydarzenia: ", e.message);
-    }
-  };
-
-  const showDeleteAlert = (id) => {
-    Alert.alert(
-      "Potwierdź usunięcie",
-      "Czy na pewno chcesz usunąć to wydarzenie?",
-      [
-        {
-          text: "Anuluj",
-          style: "cancel",
-        },
-        {
-          text: "Usuń",
-          onPress: () => handleDelete(id),
-        },
-      ],
-      { cancelable: true }
-    );
   };
 
   if (!event) {
@@ -155,7 +183,6 @@ const Details = () => {
               style={{ height: width - 40 }}
             />
           )}
-
           <View className="flex flex-row justify-between">
             <View>
               <Text className="text-3xl font-semibold">{event.title}</Text>
@@ -177,7 +204,6 @@ const Details = () => {
               )}
             </View>
           </View>
-
           <View className="flex flex-col gap-5 p-5 bg-white rounded-3xl w-full">
             {event.description && (
               <Text className="w-80 text-gray-500">{event.description}</Text>
@@ -192,12 +218,35 @@ const Details = () => {
               <View>
                 <Text className="font-semibold">Koordynaty</Text>
                 <Text className="w-80 text-gray-500">
-                  {event.coordinates.latitude.toFixed(3)},{" "}
-                  {event.coordinates.longitude.toFixed(3)}
+                  {event.coordinates.latitude.toFixed(3)}, {event.coordinates.longitude.toFixed(3)}
+                </Text>
+              </View>
+            )}
+            {distance && (
+              <View>
+                <Text className="font-semibold">Odległość</Text>
+                <Text className="w-80 text-gray-500">
+                  {distance} km
                 </Text>
               </View>
             )}
           </View>
+          {showConfirmButton&&isLike && (
+            <View className="mb-5">
+              <TouchableOpacity
+                onPress={isConfirmed ? null : handleConfirmAttendance}
+                className="p-5 rounded-full"
+                style={{
+                  backgroundColor: isConfirmed ? "gray" : "green",
+                }}
+                disabled={isConfirmed}
+              >
+                <Text className="text-white text-lg font-semibold text-center">
+                  {isConfirmed ? "Już potwierdzono przybycie" : "Potwierdź przybycie"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           <View className={Platform.OS === "ios" ? "mb-[50px]" : "mb-[84px]"}>
             <TouchableOpacity

@@ -112,7 +112,16 @@ const Index = () => {
             ...data,
           });
         });
-        setChallenges(challengesArray); // Set challenges in state
+    
+        const upcomingChallenges = challengesArray
+          .sort((a, b) => {
+            // Konwersja endTime na obiekt Date, sortowanie po dacie zakończenia
+            const dateA = new Date(a.endTime);
+            const dateB = new Date(b.endTime);
+            return dateA - dateB; // Sortuje rosnąco (od najbliższej do najdalszej daty zakończenia)
+          });
+    
+        setChallenges(upcomingChallenges); // Set challenges in state
       }
     );
 
@@ -132,12 +141,26 @@ const Index = () => {
       return eventDate >= now && eventDate <= tomorrow;
     });
 
-    const newNotifications = upcomingEvents.map((event) => ({
+    const challengesTomorrow = challenges.filter((challenge) => {
+      const challengeEndTime = new Date(challenge.endTime)
+      return challengeEndTime >= now && challengeEndTime <= tomorrow;
+    })
+
+    const eventNotifications = upcomingEvents.map((event) => ({
       id: event.id, // Używamy id wydarzenia jako id powiadomienia
       event: event,
       title: `Wydarzenie`,
       message: `${event.title} rozpoczyna się ${event.date}`,
     }));
+
+    const challengeNotifications = challengesTomorrow.map((challenge) => ({
+      id: `challenge-${challenge.id}`, // Identyfikator powiadomienia dla wyzwania
+      challenge: challenge,
+      title: `Koniec wyzwania`,
+      message: `${challenge.title} kończy się ${new Date(challenge.endTime).toLocaleString()}!`,
+    }));
+
+    const newNotifications = [...eventNotifications, ...challengeNotifications]
 
     setNotifications(newNotifications);
   };

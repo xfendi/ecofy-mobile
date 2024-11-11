@@ -4,7 +4,8 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
+  Alert
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { AntDesign, Feather } from "@expo/vector-icons";
@@ -14,6 +15,7 @@ import { useRouter } from "expo-router";
 import { UseMap } from "../context/MapContext";
 import { UserAuth } from "../context/AuthContext";
 import { db } from "../firebase";
+import { parse } from "date-fns";
 import {
   doc,
   getDoc,
@@ -44,7 +46,23 @@ const EventItem = ({ event, deleteFunction }) => {
   };
 
   const handleDelete = (event) => {
-    deleteFunction(event.id);
+    const currentTime = new Date();
+    const eventDate = parse(
+      event.date,
+      "d.M.yyyy HH:mm:ss",
+      new Date()
+    );
+    const timeDifference = eventDate - currentTime;
+
+    const timeDifferenceInHours = timeDifference / (1000 * 60 * 60);
+
+    if (timeDifferenceInHours > 0 && timeDifferenceInHours <= 1){
+      Alert.alert("Nie udało sie usunąć wydarzenia", "Nie możesz usunąć wydarzenia na godzinę przed jego rozpoczęciem")
+    }
+    else{
+      deleteFunction(event.id);
+    }
+
   };
 
   useEffect(() => {

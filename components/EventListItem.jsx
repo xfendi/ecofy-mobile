@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Platform } from "react-native";
+import { View, Text, TouchableOpacity, Platform, Alert } from "react-native";
 import React, { useEffect, useState } from "react";
 import { AntDesign, Feather, FontAwesome } from "@expo/vector-icons";
 import { useRouter } from "expo-router"; // Importuj useRouter
@@ -14,6 +14,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { UserAuth } from "../context/AuthContext";
+import { parse } from "date-fns";
 
 const EventListItem = ({ eventData, onClose, deleteFunction }) => {
   const [isLike, setIsLike] = useState();
@@ -30,7 +31,22 @@ const EventListItem = ({ eventData, onClose, deleteFunction }) => {
   };
 
   const handleDelete = (event) => {
-    deleteFunction(event.id);
+    const currentTime = new Date();
+    const eventDate = parse(
+      eventData.date,
+      "d.M.yyyy HH:mm:ss",
+      new Date()
+    );
+    const timeDifference = eventDate - currentTime;
+
+    const timeDifferenceInHours = timeDifference / (1000 * 60 * 60);
+
+    if (timeDifferenceInHours > 0 && timeDifferenceInHours <= 1){
+      Alert.alert("Nie udało sie usunąć wydarzenia", "Nie możesz usunąć wydarzenia na godzinę przed jego rozpoczęciem")
+    }
+    else{
+      deleteFunction(event.id);
+    }
   };
 
   useEffect(() => {

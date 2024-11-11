@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, Alert } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -27,6 +27,11 @@ const register = () => {
     await createUser(email, password, name);
     router.replace("/onboard_one");
   };
+
+  const handleProviderClick = () => {
+    Alert.alert("Wkrótce", "Ta funkcja zostanie odblokowana wkrótce!");
+  }
+
   return (
     <SafeAreaView>
       <View className="flex gap-5 p-10 flex-col justify-center h-full items-center">
@@ -67,14 +72,14 @@ const register = () => {
           <Text className="text-center">Lub Kontynuuj z</Text>
 
           <View className="flex flex-row gap-5">
-            <TouchableOpacity className="p-4 rounded-xl bg-white text-xl font-semibold text-center">
-              <Ionicons name="logo-google" color="black" size={30} />
+            <TouchableOpacity onPress={handleProviderClick} className="p-4 rounded-xl bg-white text-xl font-semibold text-center">
+              <Ionicons name="logo-google" color="#d1d5db" size={32} />
             </TouchableOpacity>
-            <TouchableOpacity className="p-4 rounded-xl bg-white text-xl font-semibold text-center">
-              <Ionicons name="logo-apple" color="black" size={30} />
+            <TouchableOpacity onPress={handleProviderClick} className="p-4 rounded-xl bg-white text-xl font-semibold text-center">
+              <Ionicons name="logo-apple" color="#d1d5db" size={32} />
             </TouchableOpacity>
-            <TouchableOpacity className="p-4 rounded-xl bg-white text-xl font-semibold text-center">
-              <Ionicons name="logo-facebook" color="black" size={30} />
+            <TouchableOpacity onPress={handleProviderClick} className="p-4 rounded-xl bg-white text-xl font-semibold text-center">
+              <Ionicons name="logo-facebook" color="#d1d5db" size={32} />
             </TouchableOpacity>
           </View>
         </View>

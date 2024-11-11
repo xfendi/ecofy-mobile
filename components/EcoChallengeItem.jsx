@@ -4,18 +4,23 @@ import { primaryColor } from "../config.json";
 import { db } from "../firebase"; // Ensure correct import
 import { doc, updateDoc, arrayUnion, arrayRemove  } from "firebase/firestore";
 import { UserAuth } from "../context/AuthContext"; // Import UserAuth
+import { FontAwesome } from "@expo/vector-icons";
 
 const EcoChallengeItem = ({ challenge }) => {
-    const { title, description, startTime, endTime, joinedUsers = [] } = challenge; // Default to empty array
+    const { title, description, startTime, endTime, joinedUsers = [], doneUsers= [] } = challenge; // Default to empty array
     const { user } = UserAuth(); // Get user from AuthContext
     const [isJoined, setIsJoined] = useState(false);
+    const [isDone, setIsDone] = useState(false);
 
     // Check if the user is already joined
     useEffect(() => {
         if (user?.uid && Array.isArray(joinedUsers)) {
             setIsJoined(joinedUsers.includes(user.uid));
         }
-    }, [joinedUsers, user]);
+        if (user?.uid && Array.isArray(doneUsers)) {
+            setIsDone(doneUsers.includes(user.uid));
+        }
+    }, [joinedUsers, user, doneUsers]);
 
 
     // Handle joining the challenge
@@ -60,6 +65,50 @@ const EcoChallengeItem = ({ challenge }) => {
         } catch (error) {
             console.error("Error joining challenge:", error.message); // Log the error message
             Alert.alert("Wystąpił błąd przy dołączaniu do wyzwania.");
+        }
+    };
+
+
+    const handleDoneChallenge = async () => {
+        // Check if the user is already joined
+        if (!isJoined) {
+            Alert.alert("Jeszcze nie dołączyłeś!", "Nie możesz wykonać zadania dopóki do niego nie dołaczyłeś.");
+            return;
+        }
+
+        if (!challenge || !challenge.id || typeof challenge.id !== 'number') {
+            console.error("Challenge or Challenge ID is not valid", { challenge });
+            Alert.alert("Błąd", "Nie można dołączyć do wyzwania. Proszę spróbować ponownie.");
+            return;
+        }
+
+        // Log the challenge details
+        console.log("Attempting to join challenge with ID:", challenge.id);
+        console.log("Challenge details:", {
+            title,
+            description,
+            startTime,
+            endTime,
+            joinedUsers,
+        });
+
+        // Convert challenge.id to a string
+        const challengeRef = doc(db, "ecoChallenges", String(challenge.id));
+        console.log("Challenge Reference:", challengeRef); // Log the challenge reference
+
+        try {
+            // Attempt to update the document
+            await updateDoc(challengeRef, {
+                doneUsers: arrayUnion(user?.uid) // Use optional chaining for safety
+            });
+
+            // Update local state to reflect joining
+            setIsDone(true);
+            Alert.alert(`Wykonałeś wyzwanie: ${title}`);
+            console.log(`User ${user?.uid} done challenge: ${title}`); // Debug log
+        } catch (error) {
+            console.error("Error w zrobieniu challenge:", error.message); // Log the error message
+            Alert.alert("Wystąpił błąd przy wykonywaniu wyzwania.");
         }
     };
 
@@ -112,6 +161,17 @@ const EcoChallengeItem = ({ challenge }) => {
                     {isJoined ? "Opuszczam" : "Biorę udział"}
                 </Text>
             </TouchableOpacity>
+            {isJoined &&(
+                <TouchableOpacity 
+                    className="flex flex-row gap-5 justify-center items-center rounded-full h-16"
+                    onPress={handleDoneChallenge}
+                    disabled= {isDone ? true : false}
+                    style={{ backgroundColor: isDone ? 'gray' : '#3b82f6'}}
+                >
+                    {!isDone &&<FontAwesome name="check" className="color-white text-xl text-center" style={{color: 'white', fontSize: 20}}/> }
+                    <Text className="text-white text-xl font-semibold text-center">{isDone ? "Już oznaczone jako wykonane" : "Zrobione"}</Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 };

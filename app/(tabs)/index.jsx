@@ -145,7 +145,6 @@ const Index = () => {
       const challengeEndTime = new Date(challenge.endTime)
       return challengeEndTime >= now && challengeEndTime <= tomorrow;
     })
-
     const eventNotifications = upcomingEvents.map((event) => ({
       id: event.id, // Używamy id wydarzenia jako id powiadomienia
       event: event,
@@ -158,6 +157,7 @@ const Index = () => {
       challenge: challenge,
       title: `Koniec wyzwania`,
       message: `${challenge.title} kończy się ${new Date(challenge.endTime).toLocaleString()}!`,
+      typeChallenge: true,
     }));
 
     const newNotifications = [...eventNotifications, ...challengeNotifications]

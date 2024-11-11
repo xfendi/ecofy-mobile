@@ -17,6 +17,7 @@ const NotificationItem = ({ notification }) => {
     <TouchableOpacity
       onPress={handleShowOnMap}
       className="border-b border-gray-200 pb-5"
+      disabled={notification.typeChallenge}
     >
       <Text className="text-xl font-semibold">{notification.title}</Text>
       <Text className="text-gray-500">{notification.message}</Text>

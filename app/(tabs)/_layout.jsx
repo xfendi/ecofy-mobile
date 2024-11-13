@@ -1,25 +1,24 @@
-import React, { useEffect, useState } from "react";
+// tabs/_layout.js
+import React, { useEffect } from "react";
 import { Tabs } from "expo-router";
 import TabBar from "../../components/TabBar";
-import { UserAuth } from "../../context/AuthContext";
+import { UserAuth } from "../../context/AuthContext"; // Kontekst użytkownika
 import { useRouter } from "expo-router";
 
 const _layout = () => {
-  const { user } = UserAuth(); // Pobranie użytkownika z kontekstu
-  const router = useRouter(); // Użycie hooka useRouter
-  const [loading, setLoading] = useState(true); // Stan do monitorowania ładowania
+  const { user, loading } = UserAuth();  // Używamy kontekstu użytkownika
+  const router = useRouter();
 
   useEffect(() => {
-    // Sprawdzenie, czy użytkownik jest zalogowany
-    if (!user) {
-      router.replace("/(auth)/welcome"); // Przekierowanie do ekranu logowania
-    } else {
-      setLoading(false); // Ustawienie stanu ładowania na false, jeśli użytkownik jest zalogowany
+    // Jeśli dane o użytkowniku zostały załadowane i nie jest zalogowany, przekierowujemy
+    if (!loading && !user) {
+      router.replace("/(auth)/welcome");
     }
-  }, [user, router]); // Zależność od usera i routera
+  }, [user, loading, router]);  // Reagujemy na zmiany w user i loading
 
   if (loading) {
-    return null; // Zwróć null, gdy trwa ładowanie
+    // Zwracamy null lub spinner, dopóki dane o użytkowniku są ładowane
+    return null;
   }
 
   return (

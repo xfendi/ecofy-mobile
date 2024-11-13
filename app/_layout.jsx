@@ -1,47 +1,52 @@
+// _layout.js
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
-import { onAuthStateChanged } from "firebase/auth";
 import { Stack } from "expo-router";
-
-import { AuthContextProvider } from "../context/AuthContext";
-import { MapContextProvider } from "../context/MapContext";
-import { primaryColor } from "../config.json";
-import { auth } from "../firebase";
-import registerNNPushToken from 'native-notify';
-
-import "../global.css";
+import { AuthContextProvider, UserAuth } from "../context/AuthContext"; // Kontekst użytkownika
+import { MapContextProvider } from "../context/MapContext"; // Kontekst mapy
+import { primaryColor } from "../config.json"; // Kolor z konfiguracji
+import "../global.css"; // Globalne style
 
 const _layout = () => {
-  const [isLogin, setIsLogin] = useState(null);
-  registerNNPushToken(24760, 'yWMd08JhWMihJYHlyMV9so');
+  return (
+    <AuthContextProvider>
+      <InnerLayout />
+    </AuthContextProvider>
+  );
+};
+
+const InnerLayout = () => {
+  const { user, loading } = UserAuth(); // Z kontekstu użytkownika
+  const [isUserReady, setIsUserReady] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setIsLogin(!!currentUser);
-    });
-    return unsubscribe;
-  }, []);
+    // Gdy dane o użytkowniku są dostępne, ustawiamy stan na gotowy
+    if (user !== undefined) {
+      setIsUserReady(true);
+    }
+  }, [user]);
 
-  if (isLogin === null) {
+  // Jeśli dane o użytkowniku są wciąż ładowane, wyświetlamy spinner
+  if (!isUserReady) {
     return (
-      <View>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={primaryColor} />
       </View>
     );
   }
 
+  // Jeśli użytkownik jest zalogowany, pokazujemy ekran "tabs"
+  // W przeciwnym przypadku ekran logowania
   return (
-    <AuthContextProvider>
-      <MapContextProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          {isLogin ? (
-            <Stack.Screen name="(tabs)" />
-          ) : (
-            <Stack.Screen name="(auth)" />
-          )}
-        </Stack>
-      </MapContextProvider>
-    </AuthContextProvider>
+    <MapContextProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        {user ? (
+          <Stack.Screen name="(tabs)" />  // Ekran z głównymi zakładkami
+        ) : (
+          <Stack.Screen name="(auth)" />  // Ekran logowania
+        )}
+      </Stack>
+    </MapContextProvider>
   );
 };
 

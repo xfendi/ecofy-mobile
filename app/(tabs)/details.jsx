@@ -302,7 +302,7 @@ const Details = () => {
               </View>
             )}
           </View>
-          {showConfirmButton && true && (
+          {showConfirmButton && isLike && !isArchived && (
             <View>
               <TouchableOpacity
                 onPress={isConfirmed ? null : handleConfirmAttendance}

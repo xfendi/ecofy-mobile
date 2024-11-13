@@ -11,6 +11,7 @@ import useGeoLocation from "../../context/GeoLocationContext";
 import { UseMap } from "../../context/MapContext";
 import { primaryColor } from "../../config.json";
 import { TouchableOpacity } from "react-native";
+import { endOfDay, isBefore, parse } from "date-fns";
 
 const Map = () => {
   const [events, setEvents] = useState([]);
@@ -112,27 +113,39 @@ const Map = () => {
       <View>
         <MapView
           ref={mapRef}
-          region={currentRegion} // Use local state for the region
+          region={currentRegion}
           showsUserLocation={true}
           style={styles.map}
         >
-          {events.map((marker) => (
-            <Marker
-              tracksViewChanges={false}
-              key={marker.id}
-              coordinate={marker.coordinates}
-              onPress={() => {
-                setSelectedEvent(marker);
-                animate(marker.coordinates);
-              }}
-            >
-              <FontAwesome
-                name="map-marker"
-                size={selectedEvent?.id === marker.id ? 40 : 35}
-                color={selectedEvent?.id === marker.id ? primaryColor : "black"}
-              />
-            </Marker>
-          ))}
+          {events.map((marker) => {
+            const eventDate = parse(
+              marker.date,
+              "d.M.yyyy HH:mm:ss",
+              new Date()
+            );
+
+            if (isBefore(new Date(), endOfDay(eventDate))) {
+              return (
+                <Marker
+                  tracksViewChanges={false}
+                  key={marker.id}
+                  coordinate={marker.coordinates}
+                  onPress={() => {
+                    setSelectedEvent(marker);
+                    animate(marker.coordinates);
+                  }}
+                >
+                  <FontAwesome
+                    name="map-marker"
+                    size={selectedEvent?.id === marker.id ? 40 : 35}
+                    color={
+                      selectedEvent?.id === marker.id ? primaryColor : "black"
+                    }
+                  />
+                </Marker>
+              );
+            }
+          })}
         </MapView>
 
         {selectedEvent && (

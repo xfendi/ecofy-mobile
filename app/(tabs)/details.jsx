@@ -96,9 +96,11 @@ const Details = () => {
         const date = parse(eventDetails.date, "d.M.yyyy HH:mm:ss", new Date());
         setEventDate(date);
 
-        if (isAfter(new Date(), endOfDay(eventDate))) {
+        if (isAfter(new Date(), endOfDay(date))) {
+          console.log("Event is archived");
           setIsArchived(true);
         } else {
+          console.log("Event is not archived");
           setIsArchived(false);
         }
       } else {
@@ -139,6 +141,8 @@ const Details = () => {
     ) {
       console.log("Event is still active");
       setShowConfirmButton(true);
+    } else {
+      setShowConfirmButton(false);
     }
   };
 

@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
-import { isAfter, isBefore, parse } from "date-fns";
+import { endOfDay, isAfter, isBefore, isSameSecond, parse } from "date-fns";
 
 import { db } from "../../firebase";
 import EventItem from "../../components/EventItem";
@@ -81,7 +81,7 @@ const Events = () => {
               "d.M.yyyy HH:mm:ss",
               new Date()
             );
-            return isBefore(new Date(), eventDate);
+            return isBefore(new Date(), endOfDay(eventDate));
           })
           .sort((a, b) => {
             const dateA = parse(a.date, "d.M.yyyy HH:mm:ss", new Date());
@@ -96,7 +96,7 @@ const Events = () => {
               "d.M.yyyy HH:mm:ss",
               new Date()
             );
-            return isAfter(new Date(), eventDate);
+            return isAfter(new Date(), endOfDay(eventDate));
           })
           .sort((a, b) => {
             const dateA = parse(a.date, "d.M.yyyy HH:mm:ss", new Date());

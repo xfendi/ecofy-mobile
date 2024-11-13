@@ -40,6 +40,7 @@ const Details = () => {
   const [showConfirmButton, setShowConfirmButton] = useState(false);
   const [distance, setDistance] = useState(null);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [isJoined, setIsJoined] = useState(false);
   const [isArchived, setIsArchived] = useState(false);
 
   const params = useLocalSearchParams();
@@ -87,9 +88,8 @@ const Details = () => {
       if (eventSnap.exists()) {
         const eventDetails = eventSnap.data();
         setEvent(eventDetails);
-        setIsConfirmed(
-          eventDetails.users?.includes(user.uid) || false
-        );
+        setIsConfirmed(eventDetails.confirmed?.includes(user.uid) || false);
+        setIsJoined(eventDetails.users?.includes(user.uid) || false);
         const likes = eventDetails.likes || [];
         setIsLike(likes.includes(user.uid));
 
@@ -151,7 +151,7 @@ const Details = () => {
       try {
         const eventRef = doc(db, "events", event.id.toString());
         await updateDoc(eventRef, {
-          users: arrayUnion(user.uid), // Add user ID to confirmed users array
+          confirmed: arrayUnion(user.uid),
         });
         setIsConfirmed(true); // Update local state
         Alert.alert(
@@ -199,6 +199,53 @@ const Details = () => {
       }
     }
   };
+
+  const handleJoinEvent = async () => {
+    try {
+      const eventRef = doc(db, "events", event.id.toString());
+      await updateDoc(eventRef, {
+        users: arrayUnion(user.uid),
+      });
+      setIsJoined(true);
+      Alert.alert("Sukces", `Dołączono do wydarzenia ${event.title}`);
+    } catch (e) {
+      console.error("Błąd przy potwierdzaniu przybycia:", e);
+      Alert.alert(
+        "Błąd",
+        "Nie udało się dołączyc do wydarzenia.", e.message
+      );
+    }
+  };
+
+  const handleLeaveEvent = async () => {
+    try {
+      const eventRef = doc(db, "events", event.id.toString());
+      await updateDoc(eventRef, {
+        users: arrayRemove(user.uid),
+        confirmed: arrayRemove(user.uid),
+      });
+      setIsJoined(false);
+      Alert.alert("Sukces", `opuszczono wydarzenie ${event.title}`);
+    } catch (e) {
+      console.error("Błąd przy opuszczaniu wydarzenia:", e);
+      Alert.alert(
+        "Błąd",
+        "Nie udało się opuscic wydarzenia:", e.message
+      );
+    }
+  };
+
+  const showLeaveEventModal = () => {
+    Alert.alert(
+      "Potwierdź opuszczenie",
+      "Czy na pewno opuścić to wydarzenie?",
+      [
+        { text: "Anuluj", style: "cancel" },
+        { text: "Opuść", onPress: () => handleLeaveEvent() },
+      ],
+      { cancelable: true }
+    );
+  }
 
   if (!event) {
     return (
@@ -306,7 +353,24 @@ const Details = () => {
               </View>
             )}
           </View>
-          {showConfirmButton && isLike && !isArchived && (
+          {showConfirmButton && !isArchived && (
+            <View>
+              <TouchableOpacity
+                onPress={isJoined ? showLeaveEventModal : handleJoinEvent}
+                className={`p-5 rounded-full ${
+                  isJoined ? "bg-red-500" : "bg-yellow-500"
+                }`}
+              >
+                <Text className="text-white text-lg font-semibold text-center">
+                  {isJoined
+                    ? "Opuszczam wydarzenie"
+                    : "Dołczam do wydarzenia"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {showConfirmButton && isJoined && !isArchived && (
             <View>
               <TouchableOpacity
                 onPress={isConfirmed ? null : handleConfirmAttendance}

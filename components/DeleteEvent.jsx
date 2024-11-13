@@ -1,4 +1,4 @@
-import { View, Text, Alert } from "react-native";
+import { Alert } from "react-native";
 import React from "react";
 import { Feather } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native";
@@ -7,7 +7,6 @@ import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebase";
 
 const DeleteEvent = ({ event }) => {
-    console.log(event);
   const handleDelete = async (id) => {
     const currentTime = new Date();
     const eventDate = parse(event.date, "d.M.yyyy HH:mm:ss", new Date());

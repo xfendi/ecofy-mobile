@@ -28,7 +28,7 @@ import { UserAuth } from "../../context/AuthContext";
 import { primaryColor } from "../../config.json";
 import EventItem from "../../components/EventItem";
 import { db } from "../../firebase";
-import { isAfter, isBefore, parse } from "date-fns";
+import { endOfDay, isAfter, isBefore, parse } from "date-fns";
 
 const Profile = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -58,7 +58,7 @@ const Profile = () => {
       const activeEvents = eventsList
         .filter((event) => {
           const eventDate = parse(event.date, "d.M.yyyy HH:mm:ss", new Date());
-          return isBefore(new Date(), eventDate);
+          return isBefore(new Date(), endOfDay(eventDate));
         })
         .sort((a, b) => {
           const dateA = parse(a.date, "d.M.yyyy HH:mm:ss", new Date());
@@ -69,7 +69,7 @@ const Profile = () => {
       const inactiveEvents = eventsList
         .filter((event) => {
           const eventDate = parse(event.date, "d.M.yyyy HH:mm:ss", new Date());
-          return isAfter(new Date(), eventDate);
+          return isAfter(new Date(), endOfDay(eventDate));
         })
         .sort((a, b) => {
           const dateA = parse(a.date, "d.M.yyyy HH:mm:ss", new Date());

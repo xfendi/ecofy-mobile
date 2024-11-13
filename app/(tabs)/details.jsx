@@ -19,36 +19,44 @@ import {
   updateDoc,
   arrayUnion,
   arrayRemove,
-  deleteDoc,
 } from "firebase/firestore";
 
 import { primaryColor } from "../../config.json";
 import { UseMap } from "../../context/MapContext";
 import { UserAuth } from "../../context/AuthContext";
 import { db } from "../../firebase";
-import { parse } from "date-fns";
+import { endOfDay, isAfter, isBefore, parse } from "date-fns";
 import useGeoLocation from "../../context/GeoLocationContext";
 import DeleteEvent from "../../components/DeleteEvent";
 
 const Details = () => {
-  const { location } = useGeoLocation();
   const [event, setEvent] = useState(null);
+
   const [isLike, setIsLike] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const [eventDate, setEventDate] = useState(null);
+
   const [showConfirmButton, setShowConfirmButton] = useState(false);
   const [distance, setDistance] = useState(null);
-  const [isConfirmed, setIsConfirmed] = useState(false); // New state for attendance confirmation
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [isArchived, setIsArchived] = useState(false);
 
   const params = useLocalSearchParams();
   const router = useRouter();
+
   const { eventId } = params;
+  const { location } = useGeoLocation();
   const { setSelectedEvent } = UseMap();
   const { user } = UserAuth();
   const { width } = Dimensions.get("window");
 
   useEffect(() => {
     if (eventId) {
+      console.log("fetching event details:", eventId);
       fetchEventDetails(eventId);
+    } else {
+      return console.log("no event id provided");
     }
   }, [eventId]);
 
@@ -80,10 +88,19 @@ const Details = () => {
         const eventDetails = eventSnap.data();
         setEvent(eventDetails);
         setIsConfirmed(
-          eventDetails.confirmedUsers?.includes(user.uid) || false
+          eventDetails.users?.includes(user.uid) || false
         );
         const likes = eventDetails.likes || [];
         setIsLike(likes.includes(user.uid));
+
+        const date = parse(eventDetails.date, "d.M.yyyy HH:mm:ss", new Date());
+        setEventDate(date);
+
+        if (isAfter(new Date(), endOfDay(eventDate))) {
+          setIsArchived(true);
+        } else {
+          setIsArchived(false);
+        }
       } else {
         console.log("Event not found");
       }
@@ -116,9 +133,13 @@ const Details = () => {
     const currentTime = new Date();
     const eventDate = parse(event.date, "d.M.yyyy HH:mm:ss", new Date());
     const timeDifferenceInHours = (eventDate - currentTime) / (1000 * 60 * 60);
-    setShowConfirmButton(
-      timeDifferenceInHours <= 1 && timeDifferenceInHours > 0
-    );
+    if (
+      isBefore(new Date(), endOfDay(eventDate)) &&
+      timeDifferenceInHours <= 1
+    ) {
+      console.log("Event is still active");
+      setShowConfirmButton(true);
+    }
   };
 
   const handleConfirmAttendance = async () => {
@@ -177,8 +198,15 @@ const Details = () => {
 
   if (!event) {
     return (
-      <View>
-        <Text>Ładowanie szczegółów...</Text>
+      <View
+        className="absolute flex items-center w-full bottom-0 top-0 z-40"
+        style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
+      >
+        <View className="bg-white p-5 m-auto rounded-3xl z-50">
+          <Text className="text-2xl font-semibold">
+            Ładowanie szczegółów...
+          </Text>
+        </View>
       </View>
     );
   }
@@ -218,6 +246,29 @@ const Details = () => {
               )}
             </View>
           </View>
+          {isBefore(new Date(), endOfDay(eventDate)) &&
+            isAfter(new Date(), eventDate) && (
+              <View className="p-5 bg-white rounded-3xl w-full">
+                <Text className="font-semibold">
+                  Wydarzenie juz sie rozpoczęło
+                </Text>
+              </View>
+            )}
+          {isBefore(new Date(), endOfDay(eventDate)) &&
+            isBefore(new Date(), eventDate) && (
+              <View className="p-5 bg-white rounded-3xl w-full">
+                <Text className="font-semibold">
+                  Wydarzenie jeszcze się nie rozpoczęło
+                </Text>
+              </View>
+            )}
+          {isAfter(new Date(), endOfDay(eventDate)) && (
+            <View className="p-5 bg-white rounded-3xl w-full">
+              <Text className="font-semibold">
+                Wydarzenie juz się zakończyło
+              </Text>
+            </View>
+          )}
           <View className="flex flex-col gap-5 p-5 bg-white rounded-3xl w-full">
             {event.description && (
               <Text className="w-80 text-gray-500">{event.description}</Text>
@@ -244,7 +295,7 @@ const Details = () => {
               </View>
             )}
           </View>
-          {showConfirmButton && isLike && (
+          {showConfirmButton && true && (
             <View>
               <TouchableOpacity
                 onPress={isConfirmed ? null : handleConfirmAttendance}

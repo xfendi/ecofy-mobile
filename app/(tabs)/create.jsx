@@ -342,7 +342,6 @@ const CreateEvent = () => {
               setTime(selectedDate);
             }}
             onCancel={() => setShowTimePicker(false)}
-            minimumDate={new Date()} // Przykład minimalnej daty
             maximumDate={new Date(2100, 11, 31)} // Przykład maksymalnej daty
           />
           <TouchableOpacity

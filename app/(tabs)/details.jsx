@@ -246,6 +246,13 @@ const Details = () => {
               )}
             </View>
           </View>
+          {isArchived && (
+            <View className="p-5 bg-white rounded-3xl w-full">
+              <Text className="font-semibold">
+                Wydarzenie zostało zarchiwizowane
+              </Text>
+            </View>
+          )}
           {isBefore(new Date(), endOfDay(eventDate)) &&
             isAfter(new Date(), eventDate) && (
               <View className="p-5 bg-white rounded-3xl w-full">

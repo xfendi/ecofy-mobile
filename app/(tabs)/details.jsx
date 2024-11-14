@@ -8,17 +8,20 @@ import {
   RefreshControl,
   Platform,
   Alert,
+  Modal,
+  KeyboardAvoidingView,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { AntDesign, Feather, FontAwesome } from "@expo/vector-icons";
 import {
   doc,
   getDoc,
   updateDoc,
   arrayUnion,
   arrayRemove,
+  onSnapshot,
 } from "firebase/firestore";
 
 import { primaryColor } from "../../config.json";
@@ -28,20 +31,27 @@ import { db } from "../../firebase";
 import { endOfDay, isAfter, isBefore, parse } from "date-fns";
 import useGeoLocation from "../../context/GeoLocationContext";
 import DeleteEvent from "../../components/DeleteEvent";
+import AppTextInput from "../../components/AppTextInput";
 
 const Details = () => {
   const [event, setEvent] = useState(null);
 
-  const [isLike, setIsLike] = useState(false);
+  const [isErrorModal, setIsErrorModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [eventDate, setEventDate] = useState(null);
+  const [errors, setErrors] = useState([]);
 
   const [showConfirmButton, setShowConfirmButton] = useState(false);
   const [distance, setDistance] = useState(null);
+
+  const [isLike, setIsLike] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
   const [isArchived, setIsArchived] = useState(false);
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
 
   const params = useLocalSearchParams();
   const router = useRouter();
@@ -51,15 +61,6 @@ const Details = () => {
   const { setSelectedEvent } = UseMap();
   const { user } = UserAuth();
   const { width } = Dimensions.get("window");
-
-  useEffect(() => {
-    if (eventId) {
-      console.log("fetching event details:", eventId);
-      fetchEventDetails(eventId);
-    } else {
-      return console.log("no event id provided");
-    }
-  }, [eventId]);
 
   useEffect(() => {
     if (event?.date) {
@@ -81,35 +82,47 @@ const Details = () => {
     }, 1000);
   };
 
-  const fetchEventDetails = async (id) => {
-    try {
-      const eventRef = doc(db, "events", id.toString());
-      const eventSnap = await getDoc(eventRef);
-      if (eventSnap.exists()) {
-        const eventDetails = eventSnap.data();
-        setEvent(eventDetails);
-        setIsConfirmed(eventDetails.confirmed?.includes(user.uid) || false);
-        setIsJoined(eventDetails.users?.includes(user.uid) || false);
-        const likes = eventDetails.likes || [];
-        setIsLike(likes.includes(user.uid));
+  useEffect(() => {
+    if (!eventId) return console.log("no event id provided");
 
-        const date = parse(eventDetails.date, "d.M.yyyy HH:mm:ss", new Date());
-        setEventDate(date);
+    const eventRef = doc(db, "events", eventId.toString());
 
-        if (isAfter(new Date(), endOfDay(date))) {
-          console.log("Event is archived");
-          setIsArchived(true);
+    const unsubscribe = onSnapshot(eventRef, (eventSnap) => {
+      try {
+        if (eventSnap.exists()) {
+          const eventDetails = eventSnap.data();
+          setEvent(eventDetails);
+          setIsConfirmed(eventDetails.confirmed?.includes(user.uid) || false);
+          setIsJoined(eventDetails.users?.includes(user.uid) || false);
+          const likes = eventDetails.likes || [];
+          const errors = eventDetails.errors || [];
+          setErrors(errors);
+          setIsLike(likes.includes(user.uid));
+
+          const date = parse(
+            eventDetails.date,
+            "d.M.yyyy HH:mm:ss",
+            new Date()
+          );
+          setEventDate(date);
+
+          if (isAfter(new Date(), endOfDay(date))) {
+            console.log("Event is archived");
+            setIsArchived(true);
+          } else {
+            console.log("Event is not archived");
+            setIsArchived(false);
+          }
         } else {
-          console.log("Event is not archived");
-          setIsArchived(false);
+          console.log("Event not found");
         }
-      } else {
-        console.log("Event not found");
+      } catch (error) {
+        console.error("Błąd podczas ładowania szczegółów wydarzenia:", error);
       }
-    } catch (error) {
-      console.error("Błąd podczas ładowania szczegółów wydarzenia:", error);
-    }
-  };
+    });
+
+    return () => unsubscribe();
+  }, [eventId]);
 
   const calculateDistance = () => {
     const toRadians = (degrees) => (degrees * Math.PI) / 180;
@@ -210,10 +223,7 @@ const Details = () => {
       Alert.alert("Sukces", `Dołączono do wydarzenia ${event.title}`);
     } catch (e) {
       console.error("Błąd przy potwierdzaniu przybycia:", e);
-      Alert.alert(
-        "Błąd",
-        "Nie udało się dołączyc do wydarzenia.", e.message
-      );
+      Alert.alert("Błąd", "Nie udało się dołączyc do wydarzenia.", e.message);
     }
   };
 
@@ -228,10 +238,7 @@ const Details = () => {
       Alert.alert("Sukces", `opuszczono wydarzenie ${event.title}`);
     } catch (e) {
       console.error("Błąd przy opuszczaniu wydarzenia:", e);
-      Alert.alert(
-        "Błąd",
-        "Nie udało się opuscic wydarzenia:", e.message
-      );
+      Alert.alert("Błąd", "Nie udało się opuscic wydarzenia:", e.message);
     }
   };
 
@@ -244,6 +251,85 @@ const Details = () => {
         { text: "Opuść", onPress: () => handleLeaveEvent() },
       ],
       { cancelable: true }
+    );
+  };
+
+  const handleSubmitError = async () => {
+    const errorExists = errors.some((error) => error.author === user?.uid);
+
+    if (!title || !description) {
+      Alert.alert("Błąd", "Uzupełnij wszystkie wymagane pola.");
+      return;
+    } else if (errorExists) {
+      Alert.alert(
+        "Błąd",
+        "Nie możesz zgłosić błędu, ponieważ już zgłosiłeś inny."
+      );
+      return;
+    }
+
+    try {
+      const eventRef = doc(db, "events", event.id.toString());
+      await updateDoc(eventRef, {
+        errors: arrayUnion({
+          title,
+          description,
+          createdAt: new Date(),
+          author: user?.uid,
+        }),
+      });
+      Alert.alert("Sukces", "Błąd został zgłoszony pomyślnie!");
+      closeBottomSheet();
+    } catch (e) {
+      console.error("Błąd przy zgłaszaniu błędu: ", e);
+      Alert.alert("Błąd", "Nie udało się zgłosić błędu.");
+    }
+  };
+
+  const openBottomSheet = () => {
+    setIsErrorModal(true);
+  };
+
+  const closeBottomSheet = () => {
+    setTitle("");
+    setDescription("");
+    setIsErrorModal(false);
+  };
+
+  const clearDocument = async () => {
+    const eventRef = doc(db, "events", event.id.toString());
+
+    try {
+      await updateDoc(eventRef, {
+        users: [],
+        confirmed: [],
+        likes: [],
+      });
+    } catch (e) {
+      console.error("Błąd przy czyszczeniu dokument:", e);
+    }
+  };
+
+  if (errors?.length >= 3) {
+    clearDocument();
+    return (
+      <SafeAreaView className="flex-1">
+        <ScrollView
+          className={Platform.OS === "android" ? "p-5" : "px-5"}
+          refreshControl={
+            <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+          }
+        >
+          <View className="flex flex-col gap-5 w-full">
+            <Text className="text-3xl font-semibold">{event.title}</Text>
+            <View className="p-5 bg-white rounded-3xl w-full">
+              <Text className="font-semibold text-red-500">
+                Wydarzenie zostało zablokowane
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
     );
   }
 
@@ -264,6 +350,58 @@ const Details = () => {
 
   return (
     <SafeAreaView className="flex-1">
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isErrorModal}
+        onRequestClose={closeBottomSheet}
+      >
+        <View className="flex-1 justify-end items-center">
+          <KeyboardAvoidingView
+            className="flex-row w-full h-1/2 p-5 bg-white rounded-3xl"
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+          >
+            <ScrollView>
+              <View className="flex flex-col gap-5">
+                <View className="flex flex-row justify-between">
+                  <Text className="text-2xl font-semibold">Zgłoś błąd</Text>
+                  <TouchableOpacity onPress={closeBottomSheet}>
+                    <FontAwesome name="times" size={20} />
+                  </TouchableOpacity>
+                </View>
+
+                <AppTextInput
+                  value={title}
+                  onChangeText={setTitle}
+                  placeholder="Podaj tytuł"
+                  gray
+                  full
+                />
+
+                <AppTextInput
+                  value={description}
+                  onChangeText={setDescription}
+                  placeholder="Dodaj treść"
+                  multiline
+                  gray
+                  full
+                />
+
+                <TouchableOpacity
+                  onPress={handleSubmitError}
+                  className="p-5 rounded-full mb-10"
+                  style={{ backgroundColor: primaryColor }}
+                >
+                  <Text className="text-white text-xl font-semibold text-center">
+                    Zgłoś błąd
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </View>
+      </Modal>
+
       <ScrollView
         className={Platform.OS === "android" ? "p-5" : "px-5"}
         refreshControl={
@@ -362,9 +500,20 @@ const Details = () => {
                 }`}
               >
                 <Text className="text-white text-lg font-semibold text-center">
-                  {isJoined
-                    ? "Opuszczam wydarzenie"
-                    : "Dołczam do wydarzenia"}
+                  {isJoined ? "Opuszczam wydarzenie" : "Dołczam do wydarzenia"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {showConfirmButton && isJoined && !isArchived && (
+            <View>
+              <TouchableOpacity
+                onPress={openBottomSheet}
+                className="p-5 rounded-full bg-red-500"
+              >
+                <Text className="text-white text-lg font-semibold text-center">
+                  Zgłoś błąd
                 </Text>
               </TouchableOpacity>
             </View>

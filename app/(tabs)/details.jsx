@@ -107,10 +107,8 @@ const Details = () => {
           setEventDate(date);
 
           if (isAfter(new Date(), endOfDay(date))) {
-            console.log("Event is archived");
             setIsArchived(true);
           } else {
-            console.log("Event is not archived");
             setIsArchived(false);
           }
         } else {
@@ -119,10 +117,10 @@ const Details = () => {
       } catch (error) {
         console.error("Błąd podczas ładowania szczegółów wydarzenia:", error);
       }
-    });
+    }, [eventId]);
 
     return () => unsubscribe();
-  }, [eventId]);
+  });
 
   const calculateDistance = () => {
     const toRadians = (degrees) => (degrees * Math.PI) / 180;
@@ -152,7 +150,6 @@ const Details = () => {
       isBefore(new Date(), endOfDay(eventDate)) &&
       timeDifferenceInHours <= 1
     ) {
-      console.log("Event is still active");
       setShowConfirmButton(true);
     } else {
       setShowConfirmButton(false);
@@ -255,12 +252,14 @@ const Details = () => {
   };
 
   const handleSubmitError = async () => {
-    const errorExists = errors.some((error) => error.author === user?.uid);
+    const errorExists = errors.some((error) => error.author === user.uid);
 
     if (!title || !description) {
       Alert.alert("Błąd", "Uzupełnij wszystkie wymagane pola.");
       return;
-    } else if (errorExists) {
+    }
+
+    if (errorExists) {
       Alert.alert(
         "Błąd",
         "Nie możesz zgłosić błędu, ponieważ już zgłosiłeś inny."

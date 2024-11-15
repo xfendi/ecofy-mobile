@@ -13,3 +13,4 @@ web-build/
 expo-env.d.ts
 
 .env
+eas.json

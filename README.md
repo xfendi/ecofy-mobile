@@ -59,3 +59,9 @@ You can download the app directly from the **Google Play Store**: [Download Ecof
 ## Website
 
 Check out the official website for more information and updates: [Ecofy Website]()
+
+## License
+
+Ecofy is **open-source** software licensed under the **GNU General Public License v3.0 (GPL-3.0)**. This means you are free to use, modify, and distribute the app, as long as any modifications or derivative works are also licensed under the same **GPL-3.0** license.
+
+For more details, you can view the full license text in the [LICENSE](LICENSE)

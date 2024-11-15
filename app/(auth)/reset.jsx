@@ -36,7 +36,7 @@ const reset = () => {
         </View>
 
         <TouchableOpacity
-          className="p-4 rounded-xl w-80"
+          className="p-4 rounded-full w-80"
           style={{ backgroundColor: primaryColor }}
           onPress={handleSubmit}
         >
@@ -45,7 +45,7 @@ const reset = () => {
           </Text>
         </TouchableOpacity>
 
-        <View className="flex flex-row gap-5">
+        <View className="flex flex-row gap-2">
           <Text>Pamiętasz swoje hasło?</Text>
           <Link href="/login" style={{ color: primaryColor }}>
             Zaloguj się

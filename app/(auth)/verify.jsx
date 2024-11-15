@@ -37,7 +37,7 @@ const verify = () => {
         </View>
 
         <TouchableOpacity
-          className="p-4 rounded-xl w-80"
+          className="p-4 rounded-full w-80"
           style={{ backgroundColor: primaryColor }}
           onPress={handleSubmit}
         >
@@ -46,7 +46,7 @@ const verify = () => {
           </Text>
         </TouchableOpacity>
 
-        <View className="flex flex-row gap-5">
+        <View className="flex flex-row gap-2">
           <Text>Chcesz wrócić do aplikacji?</Text>
           <Link href="/(tabs)" style={{ color: primaryColor }}>
             Strona główna

@@ -1,23 +1,20 @@
-// tabs/_layout.js
 import React, { useEffect } from "react";
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
+
 import TabBar from "../../components/TabBar";
-import { UserAuth } from "../../context/AuthContext"; // Kontekst użytkownika
-import { useRouter } from "expo-router";
+import { UserAuth } from "../../context/AuthContext";
 
 const _layout = () => {
-  const { user, loading } = UserAuth();  // Używamy kontekstu użytkownika
+  const { user, loading } = UserAuth();
   const router = useRouter();
 
   useEffect(() => {
-    // Jeśli dane o użytkowniku zostały załadowane i nie jest zalogowany, przekierowujemy
     if (!loading && !user) {
       router.replace("/(auth)/welcome");
     }
-  }, [user, loading, router]);  // Reagujemy na zmiany w user i loading
+  }, [user, loading, router]);
 
   if (loading) {
-    // Zwracamy null lub spinner, dopóki dane o użytkowniku są ładowane
     return null;
   }
 

@@ -1,16 +1,18 @@
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 
 import { primaryColor } from "../../config.json";
 
 const welcome = () => {
+  const router = useRouter();
+
   return (
     <SafeAreaView>
-      <View className="flex gap-10 p-10 flex-col justify-center h-full items-center">
+      <View className="flex gap-5 p-10 flex-col justify-center h-full items-center">
         <Image
-          className="w-[350px] h-[350px]"
+          className="w-[300px] h-[300px]"
           source={require("../../assets/images/adaptive-icon.png")}
         />
         <View className="flex flex-col gap-5">
@@ -22,30 +24,24 @@ const welcome = () => {
             społeczności!
           </Text>
         </View>
-        <View className="flex flex-row gap-5">
-          <View
-            className="p-5 rounded-xl w-1/2"
-            style={{ backgroundColor: primaryColor }}
-          >
-            <Link
-              href="/register"
-              className="text-white text-xl font-semibold text-center"
-            >
-              Zarejestruj się
-            </Link>
-          </View>
-          <View
-            className="p-5 rounded-xl w-1/2"
-            style={{ backgroundColor: "white" }}
-          >
-            <Link
-              href="/login"
-              className="text-black text-xl font-semibold text-center"
-            >
-              Zaloguj się
-            </Link>
-          </View>
-        </View>
+        <TouchableOpacity
+          className="p-4 rounded-full w-80"
+          style={{ backgroundColor: primaryColor }}
+          onPress={router.replace("/register")}
+        >
+          <Text className="text-white text-xl font-semibold text-center">
+            Zarejestruj się
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="p-4 rounded-full w-80"
+          style={{ backgroundColor: "white" }}
+          onPress={router.replace("/login")}
+        >
+          <Text className="text-black text-xl font-semibold text-center">
+            Zaloguj się
+          </Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

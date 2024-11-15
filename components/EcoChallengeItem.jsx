@@ -46,13 +46,6 @@ const EcoChallengeItem = ({ challenge }) => {
     }
 
     console.log("Attempting to join challenge with ID:", challenge.id);
-    console.log("Challenge details:", {
-      title,
-      description,
-      startTime,
-      endTime,
-      joinedUsers,
-    });
 
     const challengeRef = doc(db, "ecoChallenges", String(challenge.id));
     console.log("Challenge Reference:", challengeRef);
@@ -90,16 +83,8 @@ const EcoChallengeItem = ({ challenge }) => {
     }
 
     console.log("Attempting to join challenge with ID:", challenge.id);
-    console.log("Challenge details:", {
-      title,
-      description,
-      startTime,
-      endTime,
-      joinedUsers,
-    });
 
     const challengeRef = doc(db, "ecoChallenges", String(challenge.id));
-    console.log("Challenge Reference:", challengeRef);
 
     try {
       await updateDoc(challengeRef, {
@@ -146,13 +131,27 @@ const EcoChallengeItem = ({ challenge }) => {
         <View>
           <Text className="font-semibold">Rozpoczęcie</Text>
           <Text className="text-gray-500">
-            {new Date(startTime).toLocaleString()}
+            {`${new Date(startTime).getDate()}.${
+              new Date(startTime).getMonth() + 1
+            }.${new Date(startTime).getFullYear()} ${new Date(
+              startTime
+            ).getHours()}:${String(new Date(startTime).getMinutes()).padStart(
+              2,
+              "0"
+            )}:${String(new Date(startTime).getSeconds()).padStart(2, "0")}`}
           </Text>
         </View>
         <View>
           <Text className="font-semibold">Zakończenie</Text>
           <Text className="text-gray-500">
-            {new Date(endTime).toLocaleString()}
+            {`${new Date(endTime).getDate()}.${
+              new Date(endTime).getMonth() + 1
+            }.${new Date(endTime).getFullYear()} ${new Date(
+              endTime
+            ).getHours()}:${String(new Date(endTime).getMinutes()).padStart(
+              2,
+              "0"
+            )}:${String(new Date(endTime).getSeconds()).padStart(2, "0")}`}
           </Text>
         </View>
       </View>

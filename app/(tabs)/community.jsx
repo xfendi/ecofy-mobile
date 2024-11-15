@@ -82,11 +82,11 @@ const Community = () => {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           postsArray.push({
-            id: doc.id, // Adding id to the object
+            id: doc.id,
             ...data,
           });
         });
-        setPosts(postsArray); // Set challenges in state
+        setPosts(postsArray);
       }
     );
 
@@ -109,14 +109,13 @@ const Community = () => {
       uri, 
       [], 
       { 
-        compress: 0.5, // Zmieniaj kompresję, jeśli chcesz zmniejszyć wagę
-        format: ImageManipulator.SaveFormat.JPEG, // Możesz zmienić na PNG, jeśli chcesz
-        maxWidth: 1000, // Maksymalna szerokość
-        maxHeight: 1000, // Maksymalna wysokość
+        compress: 0.5,
+        format: ImageManipulator.SaveFormat.JPEG,
+        maxWidth: 1000,
+        maxHeight: 1000,
       }
     );
 
-    // Ustaw zaktualizowane zdjęcie po manipulacji
     setPhoto(image.uri);
     }
   };
@@ -220,8 +219,6 @@ const Community = () => {
           )}
         </View>
       </ScrollView>
-
-      {/* Modal for Creating Post */}
       <Modal
         animationType="slide"
         transparent={true}

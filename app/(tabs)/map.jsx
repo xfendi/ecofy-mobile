@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { SafeAreaView, View, StyleSheet, Alert, Text } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import { SafeAreaView, View, StyleSheet, Alert } from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFocusEffect } from "@react-navigation/native";
 import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
@@ -19,8 +19,8 @@ const Map = () => {
   const { selectedEvent, setSelectedEvent } = UseMap();
 
   const mapRef = useRef(null);
-  const { region } = useGeoLocation(); // region from context
-  const [currentRegion, setCurrentRegion] = useState(region); // local state for map region
+  const { region } = useGeoLocation();
+  const [currentRegion, setCurrentRegion] = useState(region);
 
   const handleDelete = async (id) => {
     try {
@@ -67,7 +67,6 @@ const Map = () => {
     return () => unsubscribe();
   }, []);
 
-  // Set the current region when the region from context changes
   useEffect(() => {
     if (!selectedEvent) {
       setCurrentRegion(region);
@@ -77,7 +76,6 @@ const Map = () => {
   useFocusEffect(
     React.useCallback(() => {
       if (selectedEvent && events.length > 0) {
-        // Ensure events is not empty
         const event = events.find((marker) => marker.id === selectedEvent.id);
         if (event) {
           mapRef.current?.animateToRegion(
@@ -116,6 +114,7 @@ const Map = () => {
           region={currentRegion}
           showsUserLocation={true}
           style={styles.map}
+          provider={PROVIDER_GOOGLE}
         >
           {events.map((marker) => {
             const eventDate = parse(

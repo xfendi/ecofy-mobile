@@ -163,7 +163,7 @@ const Details = () => {
         await updateDoc(eventRef, {
           confirmed: arrayUnion(user.uid),
         });
-        setIsConfirmed(true); // Update local state
+        setIsConfirmed(true);
         Alert.alert(
           "Sukces",
           `Potwierdziłeś swoje przybycie na ${event.title}`

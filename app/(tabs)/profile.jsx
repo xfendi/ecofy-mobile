@@ -48,7 +48,6 @@ const Profile = () => {
     const eventsRef = collection(db, "events");
     const q = query(eventsRef, where("host", "==", user.uid));
 
-    // Listener na żywo pobierający eventy, w których host == user.uid
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const eventsList = [];
       querySnapshot.forEach((doc) => {
@@ -81,7 +80,6 @@ const Profile = () => {
       setArchiveEvents(inactiveEvents);
     });
 
-    // Czyścimy listener przy demontażu komponentu
     return () => unsubscribe();
   }, []);
 
@@ -117,8 +115,8 @@ const Profile = () => {
 
     router.replace("/profile");
     setTimeout(() => {
-      setIsRefreshing(false); // Zatrzymanie odświeżania
-    }, 1000); // Czas odświeżania w milisekundach
+      setIsRefreshing(false);
+    }, 1000);
   };
 
   const handleDelete = async (id) => {

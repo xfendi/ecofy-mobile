@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -20,22 +20,17 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 import * as ImagePicker from "expo-image-picker";
-import * as ImageManipulator from 'expo-image-manipulator';
+import * as ImageManipulator from "expo-image-manipulator";
 import { useRouter } from "expo-router";
 
 import { primaryColor } from "../../config.json";
 import AppTextInput from "../../components/AppTextInput";
-import useGeoLocation from "../../context/GeoLocationContext"; // Adjust the path as necessary
+import useGeoLocation from "../../context/GeoLocationContext";
 import { UserAuth } from "../../context/AuthContext";
 import { db, storage } from "../../firebase";
 
 const CreateEvent = () => {
-  const [mapRegion, setMapRegion] = useState({
-    latitude: region?.latitude || 37.78825, // Default latitude
-    longitude: region?.longitude || -122.4324, // Default longitude
-    latitudeDelta: 0.0922, // Default delta
-    longitudeDelta: 0.0421, // Default delta
-  });
+  const [currentRegion, setCurrentRegion] = useState(region);
   const [isMapLoading, setIsMapLoading] = useState(true);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -46,10 +41,7 @@ const CreateEvent = () => {
   const [time, setTime] = useState(new Date());
   const [address, setAddress] = useState("");
   const [description, setDescription] = useState("");
-  const [coordinates, setCoordinates] = useState({
-    latitude: null,
-    longitude: null,
-  });
+  const [coordinates, setCoordinates] = useState({});
   const [image, setImage] = useState(null);
 
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -60,6 +52,7 @@ const CreateEvent = () => {
   const { region } = useGeoLocation();
 
   const router = useRouter();
+  const mapRef = useRef(null);
 
   const apiKey = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY;
 
@@ -68,19 +61,14 @@ const CreateEvent = () => {
     setDate(new Date());
     setAddress("");
     setDescription("");
-    setCoordinates({ latitude: null, longitude: null });
+    setCoordinates({});
     setImage(null);
     setShowDatePicker(false);
   };
 
   useEffect(() => {
-    if (region) {
-      setMapRegion({
-        latitude: region.latitude,
-        longitude: region.longitude,
-        latitudeDelta: region.latitudeDelta,
-        longitudeDelta: region.longitudeDelta,
-      });
+    if (!coordinates.latitude && !coordinates.longitude) {
+      setCurrentRegion(region);
       setIsMapLoading(false);
     }
   }, [region]);
@@ -98,11 +86,16 @@ const CreateEvent = () => {
       latitude: coordinate.latitude,
       longitude: coordinate.longitude,
     });
-    setAddress(""); // Clear address when selecting a new location on the map
-    setMapRegion({
-      latitude: coordinate.latitude,
-      longitude: coordinate.longitude,
-    });
+    setAddress("");
+    mapRef.current?.animateToRegion(
+      {
+        latitude: coordinate.latitude,
+        longitude: coordinate.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      },
+      1000
+    );
   };
 
   const pickImage = async () => {
@@ -116,20 +109,14 @@ const CreateEvent = () => {
     if (!result.canceled) {
       const { uri } = result.assets[0];
 
-    // Uzyskaj wymiary obrazu
-    const image = await ImageManipulator.manipulateAsync(
-      uri, 
-      [], 
-      { 
-        compress: 0.5, // Zmieniaj kompresję, jeśli chcesz zmniejszyć wagę
-        format: ImageManipulator.SaveFormat.JPEG, // Możesz zmienić na PNG, jeśli chcesz
-        maxWidth: 1000, // Maksymalna szerokość
-        maxHeight: 1000, // Maksymalna wysokość
-      }
-    );
+      const image = await ImageManipulator.manipulateAsync(uri, [], {
+        compress: 0.5,
+        format: ImageManipulator.SaveFormat.JPEG,
+        maxWidth: 1000,
+        maxHeight: 1000,
+      });
 
-    // Ustaw zaktualizowane zdjęcie po manipulacji
-    setImage(image.uri);
+      setImage(image.uri);
     }
   };
 
@@ -227,7 +214,7 @@ const CreateEvent = () => {
     try {
       let formattedDate =
         date.toLocaleDateString() + " " + time.toLocaleTimeString();
-        formattedDate = formattedDate.replace(/\//g, '.');
+      formattedDate = formattedDate.replace(/\//g, ".");
 
       const eventDetails = {
         title: name,
@@ -331,8 +318,8 @@ const CreateEvent = () => {
               setDate(selectedDate);
             }}
             onCancel={() => setShowDatePicker(false)}
-            minimumDate={new Date()} // Przykład minimalnej daty
-            maximumDate={new Date(2100, 11, 31)} // Przykład maksymalnej daty
+            minimumDate={new Date()}
+            maximumDate={new Date(2100, 11, 31)} 
           />
           <DateTimePickerModal
             isVisible={showTimePicker}
@@ -342,7 +329,7 @@ const CreateEvent = () => {
               setTime(selectedDate);
             }}
             onCancel={() => setShowTimePicker(false)}
-            maximumDate={new Date(2100, 11, 31)} // Przykład maksymalnej daty
+            maximumDate={new Date(2100, 11, 31)}
           />
           <TouchableOpacity
             onPress={pickImage}
@@ -369,10 +356,12 @@ const CreateEvent = () => {
                 borderRadius: 24,
                 overflow: "hidden",
               }}
-              region={mapRegion}
+              ref={mapRef}
+              region={currentRegion}
               onPress={handleMapPress}
               showsUserLocation={true}
               loadingEnabled={true}
+              provider={PROVIDER_GOOGLE}
             >
               {coordinates.latitude && coordinates.longitude && (
                 <Marker

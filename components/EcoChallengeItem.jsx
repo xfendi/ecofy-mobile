@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Alert } from "react-native";
 import { primaryColor } from "../config.json";
-import { db } from "../firebase"; // Ensure correct import
+import { db } from "../firebase";
 import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
-import { UserAuth } from "../context/AuthContext"; // Import UserAuth
-import { FontAwesome } from "@expo/vector-icons";
+import { UserAuth } from "../context/AuthContext";
 
 const EcoChallengeItem = ({ challenge }) => {
   const {
@@ -14,12 +13,11 @@ const EcoChallengeItem = ({ challenge }) => {
     endTime,
     joinedUsers = [],
     doneUsers = [],
-  } = challenge; // Default to empty array
-  const { user } = UserAuth(); // Get user from AuthContext
+  } = challenge;
+  const { user } = UserAuth();
   const [isJoined, setIsJoined] = useState(false);
   const [isDone, setIsDone] = useState(false);
 
-  // Check if the user is already joined
   useEffect(() => {
     if (user?.uid && Array.isArray(joinedUsers)) {
       setIsJoined(joinedUsers.includes(user.uid));
@@ -29,9 +27,7 @@ const EcoChallengeItem = ({ challenge }) => {
     }
   }, [joinedUsers, user, doneUsers]);
 
-  // Handle joining the challenge
   const handleJoinChallenge = async () => {
-    // Check if the user is already joined
     if (isJoined) {
       Alert.alert(
         "Już dołączony!",
@@ -40,7 +36,6 @@ const EcoChallengeItem = ({ challenge }) => {
       return;
     }
 
-    // Ensure challenge and challenge.id are defined and valid
     if (!challenge || !challenge.id || typeof challenge.id !== "number") {
       console.error("Challenge or Challenge ID is not valid", { challenge });
       Alert.alert(
@@ -50,7 +45,6 @@ const EcoChallengeItem = ({ challenge }) => {
       return;
     }
 
-    // Log the challenge details
     console.log("Attempting to join challenge with ID:", challenge.id);
     console.log("Challenge details:", {
       title,
@@ -60,28 +54,24 @@ const EcoChallengeItem = ({ challenge }) => {
       joinedUsers,
     });
 
-    // Convert challenge.id to a string
     const challengeRef = doc(db, "ecoChallenges", String(challenge.id));
-    console.log("Challenge Reference:", challengeRef); // Log the challenge reference
+    console.log("Challenge Reference:", challengeRef);
 
     try {
-      // Attempt to update the document
       await updateDoc(challengeRef, {
-        joinedUsers: arrayUnion(user?.uid), // Use optional chaining for safety
+        joinedUsers: arrayUnion(user?.uid),
       });
 
-      // Update local state to reflect joining
       setIsJoined(true);
       Alert.alert(`Dołączyłeś do wyzwania: ${title}`);
-      console.log(`User ${user?.uid} joined challenge: ${title}`); // Debug log
+      console.log(`User ${user?.uid} joined challenge: ${title}`);
     } catch (error) {
-      console.error("Error joining challenge:", error.message); // Log the error message
+      console.error("Error joining challenge:", error.message);
       Alert.alert("Wystąpił błąd przy dołączaniu do wyzwania.");
     }
   };
 
   const handleDoneChallenge = async () => {
-    // Check if the user is already joined
     if (!isJoined) {
       Alert.alert(
         "Jeszcze nie dołączyłeś!",
@@ -99,7 +89,6 @@ const EcoChallengeItem = ({ challenge }) => {
       return;
     }
 
-    // Log the challenge details
     console.log("Attempting to join challenge with ID:", challenge.id);
     console.log("Challenge details:", {
       title,
@@ -109,22 +98,19 @@ const EcoChallengeItem = ({ challenge }) => {
       joinedUsers,
     });
 
-    // Convert challenge.id to a string
     const challengeRef = doc(db, "ecoChallenges", String(challenge.id));
-    console.log("Challenge Reference:", challengeRef); // Log the challenge reference
+    console.log("Challenge Reference:", challengeRef);
 
     try {
-      // Attempt to update the document
       await updateDoc(challengeRef, {
-        doneUsers: arrayUnion(user?.uid), // Use optional chaining for safety
+        doneUsers: arrayUnion(user?.uid),
       });
 
-      // Update local state to reflect joining
       setIsDone(true);
       Alert.alert("Sukces", `Wykonałeś wyzwanie: ${title}`);
-      console.log(`User ${user?.uid} done challenge: ${title}`); // Debug log
+      console.log(`User ${user?.uid} done challenge: ${title}`);
     } catch (error) {
-      console.error("Error w zrobieniu challenge:", error.message); // Log the error message
+      console.error("Error w zrobieniu challenge:", error.message);
       Alert.alert("Wystąpił błąd przy wykonywaniu wyzwania.");
     }
   };
@@ -173,8 +159,8 @@ const EcoChallengeItem = ({ challenge }) => {
       <TouchableOpacity
         onPress={isJoined ? handleUnjoinChallenge : handleJoinChallenge}
         className="p-5 rounded-full"
-        style={{ backgroundColor: isJoined ? "red" : primaryColor }} // Color changes based on state
-        disabled={false} // Make button always active
+        style={{ backgroundColor: isJoined ? "red" : primaryColor }}
+        disabled={false}
       >
         <Text className="text-white text-xl font-semibold text-center">
           {isJoined ? "Opuszczam" : "Biorę udział"}

@@ -1,9 +1,8 @@
 import { View, Text, TouchableOpacity, Platform, Alert } from "react-native";
 import React, { useEffect, useState } from "react";
-import { AntDesign, Feather, FontAwesome } from "@expo/vector-icons";
+import { AntDesign, Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router"; // Importuj useRouter
 
-import { primaryColor } from "../config.json";
 import { db } from "../firebase";
 import {
   arrayRemove,
@@ -16,35 +15,33 @@ import {
 import { UserAuth } from "../context/AuthContext";
 import { parse } from "date-fns";
 
-const EventListItem = ({ eventData, onClose, deleteFunction }) => {
+const EventListItem = ({ eventData, deleteFunction }) => {
   const [isLike, setIsLike] = useState();
   const { user } = UserAuth();
-  const router = useRouter(); // Inicjalizuj router
+  const router = useRouter();
 
   const isHost = eventData.host === user.uid;
 
   const handleShowDetails = () => {
     router.push({
-      pathname: "/(tabs)/details", // Ścieżka do której kierujemy
-      params: { eventId: eventData.id }, // Przekazujemy eventId jako część URL
+      pathname: "/(tabs)/details",
+      params: { eventId: eventData.id },
     });
   };
 
   const handleDelete = (event) => {
     const currentTime = new Date();
-    const eventDate = parse(
-      eventData.date,
-      "d.M.yyyy HH:mm:ss",
-      new Date()
-    );
+    const eventDate = parse(eventData.date, "d.M.yyyy HH:mm:ss", new Date());
     const timeDifference = eventDate - currentTime;
 
     const timeDifferenceInHours = timeDifference / (1000 * 60 * 60);
 
-    if (timeDifferenceInHours > 0 && timeDifferenceInHours <= 1){
-      Alert.alert("Nie udało sie usunąć wydarzenia", "Nie możesz usunąć wydarzenia na godzinę przed jego rozpoczęciem")
-    }
-    else{
+    if (timeDifferenceInHours > 0 && timeDifferenceInHours <= 1) {
+      Alert.alert(
+        "Nie udało sie usunąć wydarzenia",
+        "Nie możesz usunąć wydarzenia na godzinę przed jego rozpoczęciem"
+      );
+    } else {
       deleteFunction(event.id);
     }
   };
@@ -83,7 +80,11 @@ const EventListItem = ({ eventData, onClose, deleteFunction }) => {
   };
 
   return (
-    <View className={`absolute ${Platform.OS === "ios" ? "bottom-[103px]" : "bottom-[88px]"} right-5 left-5 bg-white p-5 rounded-3xl flex flex-col gap-5`}>
+    <View
+      className={`absolute ${
+        Platform.OS === "ios" ? "bottom-[103px]" : "bottom-[88px]"
+      } right-5 left-5 bg-white p-5 rounded-3xl flex flex-col gap-5`}
+    >
       <View className="flex flex-col gap-5">
         <View className="flex flex-row justify-between items-center">
           <Text className="text-2xl font-semibold">{eventData?.title}</Text>
@@ -103,7 +104,9 @@ const EventListItem = ({ eventData, onClose, deleteFunction }) => {
             )}
           </View>
         </View>
-        {eventData?.address &&<Text className="text-gray-500">{eventData?.address}</Text>}
+        {eventData?.address && (
+          <Text className="text-gray-500">{eventData?.address}</Text>
+        )}
         <Text>{eventData?.date}</Text>
       </View>
       <TouchableOpacity

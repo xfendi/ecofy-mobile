@@ -21,11 +21,31 @@ const register = () => {
 
   const handleSubmit = async () => {
     if (!email || !password || !name) {
-      Alert.alert("Uwaga!", "Proszę wypełnić wszystkie pola.");
+      Alert.alert("Błąd", "Proszę wypełnić wszystkie pola.");
       return;
     }
-    await createUser(email, password, name);
-    router.replace("/onboard_one");
+
+    const result = await createUser(email, password, name);
+
+    if (result.error) {
+      let errorMessage = "Wystąpił błąd. Spróbuj ponownie później.";
+
+      if (result.error.includes("auth/invalid-credential")) {
+        errorMessage = "Nieprawidłowe dane rejestracyjne.";
+      } else if (result.error.includes("auth/invalid-email")) {
+        errorMessage = "Podany adres email jest nieprawidłowy.";
+      } else if (result.error.includes("auth/email-already-in-use")) {
+        errorMessage = "Ten adres email jest już używany. Wybierz inny.";
+      } else if (result.error.includes("auth/weak-password")) {
+        errorMessage = "Hasło jest za słabe. Wybierz silniejsze hasło.";
+      } else if (result.error.includes("auth/too-many-requests")) {
+        errorMessage = "Zbyt wiele prób rejestracji. Spróbuj ponownie później.";
+      }
+
+      Alert.alert("Błąd", errorMessage);
+    } else if (result.user) {
+      router.replace("/onboard_one");
+    }
   };
 
   const handleProviderClick = () => {

@@ -16,18 +16,15 @@ const login = () => {
   const router = useRouter();
 
   const handleSubmit = async () => {
-    // Sprawdzamy, czy email i hasło są podane
     if (!email || !password) {
-      Alert.alert("Uwaga!", "Proszę wypełnić wszystkie pola.");
+      Alert.alert("Błąd", "Proszę wypełnić wszystkie pola.");
       return;
     }
 
-    // Próba zalogowania
     const result = await SignIn(email, password);
 
     if (result.error) {
-      // Rozpoznajemy konkretny błąd i wyświetlamy odpowiedni komunikat
-      let errorMessage = "Wystąpił błąd. Spróbuj ponownie później."; // Domyślny komunikat
+      let errorMessage = "Wystąpił błąd. Spróbuj ponownie później.";
 
       if (result.error.includes("auth/invalid-credential")) {
         errorMessage = "Nieprawidłowe dane logowania.";
@@ -41,10 +38,8 @@ const login = () => {
         errorMessage = "Zbyt wiele prób logowania. Spróbuj ponownie później.";
       }
 
-      // Wyświetlamy odpowiedni komunikat błędu
-      Alert.alert("Błąd logowania", errorMessage);
+      Alert.alert("Błąd", errorMessage);
     } else if (result.user) {
-      // Jeśli zalogowano poprawnie, przekierowujemy na ekran główny
       router.replace("/(tabs)");
     }
   };

@@ -8,6 +8,7 @@
 - **Create Initiatives**: Users can organize their own events to promote eco-action in their communities.
 - **Notifications**: Stay updated on new initiatives with real-time notifications.
 - **User Profile**: Customize your profile and track your eco-contributions.
+- **Eco Community**: Engage with like-minded individuals through posts and discussions in the community section.
 
 ## App Structure
 
@@ -20,9 +21,41 @@
 ## Technologies Used
 
 - **React Native** + **Expo**: The main framework for mobile development
-- **Firebase**: Backend for data storage, notifications, and authentication
+- **Firebase**: Backend for data storage, notifications, authentication, and community posts
 - **React Navigation**: For navigating between screens
 - **Styled Components**: Used for styling the app
 - **Map API**: For displaying eco-initiatives on a map
 
-Thank you for supporting Ecofy! 🌱 Together, we’re building a brighter, greener future.
+## Installation
+
+To install and run the Ecofy app locally, follow these steps:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/ecofy.git
+   ```
+
+2. Navigate into the project folder:
+   ```bash
+   cd ecofy
+   ```
+
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+4. Start the app:
+   ```bash
+   npm start
+   ```
+
+5. Scan the QR code with the Expo Go app to open the app on your device.
+
+## Download
+
+You can download the app directly from the **Google Play Store**: [Download Ecofy on Google Play](https://play.google.com/store/apps/details?id=com.ecofy)
+
+## Website
+
+Check out the official website for more information and updates: [Ecofy Website](https://eco-fy.com)

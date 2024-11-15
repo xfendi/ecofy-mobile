@@ -9,7 +9,6 @@ import {
 import { auth, db } from "../firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { useRouter } from "expo-router";
-import { registerIndieID, unregisterIndieDevice } from "native-notify";
 
 const UserContext = createContext();
 
@@ -22,11 +21,6 @@ export const AuthContextProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
-      if (currentUser) {
-        registerIndieID(currentUser.uid, 24760, "yWMd08JhWMihJYHlyMV9so").catch(
-          console.error
-        );
-      }
     });
     return unsubscribe;
   }, []);
@@ -38,15 +32,13 @@ export const AuthContextProvider = ({ children }) => {
         email,
         password
       );
+
       await setDoc(doc(db, "profiles", userCredential.user.uid), {
         createdAt: new Date(),
       });
+
       await updateProfile(userCredential.user, { displayName: name });
-      await registerIndieID(
-        userCredential.user.uid,
-        24760,
-        "yWMd08JhWMihJYHlyMV9so"
-      );
+
       setUser(userCredential.user);
       return { user: userCredential.user };
     } catch (error) {
@@ -67,12 +59,6 @@ export const AuthContextProvider = ({ children }) => {
         password
       );
 
-      await registerIndieID(
-        userCredential.user.uid,
-        24760,
-        "yWMd08JhWMihJYHlyMV9so"
-      );
-
       setUser(userCredential.user);
       return { user: userCredential.user };
     } catch (error) {
@@ -83,13 +69,6 @@ export const AuthContextProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      if (auth.currentUser) {
-        await unregisterIndieDevice(
-          auth.currentUser.uid,
-          24760,
-          "yWMd08JhWMihJYHlyMV9so"
-        );
-      }
       await signOut(auth);
       setUser(null);
       router.replace("/(auth)/welcome");

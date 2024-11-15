@@ -1,8 +1,6 @@
 import { View, TouchableOpacity, Image, Platform } from "react-native";
 import React from "react";
 
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
 
 import { primaryColor } from "../config.json";

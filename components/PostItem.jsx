@@ -19,7 +19,6 @@ import ImageViewing from "react-native-image-viewing";
 import {
   collection,
   addDoc,
-  getDocs,
   getDoc,
   doc,
   updateDoc,
@@ -159,7 +158,7 @@ const Post = ({ post, deleteFunction }) => {
       <Text className="text-xl font-semibold">{post.title}</Text>
 
       <ImageViewing
-        images={[{ uri: post.imageUrl }]} // Przekazujemy tylko jeden obraz
+        images={[{ uri: post.photoURL }]}
         imageIndex={0}
         visible={isImageVisible}
         onRequestClose={() => setIsImageVisible(false)}
@@ -167,7 +166,11 @@ const Post = ({ post, deleteFunction }) => {
 
       <Text>{post.description}</Text>
 
-      <View className={`border-t-2 pt-5 ${post.author !== user.uid ? "justify-between" : "justify-end"} border-gray-100 flex flex-row`}>
+      <View
+        className={`border-t-2 pt-5 ${
+          post.author !== user.uid ? "justify-between" : "justify-end"
+        } border-gray-100 flex flex-row`}
+      >
         {post.author !== user.uid && (
           <TouchableOpacity
             onPress={checkAndToggleLike}

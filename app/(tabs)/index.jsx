@@ -14,13 +14,12 @@ import { useRouter } from "expo-router";
 import { parse, isBefore } from "date-fns";
 import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 
-import { db } from "../../firebase"; // Upewnij się, że ścieżka jest poprawna
+import { db } from "../../firebase";
 import { UserAuth } from "../../context/AuthContext";
 import EventItem from "../../components/EventItem";
-import EcoChallengeItem from "../../components/EcoChallengeItem"; // Importujemy komponent wyzwań
-import NotificationItem from "../../components/NotificationItem"; // Importujemy komponent powiadomień
+import EcoChallengeItem from "../../components/EcoChallengeItem";
+import NotificationItem from "../../components/NotificationItem";
 import { tips, faq } from "../../test-variables";
-import { primaryColor } from "../../config.json";
 
 const Index = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -63,7 +62,6 @@ const Index = () => {
     );
   };
 
-  // Pobieranie wydarzeń, aktualności, powiadomień i wyzwań ekologicznych z Firestore
   useEffect(() => {
     const unsubscribeEvents = onSnapshot(
       collection(db, "events"),
@@ -76,7 +74,6 @@ const Index = () => {
           });
         });
 
-        // Filter out events that have already passed and sort by date
         const now = new Date();
         const upcomingEvents = docsArray
           .filter((event) => {
@@ -86,13 +83,12 @@ const Index = () => {
               "d.M.yyyy HH:mm:ss",
               new Date()
             );
-            return isBefore(now, eventDate); // Include only future events
+            return isBefore(now, eventDate);
           })
           .sort((a, b) => {
-            // Sort events by date (from nearest to farthest)
             const dateA = parse(a.date, "d.M.yyyy HH:mm:ss", new Date());
             const dateB = parse(b.date, "d.M.yyyy HH:mm:ss", new Date());
-            return dateA - dateB; // Sort in ascending order
+            return dateA - dateB;
           });
 
         setEvents(upcomingEvents.slice(0, 5));
@@ -108,20 +104,18 @@ const Index = () => {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           challengesArray.push({
-            id: doc.id, // Adding id to the object
+            id: doc.id,
             ...data,
           });
         });
-    
-        const upcomingChallenges = challengesArray
-          .sort((a, b) => {
-            // Konwersja endTime na obiekt Date, sortowanie po dacie zakończenia
-            const dateA = new Date(a.endTime);
-            const dateB = new Date(b.endTime);
-            return dateA - dateB; // Sortuje rosnąco (od najbliższej do najdalszej daty zakończenia)
-          });
-    
-        setChallenges(upcomingChallenges); // Set challenges in state
+
+        const upcomingChallenges = challengesArray.sort((a, b) => {
+          const dateA = new Date(a.endTime);
+          const dateB = new Date(b.endTime);
+          return dateA - dateB;
+        });
+
+        setChallenges(upcomingChallenges);
       }
     );
 
@@ -131,10 +125,9 @@ const Index = () => {
     };
   }, []);
 
-  // Funkcja do generowania powiadomień na podstawie nadchodzących wydarzeń
   const generateNotifications = (events) => {
     const now = new Date();
-    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000); // Jutro
+    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
     const upcomingEvents = events.filter((event) => {
       const eventDate = parse(event.date, "dd.MM.yyyy HH:mm:ss", new Date());
@@ -142,25 +135,27 @@ const Index = () => {
     });
 
     const challengesTomorrow = challenges.filter((challenge) => {
-      const challengeEndTime = new Date(challenge.endTime)
+      const challengeEndTime = new Date(challenge.endTime);
       return challengeEndTime >= now && challengeEndTime <= tomorrow;
-    })
+    });
     const eventNotifications = upcomingEvents.map((event) => ({
-      id: event.id, // Używamy id wydarzenia jako id powiadomienia
+      id: event.id,
       event: event,
       title: `Wydarzenie`,
       message: `${event.title} rozpoczyna się ${event.date}`,
     }));
 
     const challengeNotifications = challengesTomorrow.map((challenge) => ({
-      id: `challenge-${challenge.id}`, // Identyfikator powiadomienia dla wyzwania
+      id: `challenge-${challenge.id}`,
       challenge: challenge,
       title: `Koniec wyzwania`,
-      message: `${challenge.title} kończy się ${new Date(challenge.endTime).toLocaleString()}!`,
+      message: `${challenge.title} kończy się ${new Date(
+        challenge.endTime
+      ).toLocaleString()}!`,
       typeChallenge: true,
     }));
 
-    const newNotifications = [...eventNotifications, ...challengeNotifications]
+    const newNotifications = [...eventNotifications, ...challengeNotifications];
 
     setNotifications(newNotifications);
   };
@@ -185,7 +180,7 @@ const Index = () => {
         }
       >
         <View className="flex flex-col gap-5">
-          {/* Logo aplikacji */}
+          {/* Header aplikacji */}
           <View className="flex flex-row justify-between items-center">
             <Text className="text-3xl font-bold w-80">
               Witaj, {firstName} 👋
@@ -228,14 +223,6 @@ const Index = () => {
                     }}
                   />
                 ))}
-                <TouchableOpacity
-                  className="p-5 rounded-full bg-blue-500"
-                  onPress={showMore}
-                >
-                  <Text className="text-white text-lg font-semibold text-center">
-                    Pokaż wszystkie wydarzenia
-                  </Text>
-                </TouchableOpacity>
               </>
             ) : (
               <View className="bg-white rounded-3xl p-5">
@@ -244,6 +231,14 @@ const Index = () => {
                 </Text>
               </View>
             )}
+            <TouchableOpacity
+              className="p-5 rounded-full bg-blue-500"
+              onPress={showMore}
+            >
+              <Text className="text-white text-lg font-semibold text-center">
+                Pokaż {events.length > 0 ? "wszystkie" : "inne"} wydarzenia
+              </Text>
+            </TouchableOpacity>
           </View>
 
           {/* Wyzwania Ekologiczne */}

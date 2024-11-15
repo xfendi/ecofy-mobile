@@ -21,14 +21,14 @@ const login = () => {
       Alert.alert("Uwaga!", "Proszę wypełnić wszystkie pola.");
       return;
     }
-  
+
     // Próba zalogowania
     const result = await SignIn(email, password);
-  
+
     if (result.error) {
       // Rozpoznajemy konkretny błąd i wyświetlamy odpowiedni komunikat
       let errorMessage = "Wystąpił błąd. Spróbuj ponownie później."; // Domyślny komunikat
-  
+
       if (result.error.includes("auth/invalid-credential")) {
         errorMessage = "Nieprawidłowe dane logowania.";
       } else if (result.error.includes("auth/invalid-email")) {
@@ -40,15 +40,14 @@ const login = () => {
       } else if (result.error.includes("auth/too-many-requests")) {
         errorMessage = "Zbyt wiele prób logowania. Spróbuj ponownie później.";
       }
-  
+
       // Wyświetlamy odpowiedni komunikat błędu
       Alert.alert("Błąd logowania", errorMessage);
     } else if (result.user) {
       // Jeśli zalogowano poprawnie, przekierowujemy na ekran główny
-      router.replace('/(tabs)');
+      router.replace("/(tabs)");
     }
   };
-  
 
   const handleProviderClick = () => {
     Alert.alert("Wkrótce", "Ta funkcja zostanie odblokowana wkrótce!");
@@ -72,15 +71,15 @@ const login = () => {
           />
         </View>
 
-        <View className="flex flex-row gap-5">
+        <View className="flex flex-row gap-2">
           <Text>Nie możesz się zalogować?</Text>
           <Link href="/reset" style={{ color: primaryColor }}>
-            Zresetuj Hasło
+            Zmień Hasło
           </Link>
         </View>
 
         <TouchableOpacity
-          className="p-4 rounded-xl w-80"
+          className="p-4 rounded-full w-80"
           style={{ backgroundColor: primaryColor }}
           onPress={handleSubmit}
         >
@@ -89,24 +88,35 @@ const login = () => {
           </Text>
         </TouchableOpacity>
 
-        <View className="flex flex-row gap-5">
+        <View className="flex flex-row gap-2">
           <Text>Nie posiadasz konta?</Text>
           <Link href="/register" style={{ color: primaryColor }}>
-            Stwórz nowe konto
+            Zarejestruj się
           </Link>
         </View>
 
         <View className="flex flex-col gap-5">
-          <Text className="text-center">Lub Kontynuuj z</Text>
+          <Text className="text-center" style={{ color: "#d1d5db" }}>
+            Lub Kontynuuj z
+          </Text>
 
           <View className="flex flex-row gap-5">
-            <TouchableOpacity onPress={handleProviderClick} className="p-4 rounded-xl bg-white text-xl font-semibold text-center">
+            <TouchableOpacity
+              onPress={handleProviderClick}
+              className="p-4 rounded-xl bg-white text-xl font-semibold text-center"
+            >
               <Ionicons name="logo-google" color="#d1d5db" size={32} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleProviderClick} className="p-4 rounded-xl bg-white text-xl font-semibold text-center">
+            <TouchableOpacity
+              onPress={handleProviderClick}
+              className="p-4 rounded-xl bg-white text-xl font-semibold text-center"
+            >
               <Ionicons name="logo-apple" color="#d1d5db" size={32} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleProviderClick} className="p-4 rounded-xl bg-white text-xl font-semibold text-center">
+            <TouchableOpacity
+              onPress={handleProviderClick}
+              className="p-4 rounded-xl bg-white text-xl font-semibold text-center"
+            >
               <Ionicons name="logo-facebook" color="#d1d5db" size={32} />
             </TouchableOpacity>
           </View>

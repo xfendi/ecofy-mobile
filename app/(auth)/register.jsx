@@ -30,7 +30,7 @@ const register = () => {
 
   const handleProviderClick = () => {
     Alert.alert("Wkrótce", "Ta funkcja zostanie odblokowana wkrótce!");
-  }
+  };
 
   return (
     <SafeAreaView>
@@ -38,7 +38,7 @@ const register = () => {
         <View className="flex flex-col gap-5">
           <Text className="text-center text-5xl font-bold">Stwórz Konto</Text>
           <Text className="text-center">
-            Wpisz poniżej swoje dane abystworzyc konto i przejść do aplikacji!
+            Wpisz poniżej swoje dane aby stworzyć konto i przejść do aplikacji!
           </Text>
         </View>
         <View className="flex flex-col gap-5">
@@ -52,7 +52,7 @@ const register = () => {
         </View>
 
         <TouchableOpacity
-          className="p-4 rounded-xl w-80"
+          className="p-4 rounded-full w-80"
           style={{ backgroundColor: primaryColor }}
           onPress={handleSubmit}
         >
@@ -61,7 +61,7 @@ const register = () => {
           </Text>
         </TouchableOpacity>
 
-        <View className="flex flex-row gap-5">
+        <View className="flex flex-row gap-2">
           <Text>Posiadasz już konto?</Text>
           <Link href="/login" style={{ color: primaryColor }}>
             Zaloguj się
@@ -69,16 +69,27 @@ const register = () => {
         </View>
 
         <View className="flex flex-col gap-5">
-          <Text className="text-center">Lub Kontynuuj z</Text>
+          <Text className="text-center" style={{ color: "#d1d5db" }}>
+            Lub Kontynuuj z
+          </Text>
 
           <View className="flex flex-row gap-5">
-            <TouchableOpacity onPress={handleProviderClick} className="p-4 rounded-xl bg-white text-xl font-semibold text-center">
+            <TouchableOpacity
+              onPress={handleProviderClick}
+              className="p-4 rounded-xl bg-white text-xl font-semibold text-center"
+            >
               <Ionicons name="logo-google" color="#d1d5db" size={32} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleProviderClick} className="p-4 rounded-xl bg-white text-xl font-semibold text-center">
+            <TouchableOpacity
+              onPress={handleProviderClick}
+              className="p-4 rounded-xl bg-white text-xl font-semibold text-center"
+            >
               <Ionicons name="logo-apple" color="#d1d5db" size={32} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleProviderClick} className="p-4 rounded-xl bg-white text-xl font-semibold text-center">
+            <TouchableOpacity
+              onPress={handleProviderClick}
+              className="p-4 rounded-xl bg-white text-xl font-semibold text-center"
+            >
               <Ionicons name="logo-facebook" color="#d1d5db" size={32} />
             </TouchableOpacity>
           </View>

@@ -1,47 +1,3 @@
-export const events = [
-  {
-    id: 1,
-    title: "Warsztaty z recyklingu",
-    date: "2024-11-05",
-    address: "ul. Ekologiczna 123, Warszawa",
-    description:
-      "Warsztaty na temat skutecznego recyklingu i jego korzyści dla środowiska.",
-    coordinates: { latitude: 52.2297, longitude: 21.0122 },
-  },
-  {
-    id: 2,
-    title: "Dzień sprzątania lasu",
-    date: "2024-11-10",
-    address: "ul. Leśna 456, Kraków",
-    description: "Przyłącz się do nas w akcji sprzątania lasów.",
-    coordinates: { latitude: 50.0614, longitude: 19.9383 },
-  },
-  {
-    id: 3,
-    title: "Eko-festiwal 2024",
-    date: "2024-12-01",
-    address: "ul. Festiwalowa 789, Gdańsk",
-    description: "Festiwal poświęcony ekologicznemu stylowi życia.",
-    coordinates: { latitude: 54.352, longitude: 18.6466 },
-  },
-  {
-    id: 4,
-    title: "Ekologiczne targi",
-    date: "2024-11-15",
-    address: "ul. Targowa 321, Wrocław",
-    description: "Targi produktów ekologicznych i lokalnych.",
-    coordinates: { latitude: 51.1079, longitude: 17.0385 },
-  },
-  {
-    id: 5,
-    title: "Warsztaty z permakultury",
-    date: "2024-11-20",
-    address: "ul. Zielona 654, Poznań",
-    description: "Warsztaty na temat permakultury i zrównoważonego rozwoju.",
-    coordinates: { latitude: 52.4064, longitude: 16.9252 },
-  },
-];
-
 export const tips = [
   {
     id: 1,
@@ -128,29 +84,5 @@ export const faq = [
     id: 8,
     question: "Jakie są najważniejsze źródła zanieczyszczeń powietrza?",
     answer: "Główne źródła to transport, przemysł i spalanie paliw kopalnych.",
-  },
-];
-
-export const challenges = [
-  {
-    id: 1,
-    title: "Dzień bez plastiku",
-    description: "Spróbuj nie używać żadnych plastikowych produktów przez jeden dzień.",
-    startTime: new Date().toISOString(), // Obecny czas jako czas rozpoczęcia
-    endTime: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 dni później jako czas zakończenia
-  },
-  {
-    id: 2,
-    title: "Zielony tydzień",
-    description: "Codziennie wykonaj jedną ekologiczną czynność, np. segreguj odpady.",
-    startTime: new Date().toISOString(),
-    endTime: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: 3,
-    title: "Dieta roślinna",
-    description: "Wypróbuj tygodniową dietę opartą na roślinach i zmniejszaj spożycie mięsa.",
-    startTime: new Date().toISOString(),
-    endTime: new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   },
 ];

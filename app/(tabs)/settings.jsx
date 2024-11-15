@@ -24,7 +24,7 @@ import {
 import { useRouter } from "expo-router";
 
 import * as ImagePicker from "expo-image-picker";
-import * as ImageManipulator from 'expo-image-manipulator';
+import * as ImageManipulator from "expo-image-manipulator";
 
 import { primaryColor } from "../../config.json";
 import { UserAuth } from "../../context/AuthContext";
@@ -52,8 +52,8 @@ const settings = () => {
     router.replace("/settings");
     closeModal();
     setTimeout(() => {
-      setIsRefreshing(false); // Zatrzymanie odświeżania
-    }, 1000); // Czas odświeżania w milisekundach
+      setIsRefreshing(false);
+    }, 1000);
   };
 
   const handleLogout = async () => {
@@ -117,16 +117,12 @@ const settings = () => {
     if (!result.canceled) {
       const { uri } = result.assets[0];
 
-      const image = await ImageManipulator.manipulateAsync(
-        uri, 
-        [], 
-        { 
-          compress: 0.5, // Zmieniaj kompresję, jeśli chcesz zmniejszyć wagę
-          format: ImageManipulator.SaveFormat.JPEG, // Możesz zmienić na PNG, jeśli chcesz
-          maxWidth: 1000, // Maksymalna szerokość
-          maxHeight: 1000, // Maksymalna wysokość
-        }
-      );
+      const image = await ImageManipulator.manipulateAsync(uri, [], {
+        compress: 0.5,
+        format: ImageManipulator.SaveFormat.JPEG,
+        maxWidth: 1000,
+        maxHeight: 1000,
+      });
 
       setImage(image.uri);
     }
@@ -168,7 +164,7 @@ const settings = () => {
         try {
           console.log("Uploading to Firebase Storage...");
           await uploadBytes(fileRef, blob);
-          
+
           const DownloadURL = await getDownloadURL(fileRef);
           await updateProfile(user, { photoURL: DownloadURL });
         } catch (e) {

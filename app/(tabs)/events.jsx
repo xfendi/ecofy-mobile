@@ -9,9 +9,9 @@ import {
   Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
-import { endOfDay, isAfter, isBefore, isSameSecond, parse } from "date-fns";
+import { endOfDay, isAfter, isBefore, parse } from "date-fns";
 
 import { db } from "../../firebase";
 import EventItem from "../../components/EventItem";
@@ -60,8 +60,8 @@ const Events = () => {
 
     router.replace("/events");
     setTimeout(() => {
-      setIsRefreshing(false); // Zatrzymanie odświeżania
-    }, 1000); // Czas odświeżania w milisekundach
+      setIsRefreshing(false);
+    }, 1000);
   };
 
   useEffect(() => {
@@ -104,8 +104,8 @@ const Events = () => {
             return dateA - dateB;
           });
 
-        setArchiveEvents(inactiveEvents); // Zapisujemy dokumenty do stanu
-        setEvents(activeEvents); // Zapisujemy dokumenty do stanu
+        setArchiveEvents(inactiveEvents);
+        setEvents(activeEvents);
       }
     );
 

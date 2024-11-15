@@ -27,7 +27,7 @@ import {
 
 const EventItem = ({ event, deleteFunction }) => {
   const [isLike, setIsLike] = useState();
-  const [isImageVisible, setIsImageVisible] = useState(false); // Dodaj stan dla widoczności obrazu
+  const [isImageVisible, setIsImageVisible] = useState(false);
   const router = useRouter();
   const { setSelectedEvent } = UseMap();
   const { user } = UserAuth();
@@ -123,7 +123,7 @@ const EventItem = ({ event, deleteFunction }) => {
 
       {/* Modal wyświetlający obraz */}
       <ImageViewing
-        images={[{ uri: event.photoURL }]} // Przekazujemy tylko jeden obraz
+        images={[{ uri: event.photoURL }]}
         imageIndex={0}
         visible={isImageVisible}
         onRequestClose={() => setIsImageVisible(false)}

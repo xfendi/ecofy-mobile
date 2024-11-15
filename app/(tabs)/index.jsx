@@ -223,14 +223,6 @@ const Index = () => {
                     }}
                   />
                 ))}
-                <TouchableOpacity
-                  className="p-5 rounded-full bg-blue-500"
-                  onPress={showMore}
-                >
-                  <Text className="text-white text-lg font-semibold text-center">
-                    Pokaż wszystkie wydarzenia
-                  </Text>
-                </TouchableOpacity>
               </>
             ) : (
               <View className="bg-white rounded-3xl p-5">
@@ -239,6 +231,14 @@ const Index = () => {
                 </Text>
               </View>
             )}
+            <TouchableOpacity
+              className="p-5 rounded-full bg-blue-500"
+              onPress={showMore}
+            >
+              <Text className="text-white text-lg font-semibold text-center">
+                Pokaż {events.length > 0 ? "wszystkie" : "inne"} wydarzenia
+              </Text>
+            </TouchableOpacity>
           </View>
 
           {/* Wyzwania Ekologiczne */}

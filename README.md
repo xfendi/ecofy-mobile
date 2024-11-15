@@ -32,12 +32,12 @@ To install and run the Ecofy app locally, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/ecofy.git
+   git clone https://github.com/xfendi/ecofy-mobile.git
    ```
 
 2. Navigate into the project folder:
    ```bash
-   cd ecofy
+   cd ecofy-mobile
    ```
 
 3. Install dependencies:

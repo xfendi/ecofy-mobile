@@ -54,8 +54,8 @@ To install and run the Ecofy app locally, follow these steps:
 
 ## Download
 
-You can download the app directly from the **Google Play Store**: [Download Ecofy on Google Play](https://play.google.com/store/apps/details?id=com.ecofy)
+You can download the app directly from the **Google Play Store**: [Download Ecofy on Google Play]()
 
 ## Website
 
-Check out the official website for more information and updates: [Ecofy Website](https://eco-fy.com)
+Check out the official website for more information and updates: [Ecofy Website]()

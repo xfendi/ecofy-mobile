@@ -26,6 +26,8 @@
 - **Styled Components**: Used for styling the app
 - **Map API**: For displaying eco-initiatives on a map
 
+Sure, here's the **Installation** section in English:
+
 ## Installation
 
 To install and run the Ecofy app locally, follow these steps:
@@ -45,12 +47,29 @@ To install and run the Ecofy app locally, follow these steps:
    npm install
    ```
 
-4. Start the app:
+4. Create a `.env` file in the root of the project and add the following environment variables. 
+
+   You can find them in the respective services:
+
+   - **Firebase API Key**: In Firebase Console under "Project Settings" -> "General" -> "Your apps".
+   - **Geoapify API Key**: On the [Geoapify website](https://www.geoapify.com/) after registering and creating a project.
+   - **Google Cloud Platform (GCP) API Key**: In the Google Cloud Platform Console (GCP) after creating a project and enabling the required APIs.
+
+   Add the following to your `.env` file:
+
+   ```
+   EXPO_PUBLIC_FIREBASE_APIKEY
+   EXPO_PUBLIC_FIREBASE_APPID
+   EXPO_PUBLIC_GEOAPIFY_API_KEY
+   EXPO_PUBLIC_GCP_API_KEY
+   ```
+
+5. Start the app:
    ```bash
    npm start
    ```
 
-5. Scan the QR code with the Expo Go app to open the app on your device.
+6. Scan the QR code using the Expo Go app to open the app on your device.
 
 ## Download
 

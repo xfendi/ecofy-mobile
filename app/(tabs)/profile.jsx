@@ -154,6 +154,10 @@ const Profile = () => {
     });
   };
 
+  const handleOpenSettings = () => {
+    router.replace("/settings");
+  }
+
   return (
     <SafeAreaView className="flex-1">
       <ScrollView
@@ -187,13 +191,11 @@ const Profile = () => {
               <TouchableOpacity
                 className="p-5 rounded-full w-full"
                 style={{ backgroundColor: primaryColor }}
+                onPress={handleOpenSettings}
               >
-                <Link
-                  href="/settings"
-                  className="text-white text-xl font-semibold text-center"
-                >
+                <Text className="text-white text-xl font-semibold text-center">
                   Ustawienia Konta
-                </Link>
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

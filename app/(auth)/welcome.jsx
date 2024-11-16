@@ -8,6 +8,14 @@ import { primaryColor } from "../../config.json";
 const welcome = () => {
   const router = useRouter();
 
+  const handleOpenRegister = () => {
+    router.navigate("/register");
+  };
+
+  const handleOpenLogin = () => {
+    router.navigate("/login");
+  };
+
   return (
     <SafeAreaView>
       <View className="flex gap-5 p-10 flex-col justify-center h-full items-center">
@@ -27,7 +35,7 @@ const welcome = () => {
         <TouchableOpacity
           className="p-4 rounded-full w-80"
           style={{ backgroundColor: primaryColor }}
-          onPress={router.replace("/register")}
+          onPress={handleOpenRegister}
         >
           <Text className="text-white text-xl font-semibold text-center">
             Zarejestruj się
@@ -36,7 +44,7 @@ const welcome = () => {
         <TouchableOpacity
           className="p-4 rounded-full w-80"
           style={{ backgroundColor: "white" }}
-          onPress={router.replace("/login")}
+          onPress={handleOpenLogin}
         >
           <Text className="text-black text-xl font-semibold text-center">
             Zaloguj się

@@ -227,7 +227,7 @@ const Community = () => {
       >
         <View className="flex-1 justify-end items-center">
           <KeyboardAvoidingView
-            className="flex-row w-full h-1/2 p-5 bg-white rounded-xl"
+            className="flex-row w-full h-1/2 p-5 bg-white rounded-t-3xl"
             behavior={Platform.OS === "ios" ? "padding" : "height"}
           >
             <ScrollView>

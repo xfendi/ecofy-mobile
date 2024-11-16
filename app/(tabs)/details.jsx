@@ -87,37 +87,41 @@ const Details = () => {
 
     const eventRef = doc(db, "events", eventId.toString());
 
-    const unsubscribe = onSnapshot(eventRef, (eventSnap) => {
-      try {
-        if (eventSnap.exists()) {
-          const eventDetails = eventSnap.data();
-          setEvent(eventDetails);
-          setIsConfirmed(eventDetails.confirmed?.includes(user.uid) || false);
-          setIsJoined(eventDetails.users?.includes(user.uid) || false);
-          const likes = eventDetails.likes || [];
-          const errors = eventDetails.errors || [];
-          setErrors(errors);
-          setIsLike(likes.includes(user.uid));
+    const unsubscribe = onSnapshot(
+      eventRef,
+      (eventSnap) => {
+        try {
+          if (eventSnap.exists()) {
+            const eventDetails = eventSnap.data();
+            setEvent(eventDetails);
+            setIsConfirmed(eventDetails.confirmed?.includes(user.uid) || false);
+            setIsJoined(eventDetails.users?.includes(user.uid) || false);
+            const likes = eventDetails.likes || [];
+            const errors = eventDetails.errors || [];
+            setErrors(errors);
+            setIsLike(likes.includes(user.uid));
 
-          const date = parse(
-            eventDetails.date,
-            "d.M.yyyy HH:mm:ss",
-            new Date()
-          );
-          setEventDate(date);
+            const date = parse(
+              eventDetails.date,
+              "d.M.yyyy HH:mm:ss",
+              new Date()
+            );
+            setEventDate(date);
 
-          if (isAfter(new Date(), endOfDay(date))) {
-            setIsArchived(true);
+            if (isAfter(new Date(), endOfDay(date))) {
+              setIsArchived(true);
+            } else {
+              setIsArchived(false);
+            }
           } else {
-            setIsArchived(false);
+            console.log("Event not found");
           }
-        } else {
-          console.log("Event not found");
+        } catch (error) {
+          console.error("Błąd podczas ładowania szczegółów wydarzenia:", error);
         }
-      } catch (error) {
-        console.error("Błąd podczas ładowania szczegółów wydarzenia:", error);
-      }
-    }, [eventId]);
+      },
+      [eventId]
+    );
 
     return () => unsubscribe();
   });
@@ -537,15 +541,17 @@ const Details = () => {
           )}
 
           <View className={Platform.OS === "ios" ? "mb-[50px]" : "mb-[84px]"}>
-            <TouchableOpacity
-              onPress={handleShowOnMap}
-              className="p-5 rounded-full"
-              style={{ backgroundColor: primaryColor }}
-            >
-              <Text className="text-white text-lg font-semibold text-center">
-                Pokaż na mapie
-              </Text>
-            </TouchableOpacity>
+            {!isArchived && (
+              <TouchableOpacity
+                onPress={handleShowOnMap}
+                className="p-5 rounded-full"
+                style={{ backgroundColor: primaryColor }}
+              >
+                <Text className="text-white text-lg font-semibold text-center">
+                  Pokaż na mapie
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </ScrollView>

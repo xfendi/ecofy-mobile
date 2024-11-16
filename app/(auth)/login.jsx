@@ -42,6 +42,7 @@ const login = () => {
         errorMessage = "Zbyt wiele prób logowania. Spróbuj ponownie później.";
       }
 
+      setIsLoading(false);
       return Alert.alert("Błąd", errorMessage);
     }
 

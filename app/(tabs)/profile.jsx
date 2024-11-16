@@ -172,11 +172,10 @@ const Profile = () => {
               {user.photoURL ? (
                 <Image
                   source={{ uri: user.photoURL }}
-                  className="rounded-full"
-                  style={{ height: 80, width: 80 }}
+                  className="rounded-full w-32 h-32"
                 />
               ) : (
-                <Feather name="user" size={64} color={primaryColor} />
+                <Feather name="user" size={100} color={primaryColor} />
               )}
               <View>
                 <Text className="text-3xl text-center font-bold w-80">

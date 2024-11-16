@@ -12,17 +12,22 @@ const verify = () => {
   const router = useRouter();
 
   if (user?.emailVerified) {
-    router.replace("/(tabs)"); 
+    router.replace("/(tabs)");
   }
 
   const handleSubmit = async () => {
     try {
       await sendEmailVerification(user);
-      Alert.alert("Wiadomość została wysłana!");
+      user.reload();
+      Alert.alert(
+        "Sukces",
+        "Wiadomość została wysłana! Po weryfikacji przeładuj aplikację!"
+      );
     } catch (error) {
-      Alert.alert("Wystąpił błąd podczas wysyłania wiadomości!");
+      Alert.alert("Błąd", "Wystąpił błąd podczas wysyłania wiadomości weryfikacyjnej!");
     }
   };
+
   return (
     <SafeAreaView>
       <View className="flex gap-5 p-10 flex-col justify-center h-full items-center">

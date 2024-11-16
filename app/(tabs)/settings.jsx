@@ -10,7 +10,7 @@ import {
   Modal,
   KeyboardAvoidingView,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome, Feather } from "@expo/vector-icons";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -30,6 +30,7 @@ import { primaryColor } from "../../config.json";
 import { UserAuth } from "../../context/AuthContext";
 import AppTextInput from "../../components/AppTextInput";
 import { storage } from "../../firebase";
+import Loading from "../../components/Loading";
 
 const settings = () => {
   const [isModal, setIsModal] = useState(false);
@@ -41,10 +42,17 @@ const settings = () => {
   const [newpass, setNewpass] = useState();
   const [password, setPassword] = useState();
 
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState();
+  const [isImageRemoved, setIsImageRemoved] = useState(false);
 
   const { logout, user } = UserAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (user && user.photoURL) {
+      setImage(user.photoURL);
+    }
+  }, [user]);  
 
   const onRefresh = () => {
     setIsRefreshing(true);
@@ -71,7 +79,7 @@ const settings = () => {
 
   const openModal = () => {
     console.log(user.email, user.displayName, user.emailVerified);
-    if (!name && !email && !newpass && !image) {
+    if (!name && !email && !newpass && !image && !isImageRemoved) {
       Alert.alert("Błąd", "Uzupełnij jakiekolwiek pole.");
       return;
     } else if (email === user.email) {
@@ -112,8 +120,6 @@ const settings = () => {
       quality: 1,
     });
 
-    console.log(result);
-
     if (!result.canceled) {
       const { uri } = result.assets[0];
 
@@ -126,6 +132,11 @@ const settings = () => {
 
       setImage(image.uri);
     }
+  };
+
+  const removeImage = () => {
+    setIsImageRemoved(true);
+    setImage(null);
   };
 
   const handleSubmit = async () => {
@@ -155,9 +166,12 @@ const settings = () => {
         Alert.alert("Sukces", "Pomyślnie zaktualizowano hasło.");
       }
 
-      if (image) {
+      if (isImageRemoved) {
+        console.log("Removing image...");
+
+        await updateProfile(user, { photoURL: "" });
+      } else if (image) {
         console.log("Uploading image...");
-        console.log(image);
 
         const response = await fetch(image);
         const blob = await response.blob();
@@ -182,6 +196,7 @@ const settings = () => {
       Alert.alert("Sukces", "Pomyślnie zaktualizowano ustawienia konta.");
       setIsLoading(false);
     } catch (e) {
+      setIsLoading(false);
       closeModal();
       Alert.alert("Błąd", e.message);
       console.log(e);
@@ -190,6 +205,7 @@ const settings = () => {
 
   return (
     <SafeAreaView className="flex-1">
+      {isLoading && <Loading />}
       <Modal
         animationType="slide"
         transparent={true}
@@ -256,7 +272,7 @@ const settings = () => {
           </View>
           {!user.emailVerified && (
             <TouchableOpacity
-              className="bg-white rounded-xl p-5"
+              className="bg-white rounded-3xl p-5"
               onPress={handleVerify}
             >
               <Text className="text-xl font-semibold">
@@ -269,19 +285,28 @@ const settings = () => {
             </TouchableOpacity>
           )}
           <View className="flex flex-col gap-5">
-            <View className="flex-row">
-              <TouchableOpacity onPress={pickImage}>
-                <View className="absolute z-50 top-[-15px] right-[-15px] h-9 w-9 flex-row items-center justify-center bg-white rounded-full">
-                  <Feather name="camera" size={16} color="black" />
-                </View>
-                {user.photoURL || image ? (
+            <View className="flex-row gap-5 items-center">
+              <TouchableOpacity>
+                {!isImageRemoved && image ? (
                   <Image
-                    source={{ uri: image || user.photoURL }}
+                    source={{ uri: image }}
                     className="h-32 w-32 rounded-3xl"
                   />
                 ) : (
-                  <FontAwesome name="user" size={100} color={primaryColor} />
+                  <Feather name="user" size={100} color={primaryColor} />
                 )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={pickImage}
+                className="h-20 w-20 flex-row items-center justify-center bg-white rounded-3xl"
+              >
+                <Feather name="camera" size={24} color="black" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={removeImage}
+                className="h-20 w-20 flex-row items-center justify-center bg-white rounded-3xl"
+              >
+                <Feather name="trash" size={24} color="red" />
               </TouchableOpacity>
             </View>
             <View>
@@ -328,7 +353,7 @@ const settings = () => {
             className="p-5 rounded-full"
             style={{
               backgroundColor:
-                !email && !image && !name && !newpass
+                !email && !image && !isImageRemoved || image == user.photoURL && !name && !newpass
                   ? "#000000"
                   : primaryColor,
             }}

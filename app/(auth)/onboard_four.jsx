@@ -1,11 +1,16 @@
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import React from "react";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { primaryColor } from "../../config.json";
 
 const onboard_four = () => {
+  const router = useRouter();
+  const handleOpenNextPage = () => {
+    router.replace("/(tabs)");
+  };
+
   return (
     <SafeAreaView>
       <View className="flex gap-10 p-10 flex-col justify-center h-full items-center">
@@ -37,7 +42,7 @@ const onboard_four = () => {
         <TouchableOpacity
           className="p-4 rounded-full w-80"
           style={{ backgroundColor: primaryColor }}
-          onPress={router.replace("/(tabs)")}
+          onPress={handleOpenNextPage}
         >
           <Text className="text-white text-xl font-semibold text-center">
             Przejdź do aplikacji

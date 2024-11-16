@@ -185,13 +185,15 @@ const Index = () => {
             <Text className="text-3xl font-bold w-80">
               Witaj, {firstName} 👋
             </Text>
-            <TouchableOpacity onPress={() => router.replace("/profile")}>
-              <Image
-                source={{ uri: user?.photoURL }}
-                className="rounded-full"
-                style={{ height: 44, width: 44 }}
-              />
-            </TouchableOpacity>
+            {user?.photoURL && (
+              <TouchableOpacity onPress={() => router.replace("/profile")}>
+                <Image
+                  source={{ uri: user?.photoURL }}
+                  className="rounded-full"
+                  style={{ height: 44, width: 44 }}
+                />
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Powiadomienia */}

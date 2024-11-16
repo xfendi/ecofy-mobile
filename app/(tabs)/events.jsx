@@ -185,6 +185,7 @@ const Events = () => {
                   deleteFunction={() => {
                     showDeleteAlert(event.id);
                   }}
+                  archived
                 />
               ))
             ) : (

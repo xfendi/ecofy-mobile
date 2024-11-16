@@ -5,7 +5,7 @@ import {
   Image,
   Dimensions,
   TouchableWithoutFeedback,
-  Alert
+  Alert,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { AntDesign, Feather } from "@expo/vector-icons";
@@ -25,7 +25,7 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 
-const EventItem = ({ event, deleteFunction }) => {
+const EventItem = ({ event, deleteFunction, archived }) => {
   const [isLike, setIsLike] = useState();
   const [isImageVisible, setIsImageVisible] = useState(false);
   const router = useRouter();
@@ -47,22 +47,19 @@ const EventItem = ({ event, deleteFunction }) => {
 
   const handleDelete = (event) => {
     const currentTime = new Date();
-    const eventDate = parse(
-      event.date,
-      "d.M.yyyy HH:mm:ss",
-      new Date()
-    );
+    const eventDate = parse(event.date, "d.M.yyyy HH:mm:ss", new Date());
     const timeDifference = eventDate - currentTime;
 
     const timeDifferenceInHours = timeDifference / (1000 * 60 * 60);
 
-    if (timeDifferenceInHours > 0 && timeDifferenceInHours <= 1){
-      Alert.alert("Nie udało sie usunąć wydarzenia", "Nie możesz usunąć wydarzenia na godzinę przed jego rozpoczęciem")
-    }
-    else{
+    if (timeDifferenceInHours > 0 && timeDifferenceInHours <= 1) {
+      Alert.alert(
+        "Nie udało sie usunąć wydarzenia",
+        "Nie możesz usunąć wydarzenia na godzinę przed jego rozpoczęciem"
+      );
+    } else {
       deleteFunction(event.id);
     }
-
   };
 
   useEffect(() => {
@@ -110,8 +107,11 @@ const EventItem = ({ event, deleteFunction }) => {
   };
 
   return (
-    <View key={event.id} className="flex flex-col gap-5 bg-white rounded-3xl p-5">
-       {event.photoURL && (
+    <View
+      key={event.id}
+      className="flex flex-col gap-5 bg-white rounded-3xl p-5"
+    >
+      {event.photoURL && (
         <TouchableWithoutFeedback onPress={() => setIsImageVisible(true)}>
           <Image
             source={{ uri: event.photoURL }}
@@ -137,14 +137,13 @@ const EventItem = ({ event, deleteFunction }) => {
           </TouchableOpacity>
         ) : (
           <View className="flex flex-row gap-3">
-          <TouchableOpacity onPress={checkAndToggleLike}>
-            {isLike ? (
-              <AntDesign name="heart" size={24} color="red" />
-            ) : (
-              <Feather name="heart" size={24} color="black" />
-            )}
-            
-          </TouchableOpacity>
+            <TouchableOpacity onPress={checkAndToggleLike}>
+              {isLike ? (
+                <AntDesign name="heart" size={24} color="red" />
+              ) : (
+                <Feather name="heart" size={24} color="black" />
+              )}
+            </TouchableOpacity>
           </View>
         )}
       </View>
@@ -154,19 +153,20 @@ const EventItem = ({ event, deleteFunction }) => {
         <Text className="text-gray-500">{event.date}</Text>
       </View>
       <View className="flex flex-row gap-5">
-        <TouchableOpacity
-          onPress={handleShowOnMap}
-          className="p-4 rounded-full"
-          style={{ backgroundColor: primaryColor, width: width * 0.5 - 43 }}
-        >
-          <Text className="text-white text-lg font-semibold text-center">
-            Pokaż na mapie
-          </Text>
-        </TouchableOpacity>
+        {!archived && (
+          <TouchableOpacity
+            onPress={handleShowOnMap}
+            className="p-4 rounded-full flex-1"
+            style={{ backgroundColor: primaryColor }}
+          >
+            <Text className="text-white text-lg font-semibold text-center">
+              Pokaż na mapie
+            </Text>
+          </TouchableOpacity>
+        )}
         <TouchableOpacity
           onPress={handleShowDetails}
-          className="p-4 rounded-full bg-black"
-          style={{ width: width * 0.5 - 43 }}
+          className="p-4 rounded-full bg-black flex-1"
         >
           <Text className="text-white text-lg font-semibold text-center">
             Szczegóły

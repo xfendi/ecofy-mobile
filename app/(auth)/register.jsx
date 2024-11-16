@@ -42,10 +42,10 @@ const register = () => {
         errorMessage = "Zbyt wiele prób rejestracji. Spróbuj ponownie później.";
       }
 
-      Alert.alert("Błąd", errorMessage);
-    } else if (result.user) {
-      router.replace("/onboard_one");
+      return Alert.alert("Błąd", errorMessage);
     }
+
+    router.replace("/onboard_one");
   };
 
   const handleProviderClick = () => {

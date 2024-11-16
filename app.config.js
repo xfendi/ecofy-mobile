@@ -7,6 +7,7 @@ export default {
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
+    backgroundColor: "#ffffff",
     scheme: "myapp",
     userInterfaceStyle: "automatic",
     splash: {
@@ -25,7 +26,7 @@ export default {
       config: {
         googleMaps: {
           apiKey: process.env.EXPO_PUBLIC_GCP_API_KEY,
-        }
+        },
       },
       permissions: ["android.permission.RECORD_AUDIO"],
       package: "com.fendziorr.ecofymobile",

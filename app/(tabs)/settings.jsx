@@ -10,7 +10,7 @@ import {
   Modal,
   KeyboardAvoidingView,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome, Feather } from "@expo/vector-icons";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -21,7 +21,7 @@ import {
   updateProfile,
   verifyBeforeUpdateEmail,
 } from "firebase/auth";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
@@ -43,16 +43,22 @@ const settings = () => {
   const [password, setPassword] = useState();
 
   const [image, setImage] = useState();
+  const [selectedImage, setSelectedImage] = useState();
   const [isImageRemoved, setIsImageRemoved] = useState(false);
 
   const { logout, user } = UserAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (user && user.photoURL) {
-      setImage(user.photoURL);
-    }
-  }, [user]);  
+  useFocusEffect(
+    useCallback(() => {
+      if (!selectedImage) {
+        setImage(user.photoURL || undefined);
+        return;
+      }
+
+      setImage(selectedImage);
+    }, [user])
+  );
 
   const onRefresh = () => {
     setIsRefreshing(true);
@@ -78,8 +84,13 @@ const settings = () => {
   };
 
   const openModal = () => {
-    console.log(user.email, user.displayName, user.emailVerified);
-    if (!name && !email && !newpass && !image && !isImageRemoved) {
+    if (
+      !name &&
+      !email &&
+      !newpass &&
+      !selectedImage &&
+      image == user.photoURL
+    ) {
       Alert.alert("Błąd", "Uzupełnij jakiekolwiek pole.");
       return;
     } else if (email === user.email) {
@@ -109,7 +120,7 @@ const settings = () => {
     setPassword("");
     setName("");
     setNewpass("");
-    setImage(null);
+    setImage(user.photoURL || undefined);
   };
 
   const pickImage = async () => {
@@ -123,20 +134,35 @@ const settings = () => {
     if (!result.canceled) {
       const { uri } = result.assets[0];
 
-      const image = await ImageManipulator.manipulateAsync(uri, [], {
+      const pickedImage = await ImageManipulator.manipulateAsync(uri, [], {
         compress: 0.5,
         format: ImageManipulator.SaveFormat.JPEG,
         maxWidth: 1000,
         maxHeight: 1000,
       });
 
-      setImage(image.uri);
+      setSelectedImage(pickedImage.uri);
+      setImage(pickedImage.uri);
     }
   };
 
   const removeImage = () => {
-    setIsImageRemoved(true);
-    setImage(null);
+    if (selectedImage) {
+      console.log("removing selected image")
+      setSelectedImage(undefined);
+      setImage(user.photoURL || undefined);
+      return;
+    } else if (user.photoURL) {
+      console.log("removing image")
+      setImage(undefined);
+      return;
+    } else if (!user.photoURL) {
+      Alert.alert("Błąd", "Brak zdjęcia profilowego do usunięcia.");
+      return;
+    } else {
+      Alert.alert("Błąd", "Nie znaleziono zdjęcia.");
+      return;
+    }
   };
 
   const handleSubmit = async () => {
@@ -166,30 +192,30 @@ const settings = () => {
         Alert.alert("Sukces", "Pomyślnie zaktualizowano hasło.");
       }
 
-      if (isImageRemoved) {
-        console.log("Removing image...");
+      if (selectedImage || image !== user.photoURL) {
+        if (selectedImage) {
+          console.log(selectedImage);
+          const response = await fetch(selectedImage);
+          const blob = await response.blob();
 
-        await updateProfile(user, { photoURL: "" });
-      } else if (image) {
-        console.log("Uploading image...");
+          const fileRef = ref(storage, `profiles/${user.uid}`);
 
-        const response = await fetch(image);
-        const blob = await response.blob();
+          try {
+            console.log("Uploading to Firebase Storage...");
+            await uploadBytes(fileRef, blob);
 
-        const fileRef = ref(storage, `profiles/${user.uid}`);
-
-        try {
-          console.log("Uploading to Firebase Storage...");
-          await uploadBytes(fileRef, blob);
-
-          const DownloadURL = await getDownloadURL(fileRef);
-          await updateProfile(user, { photoURL: DownloadURL });
-        } catch (e) {
-          console.error(e);
-          Alert.alert(
-            "Błąd",
-            `Nie udało się załadować zdjęcia do bazy danych.`
-          );
+            const DownloadURL = await getDownloadURL(fileRef);
+            await updateProfile(user, { photoURL: DownloadURL });
+          } catch (e) {
+            console.error(e);
+            Alert.alert(
+              "Błąd",
+              `Nie udało się załadować zdjęcia do bazy danych.`
+            );
+          }
+        } else {
+          console.log("Removing image...");
+          await updateProfile(user, { photoURL: "" });
         }
       }
 
@@ -353,7 +379,11 @@ const settings = () => {
             className="p-5 rounded-full"
             style={{
               backgroundColor:
-                !email && !image && !isImageRemoved || image == user.photoURL && !name && !newpass
+                !name &&
+                !email &&
+                !newpass &&
+                !selectedImage &&
+                image == user.photoURL
                   ? "#000000"
                   : primaryColor,
             }}

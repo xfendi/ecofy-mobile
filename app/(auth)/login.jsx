@@ -7,8 +7,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { UserAuth } from "../../context/AuthContext";
 import { primaryColor } from "../../config.json";
+import Loading from "../../components/Loading";
 
 const login = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -16,8 +18,10 @@ const login = () => {
   const router = useRouter();
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     if (!email || !password) {
       Alert.alert("Błąd", "Proszę wypełnić wszystkie pola.");
+      setIsLoading(false);
       return;
     }
 
@@ -38,10 +42,11 @@ const login = () => {
         errorMessage = "Zbyt wiele prób logowania. Spróbuj ponownie później.";
       }
 
-      Alert.alert("Błąd", errorMessage);
-    } else if (result.user) {
-      router.replace("/(tabs)");
+      return Alert.alert("Błąd", errorMessage);
     }
+
+    setIsLoading(false);
+    router.replace("/(tabs)");
   };
 
   const handleProviderClick = () => {
@@ -50,6 +55,7 @@ const login = () => {
 
   return (
     <SafeAreaView>
+      {isLoading && <Loading />}
       <View className="flex gap-5 p-10 flex-col justify-center h-full items-center">
         <View className="flex flex-col gap-5">
           <Text className="text-center text-5xl font-bold">Witaj Ponownie</Text>

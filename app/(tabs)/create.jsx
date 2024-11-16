@@ -28,6 +28,7 @@ import AppTextInput from "../../components/AppTextInput";
 import useGeoLocation from "../../context/GeoLocationContext";
 import { UserAuth } from "../../context/AuthContext";
 import { db, storage } from "../../firebase";
+import Loading from "../../components/Loading";
 
 const CreateEvent = () => {
   const [currentRegion, setCurrentRegion] = useState(region);
@@ -244,18 +245,7 @@ const CreateEvent = () => {
 
   return (
     <SafeAreaView>
-      {isLoading && (
-        <View
-          className="absolute flex items-center w-full bottom-0 top-0 z-40"
-          style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
-        >
-          <View className="bg-white p-5 m-auto rounded-3xl z-50">
-            <Text className="text-2xl font-semibold">
-              Tworzenie Wydarzenia...
-            </Text>
-          </View>
-        </View>
-      )}
+      {isLoading && <Loading />}
 
       <ScrollView
         className={Platform.OS === "android" ? "p-5" : "px-5"}
@@ -319,7 +309,7 @@ const CreateEvent = () => {
             }}
             onCancel={() => setShowDatePicker(false)}
             minimumDate={new Date()}
-            maximumDate={new Date(2100, 11, 31)} 
+            maximumDate={new Date(2100, 11, 31)}
           />
           <DateTimePickerModal
             isVisible={showTimePicker}

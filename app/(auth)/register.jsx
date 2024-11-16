@@ -10,8 +10,10 @@ import { Link, useRouter } from "expo-router";
 
 import { primaryColor } from "../../config.json";
 import { UserAuth } from "../../context/AuthContext";
+import Loading from "../../components/Loading";
 
 const register = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -20,8 +22,10 @@ const register = () => {
   const router = useRouter();
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     if (!email || !password || !name) {
       Alert.alert("Błąd", "Proszę wypełnić wszystkie pola.");
+      setIsLoading(false);
       return;
     }
 
@@ -42,9 +46,11 @@ const register = () => {
         errorMessage = "Zbyt wiele prób rejestracji. Spróbuj ponownie później.";
       }
 
+      setIsLoading(false);
       return Alert.alert("Błąd", errorMessage);
     }
 
+    setIsLoading(false);
     router.replace("/onboard_one");
   };
 
@@ -54,6 +60,7 @@ const register = () => {
 
   return (
     <SafeAreaView>
+      {isLoading && <Loading />}
       <View className="flex gap-5 p-10 flex-col justify-center h-full items-center">
         <View className="flex flex-col gap-5">
           <Text className="text-center text-5xl font-bold">Stwórz Konto</Text>

@@ -33,7 +33,7 @@ import { storage } from "../../firebase";
 
 const settings = () => {
   const [isModal, setIsModal] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [name, setName] = useState();
@@ -130,6 +130,9 @@ const settings = () => {
 
   const handleSubmit = async () => {
     try {
+      setIsLoading(true);
+      closeModal();
+
       const credentials = EmailAuthProvider.credential(user.email, password);
       await reauthenticateWithCredential(user, credentials);
 
@@ -177,7 +180,7 @@ const settings = () => {
       }
 
       Alert.alert("Sukces", "Pomyślnie zaktualizowano ustawienia konta.");
-      closeModal();
+      setIsLoading(false);
     } catch (e) {
       closeModal();
       Alert.alert("Błąd", e.message);

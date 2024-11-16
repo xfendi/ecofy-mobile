@@ -129,6 +129,8 @@ const Post = ({ post, deleteFunction }) => {
     }
   };
 
+  const date = post.createdAt.toDate();
+
   return (
     <View className="flex flex-col gap-5 bg-white rounded-3xl p-5">
       {post.photoURL && (
@@ -145,12 +147,14 @@ const Post = ({ post, deleteFunction }) => {
         <View>
           <Text className="font-semibold">{post?.userName || "anonymous"}</Text>
           <Text className="text-gray-500 text-[12px]">
-            {new Date(post.createdAt.seconds * 1000).toLocaleDateString()}
+            {`${date.getDate()}.${
+              date.getMonth() + 1
+            }.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`}
           </Text>
         </View>
         {deleteFunction && post.author === user.uid && (
           <TouchableOpacity onPress={() => handleDelete(post)}>
-            <Feather name="delete" size={24} color="red" />
+            <Feather name="trash" size={24} color="red" />
           </TouchableOpacity>
         )}
       </View>
@@ -167,9 +171,7 @@ const Post = ({ post, deleteFunction }) => {
       <Text>{post.description}</Text>
 
       <View
-        className={`border-t-2 pt-5 ${
-          post.author !== user.uid ? "justify-between" : "justify-end"
-        } border-gray-100 flex flex-row`}
+        className={`border-t-2 pt-5 border-gray-100 flex flex-row gap-5`}
       >
         {post.author !== user.uid && (
           <TouchableOpacity

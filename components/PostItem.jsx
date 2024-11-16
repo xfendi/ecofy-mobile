@@ -145,7 +145,7 @@ const Post = ({ post, deleteFunction }) => {
 
       <View className="flex-row justify-between">
         <View>
-          <Text className="font-semibold">{post?.userName || "anonymous"}</Text>
+          <Text className="font-semibold">{post?.displayName || "anonymous"}</Text>
           <Text className="text-gray-500 text-[12px]">
             {`${date.getDate()}.${
               date.getMonth() + 1
